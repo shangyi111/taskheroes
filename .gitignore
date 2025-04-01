@@ -11,6 +11,7 @@ client/TaskHeroes/bazel-out
 
 # Node
 client/TaskHeroes/node_modules
+server/node_modules
 client/TaskHeroes/npm-debug.log
 client/TaskHeroes/yarn-error.log
 
