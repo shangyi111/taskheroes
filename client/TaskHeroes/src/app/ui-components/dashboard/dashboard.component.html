@@ -1,0 +1,27 @@
+<div class="dashboard-container">
+    <div class="welcome-section">
+      <h1 class="welcome-heading">Welcome to Task Heroes</h1>
+      <p class="welcome-text">Where to visit today?</p>
+    </div>
+    <div class="role-selection-cards">
+      <mat-card class="role-card seeker-card" (click)="clickCard('seeker')" >
+        <mat-card-content>
+          <div class="role-icon">
+            <i class="fas fa-search"></i>
+          </div>
+          <h2 class="role-title">Service Seeker</h2>
+          <p class="role-description">Find and hire service providers for your tasks.</p>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="role-card provider-card" (click)="clickCard('provider')" >
+        <mat-card-content>
+          <div class="role-icon">
+            <i class="fas fa-hand-holding-heart"></i>
+          </div>
+          <h2 class="role-title">Service Provider</h2>
+          <p class="role-description">Offer your services and connect with clients.</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+</div>
+  

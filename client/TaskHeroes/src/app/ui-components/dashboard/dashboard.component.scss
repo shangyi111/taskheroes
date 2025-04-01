@@ -1,0 +1,165 @@
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* Changed from center to flex-start */
+  min-height: 100vh;
+  background-color: #f9f9f9;
+  padding: 20px;
+  font-family: 'Arial', sans-serif;
+  box-sizing: border-box; /* Added to include padding in height calculation */
+}
+
+.welcome-section {
+  text-align: center;
+  margin-bottom: 40px;
+  width: 100%; /* Added to ensure full width */
+}
+
+.welcome-heading {
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.welcome-text {
+  font-size: 18px;
+  color: #555;
+  line-height: 1.5;
+}
+
+.role-selection-cards {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 40px;
+  gap: 20px;
+  width: 100%;
+  max-width: 800px;
+}
+
+.role-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 350px;
+  height: 200px;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  padding: 20px;
+  text-align: center;
+  border: 1px solid #eee;
+  box-sizing: border-box; /* Added to include padding in height */
+}
+
+.role-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.role-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+}
+
+.seeker-card .role-icon {
+  color: #007bff;
+}
+
+.provider-card .role-icon {
+  color: #28a745;
+}
+
+.role-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.role-description {
+  font-size: 16px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.quick-links {
+  width: 100%;
+  max-width: 800px;
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #eee;
+  box-sizing: border-box; /* Added to include padding */
+}
+
+.quick-links-header {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.link-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: 15px;
+}
+
+.dashboard-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  color: #007bff;
+  text-decoration: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  border: 1px solid #b8d9f5;
+  box-sizing: border-box; /* Added to include padding */
+}
+
+.dashboard-link:hover {
+  background-color: #e6f7ff;
+  color: #0056b3;
+}
+
+.dashboard-link i {
+  font-size: 20px;
+}
+
+@media (max-width: 768px) {
+  .role-selection-cards {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .role-card {
+    max-width: 100%;
+     height: auto; /* Changed to auto for smaller screens */
+  }
+
+  .welcome-heading {
+    font-size: 24px;
+  }
+
+  .welcome-text {
+    font-size: 16px;
+  }
+  .dashboard-container{
+     padding: 10px;
+  }
+  .quick-links{
+    padding: 10px;
+  }
+  .dashboard-link{
+     padding: 8px 10px;
+  }
+}
