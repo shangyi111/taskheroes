@@ -1,0 +1,43 @@
+# See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+server/.env
+
+# Compiled output
+client/TaskHeroes/dist
+client/TaskHeroes/tmp
+client/TaskHeroes/out-tsc
+client/TaskHeroes/bazel-out
+
+# Node
+client/TaskHeroes/node_modules
+client/TaskHeroes/npm-debug.log
+client/TaskHeroes/yarn-error.log
+
+# IDEs and editors
+client/TaskHeroes/.idea/
+client/TaskHeroes/.project
+client/TaskHeroes/.classpath
+client/TaskHeroes/.c9/
+client/TaskHeroes/*.launch
+client/TaskHeroes/.settings/
+client/TaskHeroes/*.sublime-workspace
+
+# Visual Studio Code
+client/TaskHeroes/.vscode/*
+!client/TaskHeroes/.vscode/settings.json
+!client/TaskHeroes/.vscode/tasks.json
+!client/TaskHeroes/.vscode/launch.json
+!client/TaskHeroes/.vscode/extensions.json
+client/TaskHeroes/.history/*
+
+# Miscellaneous
+client/TaskHeroes/.angular/cache
+client/TaskHeroes/.sass-cache/
+client/TaskHeroes/connect.lock
+client/TaskHeroes/coverage
+client/TaskHeroes/libpeerconnection.log
+client/TaskHeroes/testem.log
+client/TaskHeroes/typings
+
+# System files
+client/TaskHeroes/.DS_Store
+client/TaskHeroes/Thumbs.db
