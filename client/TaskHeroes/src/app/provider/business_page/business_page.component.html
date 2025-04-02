@@ -1,1 +1,29 @@
-<div>Welcome to your business page</div>
+<div class="business-page">
+  <div class="add-new-button" >
+    <button mat-button>Add new +</button>
+  </div>
+  <section class="providers">
+    @for (provider of businessProfiles; track provider.id) {
+      <mat-card class="provider-card" target="_blank" (click)="openDetails(provider)">
+        <mat-chip 
+          class="status-chip" 
+          [ngClass]="{ 'listed': provider.status === 'listed', 'in-progress': provider.status !== 'listed' }"
+        >
+          <span class="status-dot"></span>
+          {{ provider.status }}
+        </mat-chip>
+
+        <mat-card-content class="content">
+          <mat-card-title class="service-name">{{ provider.serviceName }}</mat-card-title>
+          <p class="category">Category: {{ provider.category }}</p>
+          <p class="description">{{ provider.description }}</p>
+          @if(provider.rating){
+          <div class="rating">
+            <span class="stars">{{ provider.rating }} ★</span>
+            <span class="reviews">({{ provider.reviewCount }} reviews)</span>
+          </div>}
+        </mat-card-content>
+      </mat-card>
+    }
+  </section>
+</div>

@@ -18,10 +18,8 @@ export class UserDataService {
   }
 
   updateUserData(userData: Partial<User>): void {
-    console.log("inside updateuserdata");
     const currentData = this.userDataSubject.getValue();
     const updatedData = { ...currentData, ...userData };
-    console.log("updateData", updatedData);
     this.userDataSubject.next(updatedData);
   }
 

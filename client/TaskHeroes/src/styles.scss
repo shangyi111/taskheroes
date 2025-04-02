@@ -2,3 +2,39 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+:root {
+    // Colors
+    --dashboard-bg: #f9f9f9;
+    --text-primary: #333;
+    --text-secondary: #555;
+    --primary-blue: #007bff;
+    --primary-green: #28a745;
+    --card-border: #eee;
+    --card-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    --card-hover-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  
+    // Fonts
+    --global-font-family: 'Arial', sans-serif;
+    --heading-font-size: 28px;
+    --title-font-size: 24px;
+    --text-font-size: 18px;
+    --description-font-size: 16px;
+    --icon-font-size: 48px;
+  
+    // Spacing
+    --dashboard-padding: 20px;
+    --welcome-margin-bottom: 40px;
+    --role-cards-margin-bottom: 40px;
+    --role-cards-gap: 25px;
+    --role-icon-margin-bottom: 15px;
+    --role-title-margin-bottom: 10px;
+  
+    // Dimensions
+    --role-card-max-width: 350px;
+    --role-card-height: 200px;
+    --role-cards-max-width: 800px;
+  
+    // Transitions
+    --transition-default: transform 0.3s ease, box-shadow 0.3s ease;
+  }

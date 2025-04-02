@@ -22,6 +22,6 @@ export class DashboardComponent {
       role,
     }
     this.userDataService.updateUserData(user);
-    this.router.navigate(["/user",this.userId,role]);
+    this.router.navigate(["user",this.userId,role]);
   }
 }

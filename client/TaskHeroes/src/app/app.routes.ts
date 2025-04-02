@@ -4,6 +4,7 @@ import {AuthGuard} from 'src/app/auth/auth.guard';
 import { SearchComponent } from 'src/app/seeker/search/search.component';
 import { RegistrationComponent } from 'src/app/auth/register/register.component';
 import {DashboardComponent} from 'src/app/ui-components/dashboard/dashboard.component';
+import {BusinessDetailComponent} from 'src/app/provider/business_page/business_details/business_details.component';
 // import { attachReactRefresh } from 'next/dist/build/webpack-config';
 // import { SearchResultsComponent } from './seeker/search/search-results/search-results.component';
 // import { MessagesComponent as SeekerMessagesComponent } from './seeker/messages/messages.component';
@@ -26,6 +27,11 @@ export const routes: Routes = [
   {
     path: 'user/:userId/provider',
     component: BusinessPageComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'service/:serviceId',
+    component: BusinessDetailComponent,
     canActivate: [AuthGuard],
   },
   { path: 'register', component: RegistrationComponent }, 
