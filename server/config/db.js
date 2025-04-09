@@ -9,7 +9,6 @@ const sequelize = new Sequelize({
 });
 
 try {
-  console.log("testing sequelize", process.env.DB_NAME);
   sequelize.authenticate();
   console.log('Database connection has been established successfully.');
 } catch (error) {

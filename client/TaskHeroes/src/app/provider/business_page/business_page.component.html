@@ -1,4 +1,4 @@
-<div class="business-page">
+<!-- <div class="business-page">
   <div class="add-new-button" >
     <button mat-button>Add new +</button>
   </div>
@@ -26,4 +26,58 @@
       </mat-card>
     }
   </section>
-</div>
+</div> -->
+
+<mat-accordion>
+  <mat-expansion-panel (opened)="panelOpenState.set(true)" (closed)="panelOpenState.set(false)">
+    <mat-expansion-panel-header>
+      <mat-panel-title>  Add new provider</mat-panel-title>
+    </mat-expansion-panel-header>
+    <form [formGroup]="providerForm" (ngSubmit)="onSubmit()">
+      <mat-form-field>
+        <mat-label>Business Name</mat-label>
+        <input matInput formControlName="businessName" required />
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Business Address</mat-label>
+        <input matInput formControlName="businessAddress" />
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Phone Number</mat-label>
+        <input matInput formControlName="phoneNumber" />
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Description</mat-label>
+        <textarea matInput formControlName="description"></textarea>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Profile Picture URL</mat-label>
+        <input matInput formControlName="profilePicture" />
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" type="submit">Create Provider</button>
+      <button mat-raised-button color="primary" type="button" (click)="clearForm()">Clear</button>
+    </form>
+  </mat-expansion-panel>
+</mat-accordion>
+@for (provider of providers; track provider.id) {
+    <mat-accordion>
+      <mat-expansion-panel (opened)="panelOpenState.set(true)" (closed)="panelOpenState.set(false)">
+        <mat-expansion-panel-header>
+          <mat-panel-title>  {{provider.businessName}}</mat-panel-title>
+          <mat-panel-description>
+            {{provider.description}}
+          </mat-panel-description>
+          <div class="actions">
+            <mat-icon color="warn" (click)="deleteProvider(provider.id!); $event.stopPropagation()">delete</mat-icon>
+            <mat-icon color="primary" (click)="editProvider(provider); $event.stopPropagation()">edit</mat-icon>
+          </div>
+        </mat-expansion-panel-header>
+        <p>I'm visible because I am open</p>
+      </mat-expansion-panel>
+    </mat-accordion>
+}

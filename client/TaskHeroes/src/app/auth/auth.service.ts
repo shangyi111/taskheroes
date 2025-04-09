@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { tap,map } from 'rxjs/operators';
 import {User} from 'src/app/shared/models/user';
 import { UserDataService } from '../services/user_data.service';
+import { LOCAL_STORAGE_USER_KEY, AUTH_TOKEN_KEY } from 'src/app/shared/constants';
 
 interface LoginResponse {
   token: string;
@@ -14,8 +15,8 @@ interface LoginResponse {
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly USER_KEY = 'user';
-  private readonly AUTH_TOKEN_KEY = 'auth_token';
+  private readonly USER_KEY = LOCAL_STORAGE_USER_KEY;
+  private readonly AUTH_TOKEN_KEY = AUTH_TOKEN_KEY;
   private readonly API_URL = 'http://localhost:3000/api'; // Replace with your backend API URL
   private http = inject(HttpClient);
   private userDataService = inject(UserDataService);

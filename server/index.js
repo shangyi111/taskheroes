@@ -1,9 +1,15 @@
 const dotenv = require('dotenv');
 dotenv.config(); // Load environment variables FIRST
 const express = require('express');
+const http = require('http');
 const bodyParser = require('body-parser');
 const authRoutes = require('./auth/authRoutes');
+const providersRoutes = require('./routes/providers');
+const websocket = require('./websocket/socketServer');
+// const servicesRoutes = require('./routes/services');
+// const ratingsRoutes = require('./routes/ratings');
 const sequelize = require('./config/db');
+const models = require('./models');
 const cors = require('cors'); 
 
 const app = express();
@@ -12,16 +18,24 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(bodyParser.json());
 app.use('/api/auth', authRoutes); // Use the authentication routes
+app.use('/api/providers', providersRoutes);
+// app.use('/api/services', servicesRoutes);
+// app.use('/api/ratings', ratingsRoutes);
 
 // Example protected route
 app.get('/api/protected', authenticateToken, (req, res) => {
   res.json({ message: 'Authenticated access granted', user: req.user });
 });
 
+// Create the HTTP server instance
+const server = http.createServer(app);
+
+// Start the WebSocket server, passing the HTTP server instance
+websocket.init(server);
 // Use Sequelize to sync the models and then start the server
 sequelize.sync() // This will sync your models with the database
   .then(() => {
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
       console.log('Database models synced successfully.');
     });
