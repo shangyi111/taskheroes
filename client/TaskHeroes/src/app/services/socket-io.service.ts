@@ -25,7 +25,6 @@ export class SocketIoService implements OnDestroy {
     // Connect socket when user data is available
     this.subscriptions.push(
       this.userDataService.userData$.subscribe((user) => {
-        console.log("testing inside socketio service.t adding userdata to subscriptions")
         if (user?.id) {
           this.socket.auth = { userId: user.id }; // optional: include userId as auth
           this.connect(user.id);
@@ -75,12 +74,8 @@ export class SocketIoService implements OnDestroy {
    * Listen for specific user event types (e.g. provider_created, provider_updated)
    */
   onUserEvent<T>(type: string): Observable<T> {
-    console.log("inside onUserEvent");
     return new Observable<T>((subscriber) => {
       const handler = (payload: { type: string; data: T }) => {
-        console.log("fe socketio service inside handler");
-        console.log("type",payload.type);
-        console.log("data",payload.data);
         if (payload.type === type) {
           subscriber.next(payload.data);
         }
