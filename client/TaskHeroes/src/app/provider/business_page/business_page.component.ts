@@ -1,5 +1,4 @@
-import { Component, inject } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
+import { Component, inject, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { RouterLink } from '@angular/router';
 import { AuthService } from 'src/app/auth/auth.service';
@@ -11,11 +10,12 @@ import { MatChipsModule } from '@angular/material/chips';
 import { FormsModule } from '@angular/forms';
 import { SocketIoService } from 'src/app/services/socket-io.service';
 import { CommonModule } from '@angular/common';
-import { MatExpansionModule } from '@angular/material/expansion';
+import { MatExpansionModule, MatAccordion } from '@angular/material/expansion';
 import { ProviderService } from 'src/app/services/provider.service';
 import { UserDataService } from 'src/app/services/user_data.service';
 import {ChangeDetectionStrategy, signal} from '@angular/core';
 import {Provider} from 'src/app/shared/models/provider';
+import {MatIconModule} from '@angular/material/icon';
 import {User} from 'src/app/shared/models/user';
 import {switchMap} from 'rxjs/operators';
 import {of as observableOf, Subscription} from 'rxjs';
@@ -24,6 +24,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInput, MatInputModule } from '@angular/material/input';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
+import { BusinessFormComponent } from './business_form/business_form.component';
 
 
 export enum BUSINESS_STATUS {
@@ -81,14 +82,13 @@ const TEMP_PROFILES = [
   standalone: true,
   templateUrl: './business_page.component.html', 
   styleUrls: ['./business_page.component.scss'],
-  imports: [MatCardModule,MatIconModule,MatFormFieldModule, ReactiveFormsModule,MatInputModule,MatButtonModule,FormsModule,CommonModule,MatChipsModule, MatExpansionModule], // Import the required modules, including Router
+  imports: [MatCardModule,BusinessFormComponent,MatIconModule,MatFormFieldModule, ReactiveFormsModule,MatInputModule,MatButtonModule,FormsModule,CommonModule,MatChipsModule, MatExpansionModule], // Import the required modules, including Router
 })
 export class BusinessPageComponent {
   private socketIoService = inject(SocketIoService);
   private router = inject(Router);
   private providerService = inject(ProviderService);
   private readonly userData$ = inject(UserDataService).userData$;
-  readonly panelOpenState = signal(false);
   providerForm: FormGroup = inject(FormBuilder).group({
     businessName: ['', Validators.required],
     businessAddress: [''],
@@ -102,6 +102,11 @@ export class BusinessPageComponent {
   providers: Provider[] = [];
   private providersSubscription: Subscription | null = null;
   private socketSubscriptions: Subscription[] = [];
+  providerBeingEdited: Provider | null = null;
+  addProviderPanelOpenState = signal(false); // New signal for add panel
+  editOpenStates = signal<Record<string, boolean>>({});
+
+
   ngOnInit(): void {
     this.loadInitialProviders();
     this.joinUserRoom();
@@ -182,7 +187,7 @@ export class BusinessPageComponent {
     this.router.navigate(['service', provider.id]);
   }
 
-  onSubmit() {
+  onAddSubmit() {
     if (this.providerForm.valid) {
       this.userData$.pipe(
         switchMap((user) => {
@@ -201,7 +206,8 @@ export class BusinessPageComponent {
           if (createdProvider) {
             console.log('Provider created via API:', createdProvider);
             this.providerForm.reset();
-            this.panelOpenState.set(false);
+            this.providerBeingEdited= null;
+            this.addProviderPanelOpenState.set(false); 
             // The real-time update should happen via Socket.IO
           }
         },
@@ -212,14 +218,50 @@ export class BusinessPageComponent {
     }
   }
 
+  onEditSubmit(provider:Provider) {
+    if (this.providerForm.valid) {
+      this.userData$.pipe(
+        switchMap((user) => {
+          if (user) {
+            const newProvider: Provider = {
+              ...this.providerForm.value,
+              userId: user.id,
+              id:provider.id,
+            };
+            return this.providerService.updateProvider(newProvider.id!,newProvider);
+          } else {
+            return observableOf(null);
+          }
+        })
+      ).subscribe({
+        next: (updatedProvider) => {
+          if (updatedProvider) {
+            console.log('Provider updated via API:', updatedProvider);
+            this.providerForm.reset();
+            this.providerBeingEdited=null;
+            this.addProviderPanelOpenState.set(false); 
+            this.setEditPanelOpen(updatedProvider.id!,false);
+            // The real-time update should happen via Socket.IO
+          }
+        },
+        error: (error) => {
+          console.error('Error updating provider:', error);
+        },
+      });
+    }
+  }
+
   clearForm(): void {
     this.providerForm.reset();
+    this.providerBeingEdited = null;
   }
 
   deleteProvider(providerId: string): void {
     if (confirm('Are you sure you want to delete this provider?')) {
       this.providerService.deleteProvider(providerId).subscribe({
         next: () => {
+          this.addProviderPanelOpenState.set(false);
+          this.setEditPanelOpen(providerId!,false);
           console.log(`Provider with ID ${providerId} deleted successfully.`);
           // The real-time update should handle removing it from the list
         },
@@ -231,9 +273,16 @@ export class BusinessPageComponent {
   }
 
   editProvider(provider: Provider): void {
-    // Implement the logic to change the view to a redactive form
-    console.log('Edit provider:', provider);
-    // You might want to set a flag to show an edit form for this specific provider
-    // and populate the form with the provider's data.
+    this.providerBeingEdited = provider; // Set the provider being edited
+    this.setEditPanelOpen(provider.id!,true);
   }
+
+  isEditPanelOpen(id: string): boolean {
+    return this.editOpenStates()[id] ?? false;
+  }
+  
+  setEditPanelOpen(id: string, isOpen: boolean): void {
+    const current = this.editOpenStates();
+    this.editOpenStates.set({ ...current, [id]: isOpen });
+  }  
 }

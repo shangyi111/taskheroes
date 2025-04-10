@@ -1,6 +1,6 @@
 const { Provider } = require('../models');
 const {
-  sendProviderUpdate,
+  sendProviderUpdated,
   sendProviderCreated,
   sendProviderDeleted,
 } = require('../websocket/handlers/providerHandler');
@@ -8,7 +8,6 @@ const {
 // Get all providers
 exports.getAllProviders = async (req, res) => {
   try {
-    console.log("inside get all providers");
     const providers = await Provider.findAll();
     res.json(providers);
   } catch (error) {
@@ -54,7 +53,7 @@ exports.updateProvider = async (req, res) => {
     if (updatedRowCount > 0) {
       const updatedProvider = await Provider.findByPk(providerId);
       res.status(200).json(updatedProvider);
-      sendProviderUpdate(updatedProvider);
+      sendProviderUpdated(updatedProvider);
     } else {
       res.status(404).json({ message: 'Provider not found or unauthorized' });
     }
