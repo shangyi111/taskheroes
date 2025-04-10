@@ -3,12 +3,11 @@
     <mat-expansion-panel-header>
       <mat-panel-title>Add new provider</mat-panel-title>
     </mat-expansion-panel-header>
-    <business-form
-      [providerForm]="providerForm"
-      (formSubmit)="onAddSubmit()"
-      (formClear)="clearForm()"
-      actionName="Create"
-    ></business-form>
+    <th-form 
+    actionName="Create"
+    [fields]="formFields" 
+    (formSubmit)="onAddSubmit($event)" 
+    (formClear)="clearForm()"></th-form>
   </mat-expansion-panel>
 </mat-accordion>
 
@@ -27,13 +26,13 @@
         </div>
       </mat-expansion-panel-header>
       @if (providerBeingEdited && providerBeingEdited.id === provider.id) {
-        <business-form
-          [providerForm]="providerForm"
-          (formSubmit)="onEditSubmit(provider)"
-          (formClear)="clearForm()"
-          [provider]="providerBeingEdited"
-          actionName="Update"
-        ></business-form>
+        <th-form
+        [fields]="formFields"
+        actionName="Update"
+        [provider]="providerBeingEdited"
+        (formSubmit)="onEditSubmit($event, provider)"
+        (formClear)="clearForm()"
+      ></th-form>
       }@else{
         <p>{{provider.businessAddress}}</p>
         <p>{{provider.phoneNumber}}</p>

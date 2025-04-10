@@ -12,8 +12,9 @@ import { SocketIoService } from 'src/app/services/socket-io.service';
 import { CommonModule } from '@angular/common';
 import { MatExpansionModule, MatAccordion } from '@angular/material/expansion';
 import { ProviderService } from 'src/app/services/provider.service';
+import { FormFieldConfig } from 'src/app/ui-components/th-form/form.component';
 import { UserDataService } from 'src/app/services/user_data.service';
-import {ChangeDetectionStrategy, signal} from '@angular/core';
+import {signal} from '@angular/core';
 import {Provider} from 'src/app/shared/models/provider';
 import {MatIconModule} from '@angular/material/icon';
 import {User} from 'src/app/shared/models/user';
@@ -21,10 +22,9 @@ import {switchMap} from 'rxjs/operators';
 import {of as observableOf, Subscription} from 'rxjs';
 import { ReactiveFormsModule} from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInput, MatInputModule } from '@angular/material/input';
+import { MatInputModule } from '@angular/material/input';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Observable } from 'rxjs';
-import { BusinessFormComponent } from './business_form/business_form.component';
+import {FormComponent} from 'src/app/ui-components/th-form/form.component';
 
 
 export enum BUSINESS_STATUS {
@@ -82,7 +82,7 @@ const TEMP_PROFILES = [
   standalone: true,
   templateUrl: './business_page.component.html', 
   styleUrls: ['./business_page.component.scss'],
-  imports: [MatCardModule,BusinessFormComponent,MatIconModule,MatFormFieldModule, ReactiveFormsModule,MatInputModule,MatButtonModule,FormsModule,CommonModule,MatChipsModule, MatExpansionModule], // Import the required modules, including Router
+  imports: [MatCardModule,FormComponent,MatIconModule,MatFormFieldModule, ReactiveFormsModule,MatInputModule,MatButtonModule,FormsModule,CommonModule,MatChipsModule, MatExpansionModule], // Import the required modules, including Router
 })
 export class BusinessPageComponent {
   private socketIoService = inject(SocketIoService);
@@ -105,7 +105,13 @@ export class BusinessPageComponent {
   providerBeingEdited: Provider | null = null;
   addProviderPanelOpenState = signal(false); // New signal for add panel
   editOpenStates = signal<Record<string, boolean>>({});
-
+  formFields: FormFieldConfig[] = [
+    { name: 'businessName', label: 'Business Name', type: 'text', validators: [Validators.required] },
+    { name: 'businessAddress', label: 'Business Address', type: 'text', validators: [] },
+    { name: 'phoneNumber', label: 'Phone Number', type: 'tel', validators: [] },
+    { name: 'description', label: 'Description', type: 'text', validators: [] },
+    { name: 'profilePicture', label: 'Profile Picture URL', type: 'url', validators: [] },
+  ];
 
   ngOnInit(): void {
     this.loadInitialProviders();
@@ -187,67 +193,66 @@ export class BusinessPageComponent {
     this.router.navigate(['service', provider.id]);
   }
 
-  onAddSubmit() {
-    if (this.providerForm.valid) {
-      this.userData$.pipe(
-        switchMap((user) => {
-          if (user) {
-            const newProvider: Provider = {
-              ...this.providerForm.value,
-              userId: user.id,
-            };
-            return this.providerService.createProvider(newProvider);
-          } else {
-            return observableOf(null);
-          }
-        })
-      ).subscribe({
-        next: (createdProvider) => {
-          if (createdProvider) {
-            console.log('Provider created via API:', createdProvider);
-            this.providerForm.reset();
-            this.providerBeingEdited= null;
-            this.addProviderPanelOpenState.set(false); 
-            // The real-time update should happen via Socket.IO
-          }
-        },
-        error: (error) => {
-          console.error('Error creating provider:', error);
-        },
-      });
+  onAddSubmit(formGroup:FormGroup) {
+    if (formGroup.valid) {
+      this.userData$
+        .pipe(
+          switchMap((user) => {
+            if (user) {
+              const newProvider: Provider = {
+                ...formGroup.value,
+                userId: user.id,
+              };
+              return this.providerService.createProvider(newProvider);
+            } else {
+              return observableOf(null);
+            }
+          })
+        )
+        .subscribe({
+          next: (createdProvider) => {
+            if (createdProvider) {
+              console.log('Provider created via API:', createdProvider);
+              this.providerBeingEdited = null;
+              this.addProviderPanelOpenState.set(false);
+            }
+          },
+          error: (error) => {
+            console.error('Error creating provider:', error);
+          },
+        });
     }
   }
 
-  onEditSubmit(provider:Provider) {
-    if (this.providerForm.valid) {
-      this.userData$.pipe(
-        switchMap((user) => {
-          if (user) {
-            const newProvider: Provider = {
-              ...this.providerForm.value,
-              userId: user.id,
-              id:provider.id,
-            };
-            return this.providerService.updateProvider(newProvider.id!,newProvider);
-          } else {
-            return observableOf(null);
-          }
-        })
-      ).subscribe({
-        next: (updatedProvider) => {
-          if (updatedProvider) {
-            console.log('Provider updated via API:', updatedProvider);
-            this.providerForm.reset();
-            this.providerBeingEdited=null;
-            this.addProviderPanelOpenState.set(false); 
-            this.setEditPanelOpen(updatedProvider.id!,false);
-            // The real-time update should happen via Socket.IO
-          }
-        },
-        error: (error) => {
-          console.error('Error updating provider:', error);
-        },
-      });
+  onEditSubmit(formGroup:FormGroup,provider:Provider) {
+    if (formGroup.valid) {
+      this.userData$
+        .pipe(
+          switchMap((user) => {
+            if (user) {
+              const updatedProvider: Provider = {
+                ...formGroup.value,
+                userId: user.id,
+                id: provider.id,
+              };
+              return this.providerService.updateProvider(provider.id!, updatedProvider);
+            } else {
+              return observableOf(null);
+            }
+          })
+        )
+        .subscribe({
+          next: (updatedProvider) => {
+            if (updatedProvider) {
+              console.log('Provider updated via API:', updatedProvider);
+              this.providerBeingEdited = null;
+              this.setEditPanelOpen(provider.id!, false);
+            }
+          },
+          error: (error) => {
+            console.error('Error updating provider:', error);
+          },
+        });
     }
   }
 
