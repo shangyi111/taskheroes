@@ -1,7 +1,7 @@
 <mat-accordion class="addAccordion">
-  <mat-expansion-panel [(expanded)]="addProviderPanelOpenState">
+  <mat-expansion-panel [(expanded)]="addServicePanelOpenState">
     <mat-expansion-panel-header>
-      <mat-panel-title>Add new provider</mat-panel-title>
+      <mat-panel-title>Add new service</mat-panel-title>
     </mat-expansion-panel-header>
     <th-form 
     actionName="Create"
@@ -11,31 +11,31 @@
   </mat-expansion-panel>
 </mat-accordion>
 
-@for (provider of providers; track provider.id) {
+@for (service of services; track service.id) {
   <mat-accordion class="editAccordion">
     <mat-expansion-panel 
-    [(expanded)]="editOpenStates()[provider.id!]"
-    (opened)="setEditPanelOpen(provider.id!, true)"
-    (closed)="setEditPanelOpen(provider.id!, false)">
+    [(expanded)]="editOpenStates()[service.id!]"
+    (opened)="setEditPanelOpen(service.id!, true)"
+    (closed)="setEditPanelOpen(service.id!, false)">
       <mat-expansion-panel-header>
-        <mat-panel-title> {{ provider.businessName }} </mat-panel-title>
-        <mat-panel-description> {{ provider.description }} </mat-panel-description>
+        <mat-panel-title> {{ service.businessName }} </mat-panel-title>
+        <mat-panel-description> {{ service.description }} </mat-panel-description>
         <div class="actions">
-          <mat-icon fontIcon="edit" color="warn" (click)="editProvider(provider); $event.stopPropagation()"></mat-icon>
-          <mat-icon fontIcon="delete" color="primary" (click)="deleteProvider(provider.id!); $event.stopPropagation()"></mat-icon>
+          <mat-icon fontIcon="edit" color="warn" (click)="editService(service); $event.stopPropagation()"></mat-icon>
+          <mat-icon fontIcon="delete" color="primary" (click)="deleteService(service.id!); $event.stopPropagation()"></mat-icon>
         </div>
       </mat-expansion-panel-header>
-      @if (providerBeingEdited && providerBeingEdited.id === provider.id) {
+      @if (serviceBeingEdited && serviceBeingEdited.id === service.id) {
         <th-form
         [fields]="formFields"
         actionName="Update"
-        [provider]="providerBeingEdited"
-        (formSubmit)="onEditSubmit($event, provider)"
+        [data]="serviceBeingEdited"
+        (formSubmit)="onEditSubmit($event, service)"
         (formClear)="clearForm()"
       ></th-form>
       }@else{
-        <p>{{provider.businessAddress}}</p>
-        <p>{{provider.phoneNumber}}</p>
+        <p>{{service.businessAddress}}</p>
+        <p>{{service.phoneNumber}}</p>
       }
     </mat-expansion-panel>
   </mat-accordion>

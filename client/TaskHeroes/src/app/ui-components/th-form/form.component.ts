@@ -24,7 +24,7 @@ export class FormComponent {
     private formBuilder = inject(FormBuilder);
     @Input() fields: FormFieldConfig[] = [];
     @Input() actionName: string | null = null;
-    @Input() provider: Provider | null = null;
+    @Input() data: any= null;
     @Output() formSubmit = new EventEmitter<FormGroup>();
     @Output() formClear = new EventEmitter<void>();
     formGroup: FormGroup = this.formBuilder.group({}); // Generic FormGroup

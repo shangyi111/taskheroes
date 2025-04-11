@@ -20,7 +20,6 @@ export class HeaderComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
   readonly userData$ : Observable<User | null>= inject(UserDataService).userData$;
-  protected readonly userId = inject(ActivatedRoute).snapshot.paramMap.get('userId');
 
   isLoggedIn(): boolean {
     return this.authService.isAuthenticated();

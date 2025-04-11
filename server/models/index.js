@@ -4,14 +4,10 @@ const Service = require('./service');
 const RatingReview = require('./ratingReview');
 
 // Define associations
-Provider.belongsTo(User, { foreignKey: 'userId' });
-Provider.hasMany(Service, { foreignKey: 'providerId' });
-Provider.hasMany(RatingReview, { foreignKey: 'providerId' });
-Service.belongsTo(Provider, { foreignKey: 'providerId' });
-RatingReview.belongsTo(Provider, { foreignKey: 'providerId' });
+Service.belongsTo(User, { foreignKey: 'userId' });
 RatingReview.belongsTo(User, { foreignKey: 'userId' });
 User.hasMany(RatingReview, {foreignKey: 'userId'});
-User.hasMany(Provider, {foreignKey: 'userId'});
+User.hasMany(Service, {foreignKey: 'userId'});
 
 module.exports = {
     User,

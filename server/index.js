@@ -4,7 +4,7 @@ const express = require('express');
 const http = require('http');
 const bodyParser = require('body-parser');
 const authRoutes = require('./auth/authRoutes');
-const providersRoutes = require('./routes/providers');
+const servicesRoutes = require('./routes/services');
 const websocket = require('./websocket/socketServer');
 // const servicesRoutes = require('./routes/services');
 // const ratingsRoutes = require('./routes/ratings');
@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(bodyParser.json());
 app.use('/api/auth', authRoutes); // Use the authentication routes
-app.use('/api/providers', providersRoutes);
+app.use('/api/service', servicesRoutes);
 // app.use('/api/services', servicesRoutes);
 // app.use('/api/ratings', ratingsRoutes);
 

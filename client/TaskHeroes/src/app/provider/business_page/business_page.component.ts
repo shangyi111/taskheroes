@@ -1,81 +1,26 @@
-import { Component, inject, viewChild } from '@angular/core';
+import { Component, inject} from '@angular/core';
 import { Router } from '@angular/router';
-import { RouterLink } from '@angular/router';
-import { AuthService } from 'src/app/auth/auth.service';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
-import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
 import { MatChipsModule } from '@angular/material/chips';
 import { FormsModule } from '@angular/forms';
 import { SocketIoService } from 'src/app/services/socket-io.service';
 import { CommonModule } from '@angular/common';
-import { MatExpansionModule, MatAccordion } from '@angular/material/expansion';
-import { ProviderService } from 'src/app/services/provider.service';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { ServiceService } from 'src/app/services/service.service';
 import { FormFieldConfig } from 'src/app/ui-components/th-form/form.component';
 import { UserDataService } from 'src/app/services/user_data.service';
 import {signal} from '@angular/core';
-import {Provider} from 'src/app/shared/models/provider';
+import {Service} from 'src/app/shared/models/service';
 import {MatIconModule} from '@angular/material/icon';
 import {User} from 'src/app/shared/models/user';
-import {switchMap} from 'rxjs/operators';
+import {switchMap,take} from 'rxjs/operators';
 import {of as observableOf, Subscription} from 'rxjs';
 import { ReactiveFormsModule} from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import {FormComponent} from 'src/app/ui-components/th-form/form.component';
-
-
-export enum BUSINESS_STATUS {
-  Listed = 'listed',
-  InProgress = 'in-progress'
-}
-
-export interface BUSINESS_PROFILE {
-  id?: number;//service id
-  userId?:number;//provider's user id
-  photo?: string;
-  serviceName?: string;
-  description?: string;
-  status?: BUSINESS_STATUS;
-  details?: string;
-  phone?:string;
-  email?:string;
-  website?:string;
-  city?:string;
-  state?:string;
-  country?:string;
-  zipcode?:number;
-  reviewCount?:number;
-  category?:string;
-  rating?:number;
-  reviews?:string[];
-}
-
-const TEMP_PROFILES = [
-  {
-    id: 1,
-    userId:1,
-    photo: 'business1.jpg',
-    serviceName: 'Home Organization service',
-    description: 'Short description of service 1.',
-    status: BUSINESS_STATUS.Listed,
-    details: 'Detailed information about Service Provider 1.',
-    rating:5,
-    category:"Home Organization",
-    reviewCount:3,
-  },
-  {
-    id: 2,
-    photo: 'business2.jpg',
-    name: 'Cleaning service',
-    description: 'Short description of service 2.',
-    status: BUSINESS_STATUS.InProgress,
-    details: 'Detailed information about Service Provider 2.'
-  },
-  // Add more business profiles as needed
-];
+import { FormComponent } from 'src/app/ui-components/th-form/form.component';
 
 @Component({
   selector: 'business_page',
@@ -87,9 +32,9 @@ const TEMP_PROFILES = [
 export class BusinessPageComponent {
   private socketIoService = inject(SocketIoService);
   private router = inject(Router);
-  private providerService = inject(ProviderService);
+  private serviceService = inject(ServiceService);
   private readonly userData$ = inject(UserDataService).userData$;
-  providerForm: FormGroup = inject(FormBuilder).group({
+  serviceForm: FormGroup = inject(FormBuilder).group({
     businessName: ['', Validators.required],
     businessAddress: [''],
     phoneNumber: [''],
@@ -97,13 +42,11 @@ export class BusinessPageComponent {
     profilePicture: [''],
     // Add other form fields as needed
   });
-  businessProfiles: BUSINESS_PROFILE[] = [];
-  businessStatus = BUSINESS_STATUS;
-  providers: Provider[] = [];
-  private providersSubscription: Subscription | null = null;
+  services: Service[] = [];
+  private servicesSubscription: Subscription | null = null;
   private socketSubscriptions: Subscription[] = [];
-  providerBeingEdited: Provider | null = null;
-  addProviderPanelOpenState = signal(false); // New signal for add panel
+  serviceBeingEdited: Service | null = null;
+  addServicePanelOpenState = signal(false); // New signal for add panel
   editOpenStates = signal<Record<string, boolean>>({});
   formFields: FormFieldConfig[] = [
     { name: 'businessName', label: 'Business Name', type: 'text', validators: [Validators.required] },
@@ -114,40 +57,40 @@ export class BusinessPageComponent {
   ];
 
   ngOnInit(): void {
-    this.loadInitialProviders();
+    this.loadInitialServices();
     this.joinUserRoom();
-    this.listenForProviderUpdates();
+    this.listenForServiceUpdates();
   }
 
   ngOnDestroy(): void {
-    if (this.providersSubscription) {
-      this.providersSubscription.unsubscribe();
+    if (this.servicesSubscription) {
+      this.servicesSubscription.unsubscribe();
     }
     this.socketSubscriptions.forEach((sub) => sub.unsubscribe());
     this.socketIoService.disconnect();
   }
 
-  loadInitialProviders(): void {
-    this.providersSubscription = this.userData$.pipe(
+  loadInitialServices(): void {
+    this.servicesSubscription = this.userData$.pipe(
       switchMap((user: User | null) => {
         if (!user) return observableOf(null);
-        return this.providerService.getAllProvidersByUserId(user.id!);
+        return this.serviceService.getAllServicesByUserId(user.id!);
       })
     ).subscribe({
-      next: (loadedProviders: Provider[] | null) => {
-        if (loadedProviders) {
-          this.providers = loadedProviders;
+      next: (loadedServices: Service[] | null) => {
+        if (loadedServices) {
+          this.services = loadedServices;
           // If using OnPush, trigger change detection here
         }
       },
       error: (error) => {
-        console.error('Error loading initial providers:', error);
+        console.error('Error loading initial services:', error);
       },
     });
   }
   joinUserRoom():void{
     this.socketSubscriptions.push(
-      this.userData$.subscribe({
+      this.userData$.pipe(take(1)).subscribe({
         next: (user) => {
           if (user && user.id) {
             this.socketIoService.emit('join_user_room', user.id); // Use emit here
@@ -161,125 +104,127 @@ export class BusinessPageComponent {
     );
   }
 
-  listenForProviderUpdates(): void {  
+  listenForServiceUpdates(): void {  
     this.socketSubscriptions.push(
-      this.socketIoService.onUserEvent<Provider>('provider_created').subscribe((newProvider) => {
-        this.providers = [...this.providers, newProvider];
-        console.log('Provider Created (Real-time):', newProvider);
+      this.socketIoService.onUserEvent<Service>('service_created').subscribe((newService) => {
+        this.services = [...this.services, newService];
+        console.log('Service Created (Real-time):', newService);
         // If using OnPush, trigger change detection here
       })
     );
 
     this.socketSubscriptions.push(
-      this.socketIoService.onUserEvent<Provider>('provider_updated').subscribe((updatedProvider) => {
-        this.providers = this.providers.map((provider) =>
-          provider.id === updatedProvider.id ? updatedProvider : provider
+      this.socketIoService.onUserEvent<Service>('service_updated').subscribe((updatedService) => {
+        this.services = this.services.map((service) =>
+          service.id === updatedService.id ? updatedService : service
         );
-        console.log('Provider Updated (Real-time):', updatedProvider);
+        console.log('Service Updated (Real-time):', updatedService);
         // If using OnPush, trigger change detection here
       })
     );
 
     this.socketSubscriptions.push(
-      this.socketIoService.onUserEvent<{ providerId: number }>('provider_deleted').subscribe((data) => {
-        this.providers = this.providers.filter((provider:Provider) => provider.id != data.providerId.toString());
-        console.log('Provider Deleted (Real-time):', data.providerId);
+      this.socketIoService.onUserEvent<{ serviceId: number }>('service_deleted').subscribe((data) => {
+        this.services = this.services.filter((service:Service) => service.id != data.serviceId.toString());
+        console.log('Service Deleted (Real-time):', data.serviceId);
         // If using OnPush, trigger change detection here
       })
     );
   }
 
-  openDetails(provider: Provider) {
-    this.router.navigate(['service', provider.id]);
+  openDetails(service: Service) {
+    this.router.navigate(['service', service.id]);
   }
 
   onAddSubmit(formGroup:FormGroup) {
     if (formGroup.valid) {
       this.userData$
         .pipe(
+          take(1),
           switchMap((user) => {
             if (user) {
-              const newProvider: Provider = {
+              const newService: Service = {
                 ...formGroup.value,
                 userId: user.id,
               };
-              return this.providerService.createProvider(newProvider);
+              return this.serviceService.createService(newService);
             } else {
               return observableOf(null);
             }
           })
         )
         .subscribe({
-          next: (createdProvider) => {
-            if (createdProvider) {
-              console.log('Provider created via API:', createdProvider);
-              this.providerBeingEdited = null;
-              this.addProviderPanelOpenState.set(false);
+          next: (createdService) => {
+            if (createdService) {
+              console.log('Service created via API:', createdService);
+              this.serviceBeingEdited = null;
+              this.addServicePanelOpenState.set(false);
             }
           },
           error: (error) => {
-            console.error('Error creating provider:', error);
+            console.error('Error creating service:', error);
           },
         });
     }
   }
 
-  onEditSubmit(formGroup:FormGroup,provider:Provider) {
+  onEditSubmit(formGroup:FormGroup,service:Service) {
     if (formGroup.valid) {
       this.userData$
         .pipe(
+          take(1),
           switchMap((user) => {
             if (user) {
-              const updatedProvider: Provider = {
+              const updatedService: Service = {
                 ...formGroup.value,
                 userId: user.id,
-                id: provider.id,
+                id: service.id,
               };
-              return this.providerService.updateProvider(provider.id!, updatedProvider);
+              return this.serviceService.updateService(service.id!, updatedService);
             } else {
               return observableOf(null);
             }
           })
         )
         .subscribe({
-          next: (updatedProvider) => {
-            if (updatedProvider) {
-              console.log('Provider updated via API:', updatedProvider);
-              this.providerBeingEdited = null;
-              this.setEditPanelOpen(provider.id!, false);
+          next: (updatedService) => {
+            if (updatedService) {
+              console.log('Service updated via API:', updatedService);
+              this.serviceBeingEdited = null;
+              this.setEditPanelOpen(service.id!, false);
             }
           },
           error: (error) => {
-            console.error('Error updating provider:', error);
+            console.error('Error updating service:', error);
           },
         });
     }
   }
 
   clearForm(): void {
-    this.providerForm.reset();
-    this.providerBeingEdited = null;
+    this.serviceForm.reset();
+    this.serviceBeingEdited = null;
   }
 
-  deleteProvider(providerId: string): void {
-    if (confirm('Are you sure you want to delete this provider?')) {
-      this.providerService.deleteProvider(providerId).subscribe({
+  deleteService(serviceId: string): void {
+    if (confirm('Are you sure you want to delete this service?')) {
+      this.serviceService.deleteService(serviceId).subscribe({
         next: () => {
-          this.addProviderPanelOpenState.set(false);
-          this.setEditPanelOpen(providerId!,false);
-          console.log(`Provider with ID ${providerId} deleted successfully.`);
+          this.addServicePanelOpenState.set(false);
+          this.setEditPanelOpen(serviceId!,false);
+          console.log(`Service with ID ${serviceId} deleted successfully.`);
           // The real-time update should handle removing it from the list
         },
         error: (error) => {
-          console.error('Error deleting provider:', error);
+          console.error('Error deleting service:', error);
         },
       });
     }
   }
 
-  editProvider(provider: Provider): void {
-    this.providerBeingEdited = provider; // Set the provider being edited
-    this.setEditPanelOpen(provider.id!,true);
+  editService(service: Service): void {
+    this.serviceBeingEdited = service; // Set the service being edited
+    this.setEditPanelOpen(service.id!,true);
   }
 
   isEditPanelOpen(id: string): boolean {
