@@ -2,13 +2,13 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
 const Service = sequelize.define('Service', {
-  userId: {
+  userId: {//serviceProvider
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'Users', // Assuming your user table is named 'Users'
-      key: 'id',
-    }, // A user can have more than one provider profile
+      model: 'User', 
+      key: 'id', 
+    }, 
   },
   businessName: {
     type: DataTypes.STRING,

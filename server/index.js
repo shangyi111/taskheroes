@@ -5,9 +5,8 @@ const http = require('http');
 const bodyParser = require('body-parser');
 const authRoutes = require('./auth/authRoutes');
 const servicesRoutes = require('./routes/services');
+const reviewsRoutes = require('./routes/reviews');
 const websocket = require('./websocket/socketServer');
-// const servicesRoutes = require('./routes/services');
-// const ratingsRoutes = require('./routes/ratings');
 const sequelize = require('./config/db');
 const models = require('./models');
 const cors = require('cors'); 
@@ -19,8 +18,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use('/api/auth', authRoutes); // Use the authentication routes
 app.use('/api/service', servicesRoutes);
-// app.use('/api/services', servicesRoutes);
-// app.use('/api/ratings', ratingsRoutes);
+app.use('/api/review', reviewsRoutes);
 
 // Example protected route
 app.get('/api/protected', authenticateToken, (req, res) => {

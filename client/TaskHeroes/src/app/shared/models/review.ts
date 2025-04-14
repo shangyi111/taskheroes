@@ -4,4 +4,5 @@ export interface Review {
     reviewerId?:string;//person give out the review
     rating?:number;
     review?:string;
+    serviceId?:string,
   }

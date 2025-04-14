@@ -38,7 +38,10 @@ export class FormComponent {
       this.fields.forEach((field) => {
         formControls[field.name] = ['', field.validators];
       });
-      this.formGroup = this.formBuilder.group(formControls); // Use formGroup
+      this.formGroup = this.formBuilder.group(formControls);
+      if (this.data) {
+        this.formGroup.patchValue(this.data);
+      }
     }
 
     onSubmit(): void {

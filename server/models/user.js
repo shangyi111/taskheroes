@@ -15,7 +15,6 @@ const User = sequelize.define('User', {
     type:DataTypes.STRING,
     allowNull:false,
   },
-  // Add other fields as needed
 });
 
 module.exports = User;
