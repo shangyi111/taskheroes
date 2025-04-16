@@ -206,6 +206,10 @@ export class BusinessPageComponent {
     this.serviceBeingEdited = null;
   }
 
+  cancel():void{
+    this.serviceBeingEdited = null;
+  }
+
   deleteService(serviceId: string): void {
     if (confirm('Are you sure you want to delete this service?')) {
       this.serviceService.deleteService(serviceId).subscribe({

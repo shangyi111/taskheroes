@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
 const Service = sequelize.define('Service', {
-  userId: {//serviceProvider
+  userId: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {

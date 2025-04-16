@@ -71,7 +71,7 @@ export class SocketIoService implements OnDestroy {
   }
 
   /**
-   * Listen for specific user event types (e.g. provider_created, provider_updated)
+   * Listen for specific user event types (e.g. service_created, service_updated)
    */
   onUserEvent<T>(type: string): Observable<T> {
     return new Observable<T>((subscriber) => {

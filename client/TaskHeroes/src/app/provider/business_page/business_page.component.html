@@ -19,7 +19,6 @@
     (closed)="setEditPanelOpen(service.id!, false)">
       <mat-expansion-panel-header>
         <mat-panel-title> {{ service.businessName }} </mat-panel-title>
-        <mat-panel-description> {{ service.description }} </mat-panel-description>
         <div class="actions">
           <mat-icon fontIcon="edit" color="warn" (click)="editService(service); $event.stopPropagation()"></mat-icon>
           <mat-icon fontIcon="delete" color="primary" (click)="deleteService(service.id!); $event.stopPropagation()"></mat-icon>
@@ -32,10 +31,21 @@
         [data]="serviceBeingEdited"
         (formSubmit)="onEditSubmit($event, service)"
         (formClear)="clearForm()"
+        (cancel)="cancel()"
       ></th-form>
       }@else{
-        <p>{{service.businessAddress}}</p>
-        <p>{{service.phoneNumber}}</p>
+        <div class="business-card">
+          <div class="profile-picture">
+            <img src={{service.profilePicture}} alt="profile pic for ${service.businessName}">
+          </div>
+          <div class="business-info">
+            <p class="business-name">{{service.businessName}}</p>
+            <p class="category">Category: {{service.category}}</p>
+            <p class="description">Description: {{service.description}}</p>
+            <p class="address">Provider address: {{service.businessAddress}}</p>
+            <p class="phone">Provider phone: {{service.phoneNumber}}</p>
+          </div>
+        </div>
       }
     </mat-expansion-panel>
   </mat-accordion>

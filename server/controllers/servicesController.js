@@ -33,11 +33,10 @@ exports.getServiceById = async (req, res) => {
 // Create a new service
 exports.createService = async (req, res) => {
   try {
-    const newService = await Service.create({ ...req.body, userId: req.user.id }); // Assuming req.user contains user info
+    const newService = await Service.create({ ...req.body, userId: req.user.id }); 
     res.status(201).json(newService);
     sendServiceCreated(newService);
   } catch (error) {
-    console.log("testing error",error);
     const message = error.errors[0].message;
     res.status(400).json({ message });
   }

@@ -1,82 +1,82 @@
-const { Provider } = require('../models');
+const { Job } = require('../models');
 const {
-  sendProviderUpdated,
-  sendProviderCreated,
-  sendProviderDeleted,
-} = require('../websocket/handlers/providerHandler');
+  sendJobUpdated,
+  sendJobCreated,
+  sendJobDeleted,
+} = require('../websocket/handlers/jobHandler');
 
-// Get all providers
-exports.getAllProviders = async (req, res) => {
+// Get all jobs
+exports.getAllJobs = async (req, res) => {
   try {
-    const providers = await Provider.findAll();
-    res.json(providers);
+    const jobs = await Job.findAll();
+    res.json(jobs);
   } catch (error) {
-    console.log("error inside get all providers",error);
+    console.log("error inside get all jobs",error);
     res.status(500).json({ message: error.message });
   }
 };
 
-// Get a specific provider by ID
-exports.getProviderById = async (req, res) => {
+// Get a specific job by ID
+exports.getJobById = async (req, res) => {
   try {
-    const provider = await Provider.findByPk(req.params.id);
-    if (provider) {
-      res.json(provider);
+    const job = await Job.findByPk(req.params.id);
+    if (job) {
+      res.json(job);
     } else {
-      res.status(404).json({ message: 'Provider not found' });
+      res.status(404).json({ message: 'Job not found' });
     }
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// Create a new provider
-exports.createProvider = async (req, res) => {
+// Create a new job
+exports.createJob = async (req, res) => {
   try {
-    const newProvider = await Provider.create({ ...req.body, userId: req.user.id }); // Assuming req.user contains user info
-    res.status(201).json(newProvider);
-    sendProviderCreated(newProvider);
+    const newJob = await Job.create({ ...req.body, userId: req.user.id }); // Assuming req.user contains user info
+    res.status(201).json(newJob);
+    sendJobCreated(newJob);
   } catch (error) {
     const message = error.errors[0].message;
     res.status(400).json({ message });
   }
 };
 
-exports.updateProvider = async (req, res) => {
+exports.updateJob = async (req, res) => {
   try {
-    const providerId = req.params.id;
-    const [updatedRowCount] = await Provider.update(req.body, {
-      where: { id: providerId, userId: req.user.id }, // Ensure user owns the provider
+    const jobId = req.params.id;
+    const [updatedRowCount] = await Job.update(req.body, {
+      where: { id: jobId, userId: req.user.id }, // Ensure user owns the job
       returning: true, // To get the updated record
     });
 
     if (updatedRowCount > 0) {
-      const updatedProvider = await Provider.findByPk(providerId);
-      res.status(200).json(updatedProvider);
-      sendProviderUpdated(updatedProvider);
+      const updatedJob = await Job.findByPk(jobId);
+      res.status(200).json(updatedJob);
+      sendJobUpdated(updatedJob);
     } else {
-      res.status(404).json({ message: 'Provider not found or unauthorized' });
+      res.status(404).json({ message: 'Job not found or unauthorized' });
     }
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// Delete a provider
-exports.deleteProvider = async (req, res) => {
+// Delete a job
+exports.deleteJob = async (req, res) => {
   try {
-    const provider = await Provider.findByPk(req.params.id);
-    if (!provider || provider.userId !== req.user.id) { // Ensure user owns the provider
-      return res.status(404).json({ message: 'Provider not found or unauthorized' });
+    const job = await Job.findByPk(req.params.id);
+    if (!job || job.userId !== req.user.id) { // Ensure user owns the job
+      return res.status(404).json({ message: 'Job not found or unauthorized' });
     }
-    const deletedRows = await Provider.destroy({
+    const deletedRows = await Job.destroy({
       where: { id: req.params.id },
     });
     if (deletedRows > 0) {
       res.status(204).send();
-      sendProviderDeleted(provider.id, provider.userId);
+      sendJobDeleted(job.id, job.userId);
     } else {
-      res.status(404).json({ message: 'Provider not found' });
+      res.status(404).json({ message: 'Job not found' });
     }
   } catch (error) {
     res.status(500).json({ message: error.message });

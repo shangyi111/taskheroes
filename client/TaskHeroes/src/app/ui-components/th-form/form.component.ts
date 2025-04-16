@@ -27,6 +27,7 @@ export class FormComponent {
     @Input() data: any= null;
     @Output() formSubmit = new EventEmitter<FormGroup>();
     @Output() formClear = new EventEmitter<void>();
+    @Output() cancel = new EventEmitter<void>();
     formGroup: FormGroup = this.formBuilder.group({}); // Generic FormGroup
 
     ngOnInit(): void {
@@ -53,5 +54,9 @@ export class FormComponent {
     clearForm(): void {
     this.formGroup.reset(); // Use formGroup
     this.formClear.emit();
+    }
+
+    cancelForm():void{
+      this.cancel.emit();
     }
 }

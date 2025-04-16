@@ -2,11 +2,13 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-between; /* Distribute space between elements */
+  justify-content: space-between; 
+  font-family: var(--global-font-family);
 
   .provider-name {
     flex-grow: 1; /* Allow the name to take up available space */
     margin-right: 16px; /* Add some space between name and description */
+    font-family: var(--global-font-family);
   }
 
   .provider-description {
@@ -25,4 +27,64 @@
     }
   }
 
+}
+.business-card {
+  display: flex;
+  border: 1px solid var(--card-border);
+  padding: var(--dashboard-padding);
+  margin-bottom: 10px;
+  align-items: center;
+  box-shadow: var(--card-shadow);
+}
+
+.business-card:hover {
+  box-shadow: var(--card-hover-shadow);
+  transition: var(--transition-default);
+}
+
+.profile-picture {
+  margin-right: calc(var(--dashboard-padding) / 2);
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.profile-picture img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.business-info {
+  flex-grow: 1;
+}
+
+.business-info p {
+  margin-bottom: calc(var(--dashboard-padding) / 4);
+  color: var(--text-primary);
+  font-family: var(--global-font-family);
+  font-size: calc(var(--text-font-size) * 0.8);
+}
+
+.business-name {
+  font-size: var(--title-font-size);
+  font-weight: bold;
+  margin-bottom: calc(var(--dashboard-padding) / 3);
+  color: var(--primary-blue);
+}
+
+.category {
+  color: var(--text-secondary);
+  font-size: var(--description-font-size);
+}
+
+.description {
+  font-size: var(--description-font-size);
+  color: var(--text-secondary);
+}
+
+.address, .phone {
+  font-size: var(--description-font-size);
+  color: var(--text-secondary);
 }

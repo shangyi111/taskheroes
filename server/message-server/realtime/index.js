@@ -2,8 +2,8 @@ const socketIo = require('socket.io');
 const { getIO } = require('../../websocket/socketServer');
 const messageHandlers = require('./message-handlers');
 const chatroomHandlers = require('./chatroom-handlers');
-const messageService = require('../services/message-service');
-const chatroomService = require('../services/chatroom-service');
+const messageService = require('../controllers/message-service');
+const chatroomService = require('../controllers/chatroom-service');
 
 module.exports = (server) => {
   const io = getIO();
