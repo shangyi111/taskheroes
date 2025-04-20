@@ -40,11 +40,6 @@ export class SearchComponent {
     })
   );
 
-  constructor() {
-    this.services$.subscribe(data => {
-      console.log('SERVICES:', data); // 👈 See what's actually coming through
-    });
-  }
   handleFiltersChanged(filters: any): void {
     this.filtersSubject.next(filters);
   }

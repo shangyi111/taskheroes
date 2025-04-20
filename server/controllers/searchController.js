@@ -38,7 +38,7 @@ exports.searchServices = async (req, res) => {
     // Keyword search
     if (keyword) {
       where[Op.or] = [
-        { jobTitle: { [Op.iLike]: `%${keyword}%` } },
+        { businessName: { [Op.iLike]: `%${keyword}%` } },
         { description: { [Op.iLike]: `%${keyword}%` } },
       ];
     }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject , shareReplay} from 'rxjs';
 import {User} from 'src/app/shared/models/user';
 
 @Injectable({
@@ -7,7 +7,9 @@ import {User} from 'src/app/shared/models/user';
 })
 export class UserDataService {
   private userDataSubject = new BehaviorSubject<User|null>({});
-  userData$ = this.userDataSubject.asObservable();
+  userData$ = this.userDataSubject.asObservable().pipe(
+      shareReplay({ bufferSize: 1, refCount: true })
+  );
 
   setUserData(userData: User): void {
     this.userDataSubject.next(userData);
