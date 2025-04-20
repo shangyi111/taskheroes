@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const authRoutes = require('./auth/authRoutes');
 const servicesRoutes = require('./routes/services');
 const reviewsRoutes = require('./routes/reviews');
+const jobsRoutes = require('./routes/jobs');
 const websocket = require('./websocket/socketServer');
 const sequelize = require('./config/db');
 const models = require('./models');
@@ -19,6 +20,7 @@ app.use(bodyParser.json());
 app.use('/api/auth', authRoutes); // Use the authentication routes
 app.use('/api/service', servicesRoutes);
 app.use('/api/review', reviewsRoutes);
+app.use('/api/job',jobsRoutes);
 
 // Example protected route
 app.get('/api/protected', authenticateToken, (req, res) => {

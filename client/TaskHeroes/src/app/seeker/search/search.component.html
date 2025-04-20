@@ -1,1 +1,31 @@
-<div>search</div>
+<th-filter (filtersChanged)="handleFiltersChanged($event)"></th-filter>
+
+<div class="service-results">
+  @let services = services$ | async;
+  @let user = userData$ | async;
+
+  @for (service of services; track service.id) {
+    <mat-card class="service-card">
+      <div class="profile-side">
+        <img class="profile-picture" [src]="service.profilePicture" alt="profile pic for {{ service.businessName }}">
+        <div class="mat-card-header-text">
+          <mat-card-title>{{ service.businessName }}</mat-card-title>
+          <mat-card-subtitle>Category: {{ service.category }}</mat-card-subtitle>
+        </div>
+      </div>
+      <div class="business-info">
+        <mat-card-content>
+          <p>Description: {{ service.description }}</p>
+          <p>Provider address: {{ service.businessAddress }}</p>
+          <p>Provider phone: {{ service.phoneNumber }}</p>
+          <p>Provider hourly-rate: {{ service.hourlyRate }}</p>
+          <button mat-raised-button color="primary" (click)="request(service, user?.id)">Request</button>
+        </mat-card-content>
+      </div>
+    </mat-card>
+  }
+
+  @if (!services!.length) {
+    <p>No services found.</p>
+  }
+</div>

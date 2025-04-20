@@ -2,6 +2,8 @@ import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, ReactiveFormsModule,ValidatorFn } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule, MatInput } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core'; 
 import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { Provider } from 'src/app/shared/models/provider';
@@ -18,7 +20,8 @@ export interface FormFieldConfig {
   standalone: true,
   styleUrls: ['./form.component.scss'],
   templateUrl: './form.component.html',
-  imports: [ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatExpansionModule],
+  imports: [ReactiveFormsModule, MatDatepickerModule,MatNativeDateModule,
+    MatFormFieldModule, MatInputModule, MatButtonModule, MatExpansionModule],
 })
 export class FormComponent {
     private formBuilder = inject(FormBuilder);

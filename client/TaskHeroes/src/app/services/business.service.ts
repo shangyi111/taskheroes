@@ -9,7 +9,7 @@ import {map} from 'rxjs/operators';
   providedIn: 'root',
 })
 
-export class ServiceService {
+export class BusinessService {
   private readonly API_URL = 'http://localhost:3000/api/service';
   private readonly AUTH_TOKEN_KEY = AUTH_TOKEN_KEY;
 
@@ -27,6 +27,14 @@ export class ServiceService {
     return this.getAllServices().pipe(
       map((services: Service[]) => {
         return services.filter((service: Service) => service.userId === userId);
+      })
+    );
+  }
+
+  getAllServicesExceptUserId(userId:string):Observable<Service[]>{
+    return this.getAllServices().pipe(
+      map((services: Service[]) => {
+        return services.filter((service: Service) => service.userId != userId);
       })
     );
   }

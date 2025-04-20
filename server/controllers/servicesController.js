@@ -1,4 +1,5 @@
 const { Service } = require('../models');
+const {Review} = require('../models');
 const {
   sendServiceUpdated,
   sendServiceCreated,
@@ -8,7 +9,9 @@ const {
 // Get all services
 exports.getAllServices = async (req, res) => {
   try {
-    const services = await Service.findAll();
+    const services = await Service.findAll({
+      include:[ Review]
+    });
     res.json(services);
   } catch (error) {
     console.log("error inside get all services",error);

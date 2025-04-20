@@ -4,6 +4,8 @@ import {AuthGuard} from 'src/app/auth/auth.guard';
 import { SearchComponent } from 'src/app/seeker/search/search.component';
 import { RegistrationComponent } from 'src/app/auth/register/register.component';
 import {DashboardComponent} from 'src/app/ui-components/dashboard/dashboard.component';
+import { RequestComponent } from './seeker/request/request.component';
+import {JobOrdersComponent} from './provider/joborders/job_orders.component';
 // import { attachReactRefresh } from 'next/dist/build/webpack-config';
 // import { SearchResultsComponent } from './seeker/search/search-results/search-results.component';
 // import { MessagesComponent as SeekerMessagesComponent } from './seeker/messages/messages.component';
@@ -15,7 +17,6 @@ import { BusinessPageComponent } from 'src/app/provider/business_page/business_p
 export const routes: Routes = [
 //   { path: '', redirectTo: '/search', pathMatch: 'full' }, // Default route
   { path: 'login', component: LoginComponent },
-  
     { path: 'user/:userId', component: DashboardComponent, canActivate: [AuthGuard],
   }, // User-specific dashboard
   {
@@ -24,8 +25,18 @@ export const routes: Routes = [
     canActivate: [AuthGuard], // Add AuthGuard if needed
   },
   {
+    path:'user/:userId/service/:serviceId/request',
+    component:RequestComponent,
+    canActivate:[AuthGuard],
+  },
+  {
     path: 'user/:userId/provider',
     component: BusinessPageComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'user/:userId/jobs',
+    component: JobOrdersComponent,
     canActivate: [AuthGuard],
   },
   // {

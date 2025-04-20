@@ -1,0 +1,91 @@
+/* Styles for the Filter Component */
+th-filter {
+  display: block; /* Make it take full width */
+  margin-bottom: 20px;
+}
+
+mat-card-title,
+mat-card-subtitle {
+  font-family: var(--global-font-family);
+}
+/* ... (Your existing global styles and filter styles) ... */
+
+/* Styles for the Service Results Container */
+.service-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 10px;
+  padding: var(--dashboard-padding);
+}
+
+/* Styles for Individual Service Cards (using mat-card) */
+.service-card {
+  display: flex; /* Enable flexbox for the card */
+  flex-direction: row;
+  border: 1px solid var(--card-border);
+  align-items: flex-start; /* Align items to the top */
+  box-shadow: var(--card-shadow);
+  transition: var(--transition-default);
+  padding: var(--dashboard-padding);
+  margin-bottom: 10px;
+}
+
+.service-card:hover {
+  box-shadow: var(--card-hover-shadow);
+  transform: translateY(-2px);
+}
+
+.profile-side {
+  display: flex; /* Enable flexbox for the profile picture and header */
+  flex-direction: column; /* Stack picture and header vertically */
+  align-items: flex-start; /* Align items to the left */
+  margin-right: calc(var(--dashboard-padding) / 2);
+  width: 35%; /* Set the width of the left side */
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+.profile-picture {
+  width: auto;
+  min-height: 142px;
+  max-width: 100%;
+  height: auto;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: calc(var(--dashboard-padding) / 4);
+}
+
+.profile-picture img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+mat-card-title {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+mat-card-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.9em;
+}
+
+.business-info {
+  flex-grow: 1; /* Take remaining width */
+  width: 65%; /* Set the width of the right side */
+}
+
+mat-card-content p {
+  margin-bottom: calc(var(--dashboard-padding) / 6);
+  color: var(--text-secondary);
+  font-family: var(--global-font-family);
+  font-size: 0.9em;
+}
+
+mat-card-content button {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+}

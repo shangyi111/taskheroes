@@ -1,0 +1,25 @@
+<div class="job-list-container">
+    @for (job of jobs; track job.id) {
+      <mat-card class="job-card">
+        <mat-card-header>
+          <mat-card-title>{{ job.jobTitle }}</mat-card-title>
+          <mat-card-subtitle>Category: {{ job.category }} - Location: {{ job.location }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p>{{ job.description }}</p>
+          <p><strong>Job Date:</strong> {{ job.jobDate | date }}</p>
+          <p><strong>Fee:</strong> {{ job.fee }}</p>
+          <p><strong>HourlyRate:</strong> {{ job.hourlyRate }}</p>
+          <p><strong>Payment Method:</strong> {{ job.paymentMethod }}</p>
+          <p><strong>Customer Phone:</strong> {{ job.customerPhone }}</p>
+          <p *ngIf="job.serviceId"><strong>Service ID:</strong> {{ job.serviceId }}</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button color="accent">Contact Customer</button>
+          </mat-card-actions>
+      </mat-card>
+    }
+    @empty {
+      <p>No jobs available at the moment.</p>
+    }
+  </div>

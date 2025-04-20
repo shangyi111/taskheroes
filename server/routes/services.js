@@ -1,7 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const servicesController = require('../controllers/servicesController');
+const searchController=require('../controllers/searchController');
 const authMiddleware = require('../auth/authMiddleware');
+
+
+// Route for searching services with filtering (this is your new search controller)
+router.get('/search', searchController.searchServices);
 
 // Get all services
 router.get('/', servicesController.getAllServices);

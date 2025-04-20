@@ -7,7 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { SocketIoService } from 'src/app/services/socket-io.service';
 import { CommonModule } from '@angular/common';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { ServiceService } from 'src/app/services/service.service';
+import { BusinessService } from 'src/app/services/business.service';
 import { FormFieldConfig } from 'src/app/ui-components/th-form/form.component';
 import { UserDataService } from 'src/app/services/user_data.service';
 import {signal} from '@angular/core';
@@ -32,14 +32,16 @@ import { FormComponent } from 'src/app/ui-components/th-form/form.component';
 export class BusinessPageComponent {
   private socketIoService = inject(SocketIoService);
   private router = inject(Router);
-  private serviceService = inject(ServiceService);
+  private businessService = inject(BusinessService);
   private readonly userData$ = inject(UserDataService).userData$;
   serviceForm: FormGroup = inject(FormBuilder).group({
     businessName: ['', Validators.required],
     businessAddress: [''],
+    zipCode:[''],
     phoneNumber: [''],
     description: [''],
     profilePicture: [''],
+    hourlyRate:[''],
     // Add other form fields as needed
   });
   services: Service[] = [];
@@ -51,7 +53,9 @@ export class BusinessPageComponent {
   formFields: FormFieldConfig[] = [
     { name: 'businessName', label: 'Business Name', type: 'text', validators: [Validators.required] },
     { name: 'businessAddress', label: 'Business Address', type: 'text', validators: [] },
+    { name: 'zipCode', label: 'Zip Code', type: 'text', validators: [] },
     { name: 'phoneNumber', label: 'Phone Number', type: 'tel', validators: [] },
+    { name: 'hourlyRate', label: 'HourlyRate', type: 'number', validators: [] },
     { name: 'description', label: 'Description', type: 'text', validators: [] },
     { name: 'profilePicture', label: 'Profile Picture URL', type: 'url', validators: [] },
   ];
@@ -74,7 +78,7 @@ export class BusinessPageComponent {
     this.servicesSubscription = this.userData$.pipe(
       switchMap((user: User | null) => {
         if (!user) return observableOf(null);
-        return this.serviceService.getAllServicesByUserId(user.id!);
+        return this.businessService.getAllServicesByUserId(user.id!);
       })
     ).subscribe({
       next: (loadedServices: Service[] | null) => {
@@ -147,7 +151,7 @@ export class BusinessPageComponent {
                 ...formGroup.value,
                 userId: user.id,
               };
-              return this.serviceService.createService(newService);
+              return this.businessService.createService(newService);
             } else {
               return observableOf(null);
             }
@@ -180,7 +184,7 @@ export class BusinessPageComponent {
                 userId: user.id,
                 id: service.id,
               };
-              return this.serviceService.updateService(service.id!, updatedService);
+              return this.businessService.updateService(service.id!, updatedService);
             } else {
               return observableOf(null);
             }
@@ -212,7 +216,7 @@ export class BusinessPageComponent {
 
   deleteService(serviceId: string): void {
     if (confirm('Are you sure you want to delete this service?')) {
-      this.serviceService.deleteService(serviceId).subscribe({
+      this.businessService.deleteService(serviceId).subscribe({
         next: () => {
           this.addServicePanelOpenState.set(false);
           this.setEditPanelOpen(serviceId!,false);

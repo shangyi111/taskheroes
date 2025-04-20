@@ -1,25 +1,30 @@
 <header>
   <nav>
-    <span class="logo">TaskHeroes</span>
-    @if(isLoggedIn()){
-      <span class="menu">
-            @if(this.userData$ | async; as user){
-            @let userId = user.id;
-            @if (user.role === 'seeker') {
-              <a [routerLink]="['/user', userId, 'seeker']">Search</a>
-              <a [routerLink]="['/user', userId, 'orders']">Orders</a>
-              <a [routerLink]="['/user', userId, 'messages']">Messages</a>
-              <a [routerLink]="['/user', userId, 'profile']">Profile</a>
-            } @else if (user.role === 'provider') {
-              <a [routerLink]="['/user', userId, 'provider']">Business Page</a>
-              <a [routerLink]="['/user', userId, 'orders']">Orders</a>
-              <a [routerLink]="['/user', userId, 'messages']">Messages</a>
-              <a [routerLink]="['/user', userId, 'profile']">Profile</a>
-            }
+    @if (isLoggedIn()) {
+      @if (this.userData$ | async; as user) {
+        @let userId = user.id;
+        <span class="logo">
+          <a [routerLink]="['/user', userId]">TaskHeroes</a>
+        </span>
+        <span class="menu">
+          @if (user.role === 'seeker') {
+            <a [routerLink]="['/user', userId, 'seeker']">Search</a>
+            <a [routerLink]="['/user', userId, 'orders']">Orders</a>
+            <a [routerLink]="['/user', userId, 'messages']">Messages</a>
+            <a [routerLink]="['/user', userId, 'profile']">Profile</a>
+          } @else if (user.role === 'provider') {
+            <a [routerLink]="['/user', userId, 'provider']">Business Page</a>
+            <a [routerLink]="['/user', userId, 'jobs']">Orders</a>
+            <a [routerLink]="['/user', userId, 'messages']">Messages</a>
+            <a [routerLink]="['/user', userId, 'profile']">Profile</a>
           }
-        <button (click)="logout()">Logout</button>
-      </span>
+        </span>
+      }
+      <button (click)="logout()">Logout</button>
     } @else {
+      <span class="logo">
+        <a routerLink="/login">TaskHeroes</a>
+      </span>
       <span class="menu">
         <a routerLink="/login">Login</a>
         <a routerLink="/register">Register</a>

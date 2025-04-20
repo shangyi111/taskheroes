@@ -1,4 +1,6 @@
 const { DataTypes } = require('sequelize');
+const User = require('./user');
+const Service = require('./service');
 const sequelize = require('../config/db');
 
 const Job = sequelize.define('Job', {
@@ -6,15 +8,7 @@ const Job = sequelize.define('Job', {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'User', 
-      key: 'id',
-    }, 
-  },
-  customerId:{
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'User', 
+      model: User, 
       key: 'id',
     }, 
   },
@@ -22,7 +16,7 @@ const Job = sequelize.define('Job', {
     type: DataTypes.INTEGER,
     allowNull: true,
     references: {
-      model: 'Service',
+      model: Service,
       key: 'id',
     },
   },
@@ -43,10 +37,18 @@ const Job = sequelize.define('Job', {
     type: DataTypes.DATE,
     allowNull: true,
   },
-  jobPrice: {
+  fee: {
     type: DataTypes.DECIMAL(10, 2),
     allowNull: true,
   },
+  hourlyRate:{
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true,
+  },
+  zipCode:{
+    type:DataTypes.INTEGER,
+    allowNull:true,
+  }
   // Add any other relevant job fields here
 });
 

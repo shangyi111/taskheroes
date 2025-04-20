@@ -1,9 +1,18 @@
 <form [formGroup]="formGroup" (ngSubmit)="onSubmit()">
     @for (field of fields; track field.name) {
-      <mat-form-field>
-        <mat-label>{{ field.label }}</mat-label>
-        <input matInput [type]="field.type" [formControlName]="field.name" />
-      </mat-form-field>
+      @if (field.type === 'date') {
+        <mat-form-field>
+          <mat-label>{{ field.label }}</mat-label>
+          <input matInput [matDatepicker]="picker" [formControlName]="field.name" />
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+      } @else {
+        <mat-form-field>
+          <mat-label>{{ field.label }}</mat-label>
+          <input matInput [type]="field.type" [formControlName]="field.name" />
+        </mat-form-field>
+      }
     }
   
     <button mat-raised-button color="primary" type="submit">{{ actionName || 'Submit' }}</button>

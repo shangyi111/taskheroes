@@ -2,9 +2,15 @@ export interface Job{
     id?:string,//job Id
     performerId?:string, //person who performs job
     jobDate?:Date,
-    customerId?:string,//customer id
+    customerId?:string,//user id
     category?:string,
     location?:string,
-    fee:string,
-    paymentMethod:string,
+    zipCode?:number,
+    description?:string,
+    fee?:string,
+    hourlyRate?:number,
+    paymentMethod?:string,
+    serviceId?:string,
+    jobTitle?:string,
+    customerPhone?:string,
 }

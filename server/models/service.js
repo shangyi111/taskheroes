@@ -1,4 +1,5 @@
 const { DataTypes } = require('sequelize');
+const User = require('./user');
 const sequelize = require('../config/db');
 
 const Service = sequelize.define('Service', {
@@ -6,7 +7,7 @@ const Service = sequelize.define('Service', {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'User', 
+      model: User, 
       key: 'id', 
     }, 
   },
@@ -34,6 +35,10 @@ const Service = sequelize.define('Service', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  hourlyRate:{
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true,
+  }
 });
   
 module.exports = Service;

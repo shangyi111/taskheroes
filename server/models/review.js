@@ -1,4 +1,7 @@
 const { DataTypes } = require('sequelize');
+const User = require('./user');
+const Job = require('./job');
+const Service = require('./service');
 const sequelize = require('../config/db');
 
 const Review = sequelize.define('Review', {
@@ -6,7 +9,7 @@ const Review = sequelize.define('Review', {
     type: DataTypes.INTEGER, // Assuming revieweeId refers to a service or user ID
     allowNull: true, // Reviewee might not be known initially
     references: {
-      model: 'User', 
+      model: User, 
       key: 'id', 
     },
   },
@@ -14,7 +17,7 @@ const Review = sequelize.define('Review', {
     type: DataTypes.INTEGER, // Assuming reviewerId refers to a User id
     allowNull: true, // Reviewer might not be known initially
     references: {
-      model: 'User',
+      model: User,
       key: 'id',
     },
   },
@@ -22,7 +25,15 @@ const Review = sequelize.define('Review', {
     type: DataTypes.INTEGER, // Assuming reviewerId refers to a User id
     allowNull: true, // Reviewer might not be known initially
     references: {
-      model: 'Job',
+      model: Job,
+      key: 'id',
+    },
+  },
+  serviceId:{
+    type: DataTypes.INTEGER, 
+    allowNull: true, 
+    references: {
+      model: Service,
       key: 'id',
     },
   },

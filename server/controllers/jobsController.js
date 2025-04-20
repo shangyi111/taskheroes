@@ -33,10 +33,11 @@ exports.getJobById = async (req, res) => {
 // Create a new job
 exports.createJob = async (req, res) => {
   try {
-    const newJob = await Job.create({ ...req.body, userId: req.user.id }); // Assuming req.user contains user info
+    const newJob = await Job.create({ ...req.body, userId: req.user.id });
     res.status(201).json(newJob);
     sendJobCreated(newJob);
   } catch (error) {
+    console.log("testing error",error);
     const message = error.errors[0].message;
     res.status(400).json({ message });
   }

@@ -6,6 +6,7 @@ export interface Service {
     userId: string;
     businessName?: string;
     businessAddress?: string; 
+    zipCode?:number;
     phoneNumber?: string;
     description?: string; 
     profilePicture?: string; 
@@ -13,5 +14,7 @@ export interface Service {
     reviews?:Review[];
     jobs?:Job[];
     category?:string,
+    hourlyRate?:number,
+
     // Add other provider-related fields as needed
   }
