@@ -17,9 +17,11 @@ exports.getAllJobs = async (req, res) => {
 };
 
 // Get a specific job by ID
-exports.getJobById = async (req, res) => {
+exports.getJobsById = async (req, res) => {
   try {
-    const job = await Job.findByPk(req.params.id);
+    const job = await Job.findAll({where:
+                                    {userId:req.params.id}
+                                  });
     if (job) {
       res.json(job);
     } else {
@@ -28,12 +30,13 @@ exports.getJobById = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-};
+}
 
 // Create a new job
 exports.createJob = async (req, res) => {
   try {
-    const newJob = await Job.create({ ...req.body, userId: req.user.id });
+    console.log("req.body", req.body);
+    const newJob = await Job.create({ ...req.body});
     res.status(201).json(newJob);
     sendJobCreated(newJob);
   } catch (error) {

@@ -6,11 +6,11 @@ import { RegistrationComponent } from 'src/app/auth/register/register.component'
 import {DashboardComponent} from 'src/app/ui-components/dashboard/dashboard.component';
 import { RequestComponent } from './seeker/request/request.component';
 import {JobOrdersComponent} from './provider/joborders/job_orders.component';
-// import { attachReactRefresh } from 'next/dist/build/webpack-config';
 // import { SearchResultsComponent } from './seeker/search/search-results/search-results.component';
 // import { MessagesComponent as SeekerMessagesComponent } from './seeker/messages/messages.component';
 // import { ProfileComponent as SeekerProfileComponent } from './seeker/profile/profile.component';
 import { BusinessPageComponent } from 'src/app/provider/business_page/business_page.component';
+import { ChatroomsComponent } from './provider/messenger/chatrooms/chatrooms.component';
 // import { ProfileComponent as ProviderProfileComponent } from './provider/profile/profile.component';
 // import { MessagesComponent as ProviderMessagesComponent } from './provider/messages/messages.component';
 
@@ -37,6 +37,11 @@ export const routes: Routes = [
   {
     path: 'user/:userId/jobs',
     component: JobOrdersComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'provider/:providerId/chatrooms',
+    component: ChatroomsComponent,
     canActivate: [AuthGuard],
   },
   // {

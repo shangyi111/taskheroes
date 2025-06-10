@@ -1,0 +1,109 @@
+
+.message-list-container {
+    padding: var(--dashboard-padding);
+    background-color: var(--dashboard-bg);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .message-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2rem 0;
+    flex-grow: 1;
+    overflow-y: auto;
+  }
+  
+  .message-item {
+    padding: 1rem;
+    background-color: #fff;
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    box-shadow: var(--card-shadow);
+    animation: fadeIn 0.2s ease-in-out;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .message-header {
+    display: flex;
+    align-items: baseline;
+    margin-bottom: 0.5rem;
+  }
+  
+  .sender {
+    font-size: var(--text-font-size);
+    font-weight: bold;
+    margin-right: 0.5rem;
+    color: var(--primary-blue);
+  }
+  
+  .timestamp {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+  
+  .message-content {
+    font-size: var(--text-font-size);
+    color: var(--text-primary);
+    p {
+      margin-bottom: 0;
+    }
+  }
+  
+  .empty-message {
+    font-size: var(--text-font-size);
+    color: var(--text-secondary);
+    text-align: center;
+  }
+  
+  .new-message-input-area {
+    display: flex;
+    gap: 0.5rem;
+  
+    input {
+      flex: 1;
+      padding: 0.75rem;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      font-size: 1rem;
+      &:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+      }
+    }
+  
+    button {
+      padding: 0.75rem 1.5rem;
+      background-color: var(--primary-blue);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease-in-out;
+      &:hover {
+        filter: brightness(90%);
+      }
+      &:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+        &:hover {
+          background-color: #cccccc;
+        }
+      }
+    }
+  }
+  

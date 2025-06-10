@@ -12,6 +12,14 @@ const Job = sequelize.define('Job', {
       key: 'id',
     }, 
   },
+  performerId:{
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: User, 
+      key: 'id',
+    }, 
+  },
   serviceId: {
     type: DataTypes.INTEGER,
     allowNull: true,

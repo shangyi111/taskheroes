@@ -15,7 +15,7 @@
           } @else if (user.role === 'provider') {
             <a [routerLink]="['/user', userId, 'provider']">Business Page</a>
             <a [routerLink]="['/user', userId, 'jobs']">Orders</a>
-            <a [routerLink]="['/user', userId, 'messages']">Messages</a>
+            <a [routerLink]="['/provider', userId, 'chatrooms']">Messages</a>
             <a [routerLink]="['/user', userId, 'profile']">Profile</a>
           }
         </span>

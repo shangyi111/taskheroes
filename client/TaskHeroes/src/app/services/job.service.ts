@@ -24,11 +24,7 @@ export class JobService {
   }
 
   getAllJobsByUserId(userId:string):Observable<Job[]>{
-    return this.getAllJobs().pipe(
-      map((services: Job[]) => {
-        return services.filter((job: Job) => job.customerId === userId);
-      })
-    );
+    return this.http.get<Job[]>(`${this.API_URL}/provider/${userId}`);
   }
 
   createJob(jobData: Job): Observable<Job> {

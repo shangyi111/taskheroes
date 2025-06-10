@@ -16,8 +16,16 @@ const Message = sequelize.define('Message', {
       },
   },
   messageText: {
-    type: DataTypes.TEXT,
+    type: DataTypes.TEXT, // Store the *encrypted* message
     allowNull: false,
+  },
+  iv: { // Store the initialization vector
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  timestamp: { // Add a timestamp
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW,
   },
 });
 
