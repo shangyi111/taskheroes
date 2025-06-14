@@ -9,12 +9,12 @@
         <span class="menu">
           @if (user.role === 'seeker') {
             <a [routerLink]="['/user', userId, 'seeker']">Search</a>
-            <a [routerLink]="['/user', userId, 'orders']">Orders</a>
-            <a [routerLink]="['/user', userId, 'messages']">Messages</a>
+            <a [routerLink]="['/user', userId, 'seeker','orders']">Orders</a>
+            <a [routerLink]="['/seeker', userId, 'chatrooms']">Messages</a>
             <a [routerLink]="['/user', userId, 'profile']">Profile</a>
           } @else if (user.role === 'provider') {
             <a [routerLink]="['/user', userId, 'provider']">Business Page</a>
-            <a [routerLink]="['/user', userId, 'jobs']">Orders</a>
+            <a [routerLink]="['/user', userId, 'provider','jobs']">Orders</a>
             <a [routerLink]="['/provider', userId, 'chatrooms']">Messages</a>
             <a [routerLink]="['/user', userId, 'profile']">Profile</a>
           }

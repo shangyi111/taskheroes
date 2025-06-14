@@ -15,8 +15,8 @@
           <p *ngIf="job.serviceId"><strong>Service ID:</strong> {{ job.serviceId }}</p>
         </mat-card-content>
         <mat-card-actions>
-          <button mat-button color="accent" (click)="contactCustomer(job.id!,job.performerId!)">Contact Customer</button>
-          <button mat-button color="warn" (click)="deleteJob(job.id!)">Delete Job</button>
+          <button mat-button color="accent" (click)="contactProvider(job)">Contact Provider</button>
+          <button mat-button color="warn" (click)="deleteOrder(job.id!)">Delete Order</button>
           </mat-card-actions>
       </mat-card>
     }

@@ -4,8 +4,8 @@ import { Router } from '@angular/router';
 import { RouterLink } from '@angular/router';
 import { Job } from 'src/app/shared/models/job';
 import { CommonModule } from '@angular/common';
-import { FormComponent } from 'src/app/ui-components/th-form/form.component';
-import { FormFieldConfig } from 'src/app/ui-components/th-form/form.component';
+import { FormComponent } from 'src/app/shared/ui-components/th-form/form.component';
+import { FormFieldConfig } from 'src/app/shared/ui-components/th-form/form.component';
 import { JobService } from 'src/app/services/job.service';
 import { BusinessService } from 'src/app/services/business.service';
 import { ChatroomService } from 'src/app/services/chatroom.service';
@@ -71,7 +71,7 @@ export class RequestComponent {
                     if (service && service.userId) {
                         const newJob :Job= {
                             ...formGroup.value,
-                            userId: this.userId,
+                            customerId: this.userId,
                             serviceId: this.serviceId,
                             performerId:service.userId,
                         };
@@ -82,7 +82,6 @@ export class RequestComponent {
                     }
                 }),
                 switchMap(jobWithPerformerId => {
-                    console.log("testing jobwithPerformerId", jobWithPerformerId);
                     // Now that newJob has performerId, create the job
                     return this.jobService.createJob(jobWithPerformerId).pipe(
                         switchMap(createdJob => {

@@ -10,7 +10,7 @@ import {User} from 'src/app/shared/models/user';
   standalone: true,
   templateUrl: './dashboard.component.html', 
   styleUrls: ['./dashboard.component.scss'],
-  imports: [MatCardModule, MatButtonModule], // Import the required modules, including Router
+  imports: [MatCardModule, MatButtonModule],
 })
 export class DashboardComponent {
   private userDataService = inject(UserDataService);

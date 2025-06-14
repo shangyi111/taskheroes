@@ -20,7 +20,8 @@ Review.belongsTo(Job, { foreignKey: 'jobId' });
 Job.hasOne(Review,{foreignKey:'jobId'});
 Job.belongsTo(Service, { foreignKey: 'serviceId' });
 User.hasMany(Service, {foreignKey: 'userId'});
-User.hasMany(Job, {foreignKey: 'userId'});
+User.hasMany(Job, {foreignKey: 'customerId'});
+User.hasMany(Job,{foreignKey:'performerId'});
 User.hasMany(Review,{foreignKey:'userId'});
 User.belongsToMany(Chatroom, { through: ChatroomUser });
 

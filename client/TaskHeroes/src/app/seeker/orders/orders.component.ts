@@ -8,11 +8,9 @@ import { SocketIoService } from 'src/app/services/socket-io.service';
 import { CommonModule } from '@angular/common';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { JobService } from 'src/app/services/job.service';
-import { FormFieldConfig } from 'src/app/shared/ui-components/th-form/form.component';
 import { ChatroomService } from 'src/app/services/chatroom.service';
-import { Chatroom } from 'src/app/shared/models/chatroom';
 import { UserDataService } from 'src/app/services/user_data.service';
-import {signal} from '@angular/core';
+import { Chatroom } from 'src/app/shared/models/chatroom';
 import {Job} from 'src/app/shared/models/job';
 import {MatIconModule} from '@angular/material/icon';
 import {User} from 'src/app/shared/models/user';
@@ -25,15 +23,15 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FormComponent } from 'src/app/shared/ui-components/th-form/form.component';
 
 @Component({
-  selector: 'provider-order',
+  selector: 'seeker-order',
   standalone: true,
-  templateUrl: './job_orders.component.html', 
-  styleUrls: ['./job_orders.component.scss'],
+  templateUrl: './orders.component.html', 
+  styleUrls: ['./orders.component.scss'],
   imports: [MatCardModule,MatIconModule,MatFormFieldModule, MatInputModule,MatButtonModule,FormsModule,CommonModule,MatChipsModule, MatExpansionModule], // Import the required modules, including Router
 })
-export class JobOrdersComponent {
-  private socketIoService = inject(SocketIoService);
+export class OrdersComponent {
   private chatroomService = inject(ChatroomService);
+  private socketIoService = inject(SocketIoService);
   private router = inject(Router);
   private jobService = inject(JobService);
   private readonly userData$ = inject(UserDataService).userData$;
@@ -58,7 +56,7 @@ export class JobOrdersComponent {
     this.jobsSubscription = this.userData$.pipe(
       switchMap((user: User | null) => {
         if (!user) return observableOf(null);
-        return this.jobService.getAllJobsByPerformerId(user.id!);
+        return this.jobService.getAllOrdersByCustomerId(user.id!);
       })
     ).subscribe({
       next: (loadedJobs: Job[] | null) => {
@@ -116,11 +114,11 @@ export class JobOrdersComponent {
     );
   }
 
-  deleteJob(jobId: string): void {
+  deleteOrder(orderId: string): void {
     if (confirm('Are you sure you want to delete this job?')) {
-      this.jobService.deleteJob(jobId).subscribe({
+      this.jobService.deleteOrder(orderId).subscribe({
         next: () => {
-          console.log(`Job with ID ${jobId} deleted successfully.`);
+          console.log(`Job with ID ${orderId} deleted successfully.`);
           // The real-time update should handle removing it from the list
         },
         error: (error) => {
@@ -130,12 +128,34 @@ export class JobOrdersComponent {
     }
   }
 
-  contactCustomer(jobId:string,userId:string):void{
-    this.chatroomService.getChatroomByJobId(jobId).subscribe({
-      next:(response:Chatroom[])=>{
-        const chatRoom = response[0];
-        this.router.navigate(['user',userId,'job',jobId,'chatroom',chatRoom.id])
-      }
-    })
+  contactProvider(job: Job): void {
+    this.chatroomService.getChatroomByJobId(job.id!)
+      .pipe(
+        switchMap((foundChatroom: Chatroom[] | undefined) => {
+          console.log("foundChatroom",foundChatroom);
+          if (foundChatroom && foundChatroom.length > 0) {
+            return observableOf(foundChatroom[0]);
+          } else {
+            const newChatRoom = {
+              name: `Chat for Job: ${job.jobTitle!}`,
+              jobId: job.id!,
+              customerId: job.customerId!,
+              providerId: job.performerId!,
+            };
+            console.log("chatRoom to create",newChatRoom);
+            // return observableOf(newChatRoom as Chatroom);
+            return this.chatroomService.createChatroom(newChatRoom);
+          }
+        })
+      )
+      .subscribe({
+        next: (chatRoom: Chatroom) => {
+          this.router.navigate(['user', job.customerId, 'job', job.id, 'chatroom', chatRoom.id]);
+        },
+        error: (err) => {
+          console.error('Failed to contact provider:', err);
+        }
+      });
   }
+  
 }

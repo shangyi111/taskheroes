@@ -25,6 +25,16 @@ export class ChatroomService {
     return this.http.get<Chatroom[]>(`${this.API_URL}/chatrooms/provider/${providerId}`, { headers });
   }
 
+  getChatroomsBySeekerId(seekerId: string): Observable<Chatroom[]> {
+    const headers = this.getAuthHeaders();
+    return this.http.get<Chatroom[]>(`${this.API_URL}/chatrooms/seeker/${seekerId}`, { headers });
+  }
+
+  getChatroomByJobId(jobId:string):Observable<Chatroom[]>{
+    const headers = this.getAuthHeaders();
+    return this.http.get<Chatroom[]>(`${this.API_URL}/job/${jobId}`, { headers });
+  }
+
   createChatroom(chatroomData: Omit<Chatroom, 'id' | 'createdAt' | 'updatedAt'>): Observable<Chatroom> {
     const headers = this.getAuthHeaders();
     return this.http.post<Chatroom>(`${this.API_URL}`, chatroomData, { headers });

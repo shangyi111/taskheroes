@@ -8,7 +8,7 @@ import { SocketIoService } from 'src/app/services/socket-io.service';
 import { CommonModule } from '@angular/common';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { BusinessService } from 'src/app/services/business.service';
-import { FormFieldConfig } from 'src/app/ui-components/th-form/form.component';
+import { FormFieldConfig } from 'src/app/shared/ui-components/th-form/form.component';
 import { UserDataService } from 'src/app/services/user_data.service';
 import {signal} from '@angular/core';
 import {Service} from 'src/app/shared/models/service';
@@ -20,7 +20,7 @@ import { ReactiveFormsModule} from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { FormComponent } from 'src/app/ui-components/th-form/form.component';
+import { FormComponent } from 'src/app/shared/ui-components/th-form/form.component';
 
 @Component({
   selector: 'business_page',

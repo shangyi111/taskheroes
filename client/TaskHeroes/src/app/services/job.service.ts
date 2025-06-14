@@ -10,21 +10,26 @@ import {map} from 'rxjs/operators';
 })
 
 export class JobService {
-  private readonly API_URL = 'http://localhost:3000/api/job';
+  private readonly API_URL_PROVIDER = 'http://localhost:3000/api/job';
+  private readonly API_URL_SEEKER = 'http://localhost:3000/api/order';
   private readonly AUTH_TOKEN_KEY = AUTH_TOKEN_KEY;
 
   constructor(private http: HttpClient) {}
 
   getAllJobs(): Observable<Job[]> {
-    return this.http.get<Job[]>(this.API_URL);
+    return this.http.get<Job[]>(this.API_URL_PROVIDER);
   }
 
   getJobById(id: number): Observable<Job> {
-    return this.http.get<Job>(`${this.API_URL}/${id}`);
+    return this.http.get<Job>(`${this.API_URL_PROVIDER}/${id}`);
   }
 
-  getAllJobsByUserId(userId:string):Observable<Job[]>{
-    return this.http.get<Job[]>(`${this.API_URL}/provider/${userId}`);
+  getAllJobsByPerformerId(performerId:string):Observable<Job[]>{
+    return this.http.get<Job[]>(`${this.API_URL_PROVIDER}/provider/${performerId}`);
+  }
+
+  getAllOrdersByCustomerId(customerId:string):Observable<Job[]>{
+    return this.http.get<Job[]>(`${this.API_URL_SEEKER}/seeker/${customerId}`);
   }
 
   createJob(jobData: Job): Observable<Job> {
@@ -33,7 +38,7 @@ export class JobService {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     });
-    return this.http.post<any>(this.API_URL, jobData, { headers });
+    return this.http.post<any>(this.API_URL_PROVIDER, jobData, { headers });
   }
 
   updateJob(id: string, jobData: Job): Observable<Job> {
@@ -42,7 +47,7 @@ export class JobService {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     });
-    return this.http.put<any>(`${this.API_URL}/${id}`, jobData, { headers });
+    return this.http.put<any>(`${this.API_URL_PROVIDER}/${id}`, jobData, { headers });
   }
 
   deleteJob(id: string): Observable<Job> {
@@ -50,6 +55,14 @@ export class JobService {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`,
     });
-    return this.http.delete<any>(`${this.API_URL}/${id}`, { headers });
+    return this.http.delete<any>(`${this.API_URL_PROVIDER}/${id}`, { headers });
+  }
+
+  deleteOrder(id: string): Observable<Job> {
+    const token = localStorage.getItem(this.AUTH_TOKEN_KEY);
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+    return this.http.delete<any>(`${this.API_URL_SEEKER}/${id}`, { headers });
   }
 }

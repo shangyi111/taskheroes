@@ -3,7 +3,7 @@
     @if (chatrooms().length > 0) {
       <ul class="chatrooms-list">
         @for (chatroom of chatrooms(); track chatroom.id) {
-          <li class="chatroom-item" (click)="goToChatroom(chatroom.id)">
+          <li class="chatroom-item" (click)="goToChatroom(chatroom)">
             <div class="chatroom-details">
               <h2 class="chatroom-name">{{ chatroom.name }}</h2>
               <p class="chatroom-job">Job ID: {{ chatroom.jobId }}</p>

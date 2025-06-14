@@ -51,7 +51,7 @@ exports.getChatroomsForProvider = async (req, res) => {
 
 exports.getChatroomsForCustomer = async (req, res) => {
   try {
-    const customerId = req.params.id;
+    const customerId = req.params.seekerId;
     if (!customerId) {
       return res.status(400).json({ message: 'Customer ID is required' });
     }
@@ -67,6 +67,23 @@ exports.getChatroomsForCustomer = async (req, res) => {
     }
   } catch (err) {
     console.error('Error retrieving chatrooms for customer:', err);
+    res.status(500).json({ message: 'Internal Server Error', error: err.message });
+  }
+};
+
+exports.getChatroomByJobId = async (req, res) => {
+  try {
+    const jobId = req.params.jobId;
+    if (!jobId) {
+      return res.status(400).json({ message: 'Job ID is required' });
+    }
+
+    const chatrooms = await Chatroom.findAll({
+      where: { jobId: jobId },
+    });
+    res.json(chatrooms);
+  } catch (err) {
+    console.error('Error retrieving chatrooms for job:', err);
     res.status(500).json({ message: 'Internal Server Error', error: err.message });
   }
 };

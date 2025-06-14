@@ -4,7 +4,7 @@ const Service = require('./service');
 const sequelize = require('../config/db');
 
 const Job = sequelize.define('Job', {
-  userId: {//performer
+  performerId: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
@@ -12,7 +12,7 @@ const Job = sequelize.define('Job', {
       key: 'id',
     }, 
   },
-  performerId:{
+  customerId:{
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {

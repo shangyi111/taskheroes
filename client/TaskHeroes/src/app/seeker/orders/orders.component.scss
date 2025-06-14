@@ -1,0 +1,85 @@
+/* Styles for the job list container */
+.job-list-container {
+    padding: var(--dashboard-padding);
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Adjust minmax width as needed */
+    gap: 20px; /* Adjust gap between cards */
+  }
+  
+  /* Styles for individual job cards */
+  .job-card {
+    border: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
+    transition: var(--transition-default);
+    display: flex;
+    flex-direction: column;
+    height: auto; /* Adjust height as needed based on content */
+  }
+  
+  .job-card:hover {
+    box-shadow: var(--card-hover-shadow);
+    transform: translateY(-2px);
+  }
+  
+  /* Styles for the card header */
+  .job-card-header {
+    font-family: var(--global-font-family);
+    padding: calc(var(--dashboard-padding) / 2);
+    border-bottom: 1px solid var(--card-border);
+  }
+  
+  .job-card-header .mat-card-title {
+    font-family: var(--global-font-family);
+    font-size: var(--title-font-size);
+    color: var(--text-primary);
+    margin-bottom: 5px;
+  }
+  
+  .job-card-header .mat-card-subtitle {
+    font-size: var(--description-font-size);
+    color: var(--text-secondary);
+  }
+  
+  /* Styles for the card content */
+  .job-card-content {
+    padding: calc(var(--dashboard-padding) / 2);
+    flex-grow: 1; /* Allow content to take up available vertical space */
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Spacing between content elements */
+  }
+  
+  .job-card-content p {
+    font-size: var(--text-font-size);
+    color: var(--text-primary);
+    margin-bottom: 0;
+  }
+  
+  .job-card-content strong {
+    font-weight: bold;
+  }
+  
+  /* Styles for the job skills chip list */
+  .job-card-content .mat-chip-list {
+    margin-top: 10px;
+  }
+  
+  .job-card-content .mat-chip {
+    font-size: var(--description-font-size);
+  }
+  
+  /* Styles for the card actions */
+  .job-card-actions {
+    padding: calc(var(--dashboard-padding) / 2);
+    border-top: 1px solid var(--card-border);
+    display: flex;
+    gap: 10px; /* Spacing between buttons */
+    justify-content: flex-end; /* Align buttons to the right */
+  }
+  
+  /* Style for the "No jobs available" message */
+  .job-list-container > p {
+    padding: var(--dashboard-padding);
+    font-style: italic;
+    color: var(--text-secondary);
+  }

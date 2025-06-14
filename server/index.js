@@ -7,6 +7,7 @@ const authRoutes = require('./auth/authRoutes');
 const servicesRoutes = require('./routes/services');
 const reviewsRoutes = require('./routes/reviews');
 const jobsRoutes = require('./routes/jobs');
+const orderRoutes = require('./routes/order');
 const messageRoutes = require('./message-server/routes/messages');
 const websocket = require('./websocket/socketServer');
 const sequelize = require('./config/db');
@@ -22,6 +23,7 @@ app.use('/api/auth', authRoutes); // Use the authentication routes
 app.use('/api/service', servicesRoutes);
 app.use('/api/review', reviewsRoutes);
 app.use('/api/job',jobsRoutes);
+app.use('/api/order',orderRoutes);
 app.use('/api/message', messageRoutes);
 // Example protected route
 app.get('/api/protected', authenticateToken, (req, res) => {

@@ -12,6 +12,13 @@ router.route('/chatrooms/:chatroomId')
 router.route('/chatroom/chatrooms/provider/:providerId')
   .get(chatroomController.getChatroomsForProvider)
 
+// Routes for chatrooms list for certain customer
+router.route('/chatroom/chatrooms/seeker/:seekerId')
+.get(chatroomController.getChatroomsForCustomer)
+
+router.route('/chatroom/job/:jobId')
+  .get(chatroomController.getChatroomByJobId)
+
 router.route('/chatroom')
   .post(chatroomController.createChatroom);    // Create a new chatroom   
 

@@ -6,8 +6,8 @@ const authMiddleware = require('../auth/authMiddleware');
 // Get all jobs
 router.get('/', jobsController.getAllJobs);
 
-// Get a specific job by provider userId
-router.get('/provider/:id', jobsController.getJobsByPerformerId);
+// Get a specific order by customerId
+router.get('/seeker/:id', jobsController.getJobsByCustomerId);
 
 // Create a new job (protected)
 router.post('/', authMiddleware, jobsController.createJob);
@@ -16,6 +16,6 @@ router.post('/', authMiddleware, jobsController.createJob);
 router.put('/:id', authMiddleware, jobsController.updateJob);
 
 // Delete a job (protected)
-router.delete('/:id', authMiddleware, jobsController.deleteJob);
+router.delete('/:id', authMiddleware, jobsController.deleteOrder);
 
 module.exports = router;
