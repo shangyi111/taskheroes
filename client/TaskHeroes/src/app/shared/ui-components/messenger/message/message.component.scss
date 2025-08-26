@@ -1,0 +1,120 @@
+.message-bubble {
+    max-width: 70%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius-lg);
+    font-size: var(--description-font-size);
+    line-height: 1.4;
+    position: relative;
+    word-wrap: break-word;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: var(--spacing-sm);
+  
+    .message-content {
+      p {
+        margin: 0;
+        color: var(--text-primary);
+      }
+  
+      .message-image {
+        max-width: 100%;
+        height: auto;
+        border-radius: var(--border-radius-md);
+        margin-top: var(--spacing-sm);
+      }
+  
+      .message-file {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        background-color: rgba(var(--primary-blue-rgb), 0.1); /* Use RGB for alpha adjustment */
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: var(--border-radius-sm);
+        color: var(--primary-blue);
+        text-decoration: none;
+        margin-top: var(--spacing-sm);
+  
+        &:hover {
+          text-decoration: underline;
+        }
+        .material-icons {
+          font-size: 1.2rem;
+        }
+      }
+    }
+  
+    .message-sender {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--primary-blue);
+      margin-bottom: calc(var(--spacing-xs) / 2);
+      display: block;
+    }
+  
+    .message-meta {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin-top: calc(var(--spacing-xs) / 2);
+      gap: var(--spacing-xs);
+    }
+  
+    .message-timestamp {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      opacity: 0.8;
+    }
+  
+    .icon-read {
+      font-size: calc(0.75rem * 1.2);
+      color: var(--primary-green);
+      vertical-align: middle;
+    }
+  
+    &.sent {
+      background-color: var(--primary-blue);
+      color: var(--dashboard-bg); /* This is already white/light, so no direct lighten needed here */
+      border-bottom-right-radius: var(--border-radius-sm);
+      align-self: flex-end;
+      box-shadow: var(--card-shadow);
+  
+      .message-sender {
+        /* To replace lighten(var(--dashboard-bg), 10%), you can pick a slightly off-white */
+        color: rgba(var(--dashboard-bg-rgb), 0.9); /* Example: 90% opacity of dashboard-bg */
+        /* Or use a specific light variant if defined: var(--text-light-variant); */
+      }
+      .message-timestamp {
+        /* To replace lighten(var(--dashboard-bg), 20%), similar approach */
+        color: rgba(var(--dashboard-bg-rgb), 0.8); /* Example: 80% opacity of dashboard-bg */
+        /* Or use a specific lighter variant: var(--text-lighter-variant); */
+      }
+      .message-file {
+        background-color: rgba(var(--dashboard-bg-rgb), 0.2); /* Use RGB for alpha adjustment */
+        color: var(--dashboard-bg);
+      }
+    }
+  
+    &.received {
+      background-color: var(--dashboard-bg);
+      color: var(--text-primary);
+      border-bottom-left-radius: var(--border-radius-sm);
+      align-self: flex-start;
+      box-shadow: var(--card-shadow);
+    }
+  }
+  
+  .material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+  }

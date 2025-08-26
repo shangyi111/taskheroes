@@ -4,7 +4,7 @@
       @if (this.userData$ | async; as user) {
         @let userId = user.id;
         <span class="logo">
-          <a [routerLink]="['/user', userId]">TaskHeroes</a>
+          <a [routerLink]="['/user', userId]">TaskHeroes <span>{{user.role}}</span></a>
         </span>
         <span class="menu">
           @if (user.role === 'seeker') {

@@ -1,4 +1,4 @@
-const { Message } = require('../../models'); 
+const { Message, User, Chatroom } = require('../../models'); 
 const { getIO } = require('../../websocket/socketServer');
 const crypto = require('crypto');
 
@@ -30,60 +30,88 @@ function decryptMessage(ivHex, encryptedData) {
   return decrypted;
 }
 
-exports.saveMessage = async (messageData) => {
+exports.saveMessage = async (req,res) => {
   try {
-    const encrypted = encryptMessage(messageData.messageText); // Encrypt
+    const messageData = req.body;
+    const encrypted = encryptMessage(messageData.text); 
     const savedMessage = await Message.create({
       chatroomId: messageData.chatroomId,
       senderId: messageData.senderId,
-      messageText: encrypted.encryptedData, // Store encrypted
+      encryptedContent: encrypted.encryptedData, // Store encrypted
       iv: encrypted.iv, // Store IV
     });
 
+    let senderUsername = 'Unknown User';
+    const senderUser = await User.findByPk(savedMessage.senderId);
+    if (senderUser && senderUser.username) {
+        senderUsername = senderUser.username;
+    }
+
+    const decryptedText = decryptMessage(savedMessage.iv, savedMessage.encryptedContent);
+
     const messageToSend = {
+      // Include all saved message properties (like ID, timestamps)
       ...savedMessage.dataValues,
-      messageText: messageData.messageText, // Decrypt before sending
+      senderUsername: senderUsername, // Use 'senderUsername' to match frontend interface
+      text: decryptedText, // Use 'text' to match frontend interface, contains decrypted content
     };
+
     getIO().to(messageData.chatroomId).emit('newMessage', messageToSend);
-    return savedMessage;
+    await Chatroom.update(
+      { lastActivityAt: new Date() },
+      { where: { id: messageData.chatroomId } }
+    );
+    return res.json(messageToSend);
   } catch (err) {
     console.error('Error saving message:', err);
     throw err;
   }
 };
 
-exports.getMessagesByChatroom = async (chatroomId) => {
+exports.getMessagesByChatroom = async (req, res) => {
   try {
-    const messages = await Message.findAll({ where: { chatroomId } });
+    const chatroomId = req.params.chatroomId;
+    let messages = await Message.findAll({ 
+        where: { chatroomId:chatroomId },  
+        include: [{ model: User, as: 'sender', attributes: ['username'] }], 
+        order: [['createdAt', 'ASC']]
+      });
     const decryptedMessages = messages.map((message) => {
-      const decryptedText = decryptMessage(message.iv, message.messageText);
+      const decryptedText = decryptMessage(message.iv, message.encryptedContent);
       return {
         ...message.dataValues,
-        messageText: decryptedText, // Decrypted text
+        text: decryptedText,
+        senderUsername: message.sender ? message.sender.username : 'Unknown User',
       };
     });
-    return decryptedMessages;
+    res.json(decryptedMessages);
   } catch (err) {
     console.error('Error retrieving messages:', err);
     throw err;
   }
 };
 
-exports.getPaginatedMessages = async (chatroomId, offset, limit) => {
+exports.getPaginatedMessages = async (req,res) => {
   try {
+    const offset = req.params.offset;
+    const limit = req.params.limit;
+    const chatroomId = req.params.chatroomId;
     const messages = await Message.findAll({
       where: { chatroomId },
       offset,
       limit,
+      include: [{ model: User, as: 'sender', attributes: ['username'] }], 
+      order: [['sentAt', 'DESC']] // Order by timestamp (newest first for pagination)
     });
     const decryptedMessages = messages.map((message) => {
       const decryptedText = decryptMessage(message.iv, message.messageText);
       return {
         ...message.dataValues,
-        messageText: decryptedText, // Decrypted text
+        messageText: decryptedText, 
+        senderUsername: message.sender ? message.sender.username : 'Unknown User', 
       };
     });
-    return decryptedMessages;
+    res.json(decryptedMessages);
   } catch (err) {
     console.error('Error retrieving paginated messages:', err);
     throw err;

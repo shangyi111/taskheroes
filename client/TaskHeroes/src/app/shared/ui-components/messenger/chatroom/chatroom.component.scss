@@ -1,0 +1,283 @@
+// SCSS variables for granular spacing and border radii,
+// as they are not defined as generic CSS variables in :root.
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+
+$border-radius-sm: 4px;
+$border-radius-md: 8px;
+$border-radius-lg: 12px;
+$border-radius-pill: 9999px; // For fully rounded elements like badges, avatars
+
+// Breakpoints (keeping this as an SCSS variable as it's not in :root)
+$breakpoint-md: 768px;
+
+// Mixins (reusable blocks of CSS)
+@mixin flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@mixin button-reset {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    outline: inherit;
+}
+
+/* Chatroom Container and Main Area Styles */
+.chatroom-container {
+    display: flex;
+    height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+    background-color: var(--dashboard-bg);
+
+    @media (max-width: $breakpoint-md) {
+        flex-direction: column;
+    }
+}
+
+.chatroom-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--dashboard-bg);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Header Styles */
+.chat-header {
+    background-color: white; /* No direct var for white, using literal */
+    padding: var(--dashboard-padding); /* Using :root variable */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
+
+    .mobile-menu-toggle {
+        display: none;
+        @include button-reset();
+        font-size: var(--title-font-size); /* Using a more appropriate font size from :root */
+        color: var(--text-primary);
+        margin-right: $spacing-md;
+        cursor: pointer;
+        @media (max-width: $breakpoint-md) {
+            display: block;
+        }
+    }
+
+    .chat-title {
+        font-size: var(--title-font-size);
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        flex-grow: 1;
+    }
+
+    .chat-options {
+        display: flex;
+        gap: $spacing-md;
+        .material-icons {
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: var(--text-font-size); /* Adjusting icon size to fit context */
+            transition: color 0.2s ease;
+            &:hover {
+                color: var(--primary-blue);
+            }
+        }
+    }
+}
+
+/* Message Area Styles */
+.message-area {
+    flex-grow: 1;
+    padding: var(--dashboard-padding); /* Using :root variable */
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+    scroll-behavior: smooth;
+
+    .date-separator {
+        text-align: center;
+        margin: $spacing-md 0;
+        span {
+            background-color: var(--dashboard-bg);
+            color: var(--text-secondary);
+            font-size: var(--description-font-size); /* Using :root variable */
+            padding: $spacing-xs $spacing-sm;
+            border-radius: $border-radius-pill;
+        }
+    }
+
+    .message-bubble {
+        max-width: 70%;
+        padding: $spacing-sm $spacing-md;
+        border-radius: $border-radius-lg;
+        font-size: var(--description-font-size);
+        line-height: 1.4;
+        position: relative;
+        word-wrap: break-word;
+
+        &.received {
+            background-color: white; /* No direct var for white, using literal */
+            border-bottom-left-radius: $border-radius-sm;
+            align-self: flex-start;
+            box-shadow: var(--card-shadow);
+        }
+
+        &.sent {
+            background-color: var(--primary-blue);
+            color: white; /* No direct var for white, using literal for text on dark background */
+            border-bottom-right-radius: $border-radius-sm;
+            align-self: flex-end;
+        }
+
+        .message-sender {
+            font-size: var(--description-font-size); /* Using :root variable */
+            font-weight: 600;
+            color: var(--primary-blue);
+            margin-bottom: 2px;
+            display: block;
+        }
+
+        .message-timestamp {
+            font-size: 0.7rem; /* Keeping as literal for fine control */
+            color: var(--text-secondary);
+            margin-top: $spacing-xs;
+            display: block;
+            text-align: right;
+            opacity: 0.8;
+        }
+
+        .material-icons.icon-read {
+            font-size: 0.6em; /* Keeping as literal for fine control relative to font size */
+            margin-left: 5px;
+            color: var(--primary-green);
+            vertical-align: middle;
+        }
+    }
+
+    .typing-indicator {
+        font-size: var(--description-font-size);
+        color: var(--text-secondary);
+        align-self: flex-start;
+        margin-top: $spacing-sm;
+    }
+
+    .scroll-to-bottom-button {
+        @include button-reset();
+        @include flex-center();
+        position: absolute;
+        bottom: $spacing-md;
+        right: $spacing-md;
+        background-color: var(--primary-blue);
+        color: white; /* No direct var for white, using literal */
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        box-shadow: var(--card-shadow);
+        font-size: var(--title-font-size); /* Using :root variable for icon size */
+        opacity: 0;
+        visibility: hidden;
+        transition: var(--transition-default);
+        z-index: 10;
+        &.show {
+            opacity: 1;
+            visibility: visible;
+        }
+    }
+}
+
+/* Message Input Area Styles */
+.message-input-area {
+    background-color: white; /* No direct var for white, using literal */
+    padding: $spacing-md; /* Keeping as SCSS var for specific input padding */
+    display: flex;
+    align-items: flex-end;
+    gap: $spacing-md;
+    border-top: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
+
+    .input-actions {
+        display: flex;
+        gap: $spacing-sm;
+        .material-icons {
+            font-size: var(--title-font-size); /* Using :root variable for icon size */
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: color 0.2s ease;
+            &:hover {
+                color: var(--primary-blue);
+            }
+        }
+    }
+
+    textarea {
+        flex-grow: 1;
+        border: none;
+        outline: none;
+        resize: none;
+        padding: $spacing-sm;
+        border-radius: $border-radius-md;
+        background-color: var(--dashboard-bg);
+        font-size: var(--text-font-size);
+        line-height: 1.4;
+        max-height: 120px;
+        overflow-y: auto;
+        color: var(--text-primary);
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); /* Specific inner shadow */
+
+        &::placeholder {
+            color: var(--text-secondary);
+        }
+    }
+
+    .send-button {
+        @include button-reset();
+        background-color: var(--primary-blue);
+        color: white; /* No direct var for white, using literal */
+        width: 48px;
+        height: 48px;
+        border-radius: $border-radius-md;
+        @include flex-center();
+        font-size: var(--title-font-size); /* Using :root variable for icon size */
+        transition: background-color 0.2s ease;
+
+        &:hover:not(:disabled) {
+            /* Note: `darken` SCSS function won't work on CSS variables (var(--primary-blue)) */
+            /* You'll need a pre-defined darker shade in :root or use rgba for a visual effect */
+            background-color: color-mix(in srgb, var(--primary-blue) 90%, black); /* A modern CSS way to darken */
+        }
+        &:disabled {
+            background-color: var(--text-secondary);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+    }
+}
+
+/* Material Icons basic styles - ensure font is loaded globally via index.html or angular.json */
+.material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+}

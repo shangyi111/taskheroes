@@ -1,11 +1,16 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
+const Chatroom = require('./chatroom');
 const User = require('./user');
 
 const Message = sequelize.define('Message', {
   chatroomId: {
     type: DataTypes.INTEGER,
     allowNull: false,
+    references:{
+      model:Chatroom,
+      key:'id',
+    }
   },
   senderId: {
     type: DataTypes.INTEGER,
@@ -15,16 +20,22 @@ const Message = sequelize.define('Message', {
         key: 'id',
       },
   },
-  messageText: {
+  encryptedContent: {
     type: DataTypes.TEXT, // Store the *encrypted* message
     allowNull: false,
   },
   iv: { // Store the initialization vector
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
     allowNull: false,
   },
-  timestamp: { // Add a timestamp
+  createdAt: {
     type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
     defaultValue: DataTypes.NOW,
   },
 });

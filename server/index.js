@@ -8,7 +8,8 @@ const servicesRoutes = require('./routes/services');
 const reviewsRoutes = require('./routes/reviews');
 const jobsRoutes = require('./routes/jobs');
 const orderRoutes = require('./routes/order');
-const messageRoutes = require('./message-server/routes/messages');
+const messageRoutes = require('./message-server/routes/message');
+const chatroomRoutes = require('./message-server/routes/chatroom');
 const websocket = require('./websocket/socketServer');
 const sequelize = require('./config/db');
 const models = require('./models');
@@ -25,6 +26,7 @@ app.use('/api/review', reviewsRoutes);
 app.use('/api/job',jobsRoutes);
 app.use('/api/order',orderRoutes);
 app.use('/api/message', messageRoutes);
+app.use('/api/chatroom',chatroomRoutes);
 // Example protected route
 app.get('/api/protected', authenticateToken, (req, res) => {
   res.json({ message: 'Authenticated access granted', user: req.user });

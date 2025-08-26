@@ -77,6 +77,7 @@ export class JobOrdersComponent {
       this.userData$.pipe(take(1)).subscribe({
         next: (user) => {
           if (user && user.id) {
+            this.socketIoService.connect(user.id);
             this.socketIoService.emit('join_user_room', user.id); // Use emit here
             console.log(`User ${user.id} joined room.`);
           }

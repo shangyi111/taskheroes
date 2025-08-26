@@ -8,9 +8,9 @@ const Message = require('./message');
 
 // Define associations
 Chatroom.belongsToMany(User, { through: ChatroomUser });
-Chatroom.hasMany(Message);
-Message.belongsTo(Chatroom);
-Message.belongsTo(User, { foreignKey: 'senderId' });
+Chatroom.hasMany(Message, {foreignKey:'chatroomId'});
+Message.belongsTo(Chatroom, { foreignKey:'chatroomId'});
+Message.belongsTo(User, { as: 'sender', foreignKey: 'senderId' });
 Service.belongsTo(User, { foreignKey: 'userId' });
 Service.hasMany(Review, {foreignKey: 'serviceId'});
 Service.hasMany(Job, {foreignKey: 'serviceId'});

@@ -16,6 +16,6 @@ router.post('/', authMiddleware, jobsController.createJob);
 router.put('/:id', authMiddleware, jobsController.updateJob);
 
 // Delete a job (protected)
-router.delete('/:id', authMiddleware, jobsController.deleteOrder);
+router.delete('/:id', authMiddleware, jobsController.deleteOrderByCustomerId);
 
 module.exports = router;

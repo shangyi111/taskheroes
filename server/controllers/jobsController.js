@@ -55,6 +55,7 @@ exports.createJob = async (req, res) => {
     res.status(201).json(newJob);
     sendJobCreated(newJob);
   } catch (error) {
+    console.log(error);
     const message = error.errors[0].message;
     res.status(400).json({ message });
   }
@@ -102,7 +103,7 @@ exports.deleteJob = async (req, res) => {
 };
 
 //delete order
-exports.deleteOrder = async (req, res) => {
+exports.deleteOrderByCustomerId = async (req, res) => {
   try {
     console.log("testing req.params",req.params);
     console.log("testing req.user",req.user);
@@ -115,7 +116,7 @@ exports.deleteOrder = async (req, res) => {
     });
     if (deletedRows > 0) {
       res.status(204).send();
-      sendJobDeleted(job.id, job.userId);
+      sendJobDeleted(job.id, job.customerId);
     } else {
       res.status(404).json({ message: 'Job not found' });
     }
@@ -123,3 +124,27 @@ exports.deleteOrder = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+//delete job
+exports.deleteOrderByPerformerId = async (req, res) => {
+  try {
+    console.log("testing req.params",req.params);
+    console.log("testing req.user",req.user);
+    const job = await Job.findByPk(req.params.id);
+    if (!job || job.performerId !== req.user.id) { // Ensure user owns the order
+      return res.status(404).json({ message: 'Job not found or unauthorized' });
+    }
+    const deletedRows = await Job.destroy({
+      where: { id: req.params.id },
+    });
+    if (deletedRows > 0) {
+      res.status(204).send();
+      sendJobDeleted(job.id, job.performerId);
+    } else {
+      res.status(404).json({ message: 'Job not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+

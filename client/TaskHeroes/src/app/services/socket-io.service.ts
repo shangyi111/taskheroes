@@ -71,11 +71,30 @@ export class SocketIoService implements OnDestroy {
   }
 
   /**
+   * Listens for a specific Socket.IO event by its direct name.
+   * This is for events like 'newMessage', 'typing', 'userStatusUpdate', etc.
+   *
+   * @param eventName The name of the socket event to listen for.
+   * @returns An Observable that emits the event's data.
+  */
+  on<T>(eventName: string): Observable<T> {
+    return new Observable<T>((subscriber) => {
+      const handler = (data: T) => {
+        subscriber.next(data);
+      };
+      this.socket.on(eventName, handler);
+      return () => {
+        this.socket.off(eventName, handler); // Cleanup handler on unsubscribe
+      };
+    });
+  }
+  /**
    * Listen for specific user event types (e.g. service_created, service_updated)
    */
   onUserEvent<T>(type: string): Observable<T> {
     return new Observable<T>((subscriber) => {
       const handler = (payload: { type: string; data: T }) => {
+        console.log("testing handler", handler);
         if (payload.type === type) {
           subscriber.next(payload.data);
         }

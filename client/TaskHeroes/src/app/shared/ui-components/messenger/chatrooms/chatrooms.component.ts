@@ -54,7 +54,7 @@ export class ChatroomsComponent implements OnInit, OnDestroy {
     if(role=="provider"){
     this.subscriptions.push(
       this.chatRoomservice.getChatroomsByProviderId(userId!)
-        .subscribe(chatrooms => {
+        .subscribe(chatrooms=> {
           this.chatrooms.set(chatrooms);
         })
     )}else if(role==="seeker"){

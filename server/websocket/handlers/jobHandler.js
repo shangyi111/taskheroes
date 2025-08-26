@@ -9,6 +9,7 @@ function sendJobUpdated(job) {
 }
 
 function sendJobDeleted(jobId, userId) {
+  console.log(`Emitting to userId ${userId} with event "job_deleted" for job ${jobId}`);
   emitToUser(userId, 'job_deleted', { jobId });
 }
 

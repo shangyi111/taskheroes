@@ -1,144 +1,244 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router'; // For route parameters and navigation
-import { Subscription } from 'rxjs'; // To manage observable subscriptions
-
-// --- Import your services here ---
-// import { ChatroomService } from 'path/to/your/chatroom.service';
-// import { AuthService } from 'path/to/your/auth.service';
+import { Component, OnInit, OnDestroy, inject, signal, WritableSignal, ViewChild, ElementRef } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription, combineLatest, of, Observable } from 'rxjs';
+import { switchMap, filter, tap, catchError } from 'rxjs/operators';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MessageComponent } from '../message/message.component';
+import { ChatroomService } from 'src/app/services/chatroom.service';
+import { UserDataService } from 'src/app/services/user_data.service';
+import { Chatroom } from 'src/app/shared/models/chatroom';
+import { User } from 'src/app/shared/models/user';
+import { Message } from 'src/app/shared/models/message';
+import { throwError } from 'rxjs';
 
 @Component({
-  selector: 'app-chatroom', // Changed selector to app-chatroom
-  templateUrl: './chatroom.component.html', // Path to your HTML template
-  styleUrls: ['./chatroom.component.scss'] // Path to your SCSS styles
+  selector: 'app-chatroom',
+  templateUrl: './chatroom.component.html',
+  styleUrls: ['./chatroom.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MessageComponent
+  ]
 })
-export class ChatroomComponent implements OnInit, OnDestroy { // Changed class name to ChatroomComponent
+export class ChatroomComponent implements OnInit, OnDestroy {
+  @ViewChild('messageContainer') private messageContainer!: ElementRef;
 
-  // --- Properties to hold data ---
-  currentUserId: string | null = null;
-  currentUserRole: string | null = null; // 'seeker' or 'provider'
-  chatroomId: string | null = null; // The ID of the currently viewed chatroom
+  private router = inject(Router);
+  private chatroomService = inject(ChatroomService);
+  private userDataService = inject(UserDataService);
+  private route = inject(ActivatedRoute);
 
-  chatroom: any; // You'll define a proper interface for Chatroom later
-  messages: any[] = []; // You'll define a proper interface for Message later
+  currentUser:WritableSignal<User | null> = signal(null);
+  chatroomId: WritableSignal<string | null> = signal(null);
+  chatroom: WritableSignal<Chatroom | null> = signal(null);
+  messages: WritableSignal<Message[]> = signal([]);
 
-  newMessageContent: string = ''; // Holds the content of the message being typed
+  newMessageContent: WritableSignal<string> = signal('');
 
-  isLoading: boolean = true; // To show a loading indicator
-  error: string | null = null; // To display error messages
+  isLoading: WritableSignal<boolean> = signal(true);
+  error: WritableSignal<string | null> = signal(null);
 
-  // --- Subscriptions to manage memory ---
-  private routeSubscription: Subscription | undefined;
-  private chatroomMessageSubscription: Subscription | undefined; // For real-time messages
+  private subscriptions: Subscription = new Subscription();
+  private chatroomMessageSubscription: Subscription | undefined;
 
-  constructor(
-    private route: ActivatedRoute, // Used to read URL parameters (like chatroomId)
-    private router: Router,       // Used for programmatic navigation (e.g., redirecting)
-    // --- Inject your services here ---
-    // private chatroomService: ChatroomService,
-    // private authService: AuthService
-  ) {}
-
-  /**
-   * ngOnInit is called once, after the component's data-bound properties are initialized.
-   * It's a good place to fetch data from services or set up subscriptions.
-   */
   ngOnInit(): void {
-    console.log('ChatroomComponent initialized.'); // Updated console log
+    console.log('ChatroomComponent initialized.');
 
-    // --- Step 1: Get current user info ---
-    // Uncomment and replace with your actual AuthService calls
-    // this.currentUserId = this.authService.getCurrentUserId();
-    // this.currentUserRole = this.authService.currentUserValue?.role || null;
+    this.subscriptions.add(
+      combineLatest([
+        this.userDataService.userData$,
+        this.route.paramMap
+      ]).pipe(
+        filter(([user, params]) => !!user?.id && !!user?.role && !!params.get('chatroomId')),
+        tap(([user, params]) => {
+          this.currentUser.set(user!);
+          this.chatroomId.set(params.get('chatroomId'));
+        }),
+        switchMap(([user, params]) => {
+          const chatroomId = params.get('chatroomId')!;
+          const userId = user!.id!;
 
-    // if (!this.currentUserId || !this.currentUserRole) {
-    //   this.error = 'User not logged in or role not defined.';
-    //   this.router.navigate(['/login']); // Redirect if not logged in
-    //   return;
-    // }
-
-    // --- Step 2: Subscribe to route parameters to get chatroomId ---
-    this.routeSubscription = this.route.paramMap.subscribe(params => {
-      this.chatroomId = params.get('chatroomId');
-      console.log('Chatroom ID from route:', this.chatroomId);
-
-      if (this.chatroomId) {
-        // --- Step 3: Load chatroom data and messages ---
-        // You'll call methods here to fetch data from your chatroomService
-        // Example: this.loadChatroomData(this.chatroomId);
-        // Example: this.setupRealtimeMessaging(this.chatroomId);
-      } else {
-        this.error = 'Chatroom ID not found in URL.';
-        this.isLoading = false;
-      }
-    });
+          this.isLoading.set(true);
+          this.error.set(null);
+          return this.loadChatroomAndMessages(chatroomId, userId);
+        }),
+        catchError(err => {
+          console.error('Error in chatroom initialization pipe:', err);
+          this.error.set('Failed to load chatroom. Please try again.');
+          this.isLoading.set(false);
+          return of(null);
+        })
+      ).subscribe({
+        next: (data) => {
+          console.log('Chatroom data loaded. Setting up real-time messaging.');
+          const currentChatroomId = this.chatroomId();
+          if (currentChatroomId) {
+            this.setupRealtimeMessaging(currentChatroomId);
+          }
+          setTimeout(() => this.scrollToBottom(), 0);
+        },
+        error: (err) => {
+          console.error('Subscription error in ChatroomComponent:', err);
+        }
+      })
+    );
   }
 
-  /**
-   * Method to load chatroom details and messages from your backend.
-   * This will involve calling methods on your `chatroomService`.
-   */
-  private loadChatroomData(id: string): void {
-    // Implement logic to fetch chatroom details and initial messages
-    // Set isLoading to false once data is loaded or if an error occurs.
-    // Example:
-    // this.chatroomService.getChatroomById(id).subscribe(
-    //   data => { this.chatroom = data; this.isLoading = false; },
-    //   error => { this.error = 'Failed to load chatroom.'; this.isLoading = false; }
-    // );
+  private loadChatroomAndMessages(chatroomId: string, userId: string): Observable<any> {
+    console.log(`Fetching chatroom ${chatroomId} for user ${userId} via ChatroomService.`);
+
+    return this.chatroomService.getChatroomById(chatroomId).pipe(
+      tap(chatroomData => {
+        if (!chatroomData) {
+          throw new Error('Chatroom not found.');
+        }
+        if (chatroomData.customerId !== userId && chatroomData.providerId !== userId) {
+          this.error.set('You do not have access to this chatroom.');
+          this.isLoading.set(false);
+          throw new Error('Unauthorized access to chatroom');
+        }
+        this.chatroom.set(chatroomData);
+      }),
+      switchMap(() => this.chatroomService.getMessagesForChatroom(chatroomId)),
+      tap(messagesData => {
+        this.messages.set(messagesData);
+        this.isLoading.set(false);
+      }),
+      catchError(err => {
+        console.error('Error fetching chatroom or messages:', err);
+        this.error.set('Failed to retrieve chatroom details or messages.');
+        this.isLoading.set(false);
+        return throwError(() => new Error('Chatroom data load failed'));
+      })
+    );
   }
 
-  /**
-   * Method to set up real-time messaging listeners (e.g., Socket.IO).
-   */
-  private setupRealtimeMessaging(id: string): void {
-    // Implement logic to join a Socket.IO room and listen for new messages
-    // Example:
-    // this.chatroomService.joinChatroom(id);
-    // this.chatroomMessageSubscription = this.chatroomService.onNewMessage().subscribe(message => {
-    //   if (message.chatroomId === this.chatroomId) {
-    //     this.messages.push(message);
-    //     // Optionally scroll to bottom here
-    //   }
-    // });
-  }
+  private setupRealtimeMessaging(chatroomId: string): void {
+    console.log(`Setting up real-time messaging for chatroom ${chatroomId}.`);
 
-  /**
-   * Method to send a new message.
-   * This will involve calling a method on your `chatroomService`.
-   */
-  sendMessage(): void {
-    if (this.newMessageContent.trim() && this.currentUserId && this.chatroomId) {
-      console.log('Sending message:', this.newMessageContent);
-      // Construct the message object (e.g., { chatroomId, senderId, content, timestamp })
-      // Call your chatroomService to send the message
-      // Example:
-      // this.chatroomService.sendMessage(messageObject).subscribe(
-      //   response => { this.newMessageContent = ''; }, // Clear input on success
-      //   error => { this.error = 'Failed to send message.'; console.error(error); }
-      // );
-    }
-  }
+    this.chatroomService.joinChatroomSocket(chatroomId);
 
-  /**
-   * Helper function to determine if a message was sent by the current user for styling.
-   */
-  isMyMessage(senderId: string): boolean {
-    return senderId === this.currentUserId;
-  }
-
-  /**
-   * ngOnDestroy is called once, before the component is destroyed.
-   * It's crucial for unsubscribing from observables to prevent memory leaks.
-   */
-  ngOnDestroy(): void {
-    console.log('ChatroomComponent destroyed.'); // Updated console log
-    if (this.routeSubscription) {
-      this.routeSubscription.unsubscribe();
-    }
     if (this.chatroomMessageSubscription) {
       this.chatroomMessageSubscription.unsubscribe();
     }
-    // If you joined a real-time chatroom, leave it here
-    // Example: if (this.chatroomId) this.chatroomService.leaveChatroom(this.chatroomId);
+
+    this.chatroomMessageSubscription = this.chatroomService.onNewMessage().pipe(
+      filter(message => message.chatroomId === this.chatroomId()),
+      tap(message => {
+        console.log('Received new real-time message:', message);
+        this.messages.update(msgs => {
+          if (!msgs.some(m => m.id === message.id)) {
+            return [...msgs, message];
+          }
+          return msgs;
+        });
+        setTimeout(() => this.scrollToBottom(), 0);
+      }),
+      catchError(err => {
+        console.error('Error receiving real-time message:', err);
+        return of(null);
+      })
+    ).subscribe();
+
+    this.subscriptions.add(this.chatroomMessageSubscription);
+  }
+
+  sendMessage(): void {
+    if (!this.currentUser()) {
+      this.error.set('User not logged in. Please sign in to send messages.');
+      return;
+    }
+    
+    const messageText = this.newMessageContent().trim();
+    const userId = this.currentUser()!.id;
+    const chatroomId = this.chatroomId();
+
+    if (messageText && userId && chatroomId) {
+      console.log('Attempting to send message:', messageText);
+
+      const messageToSend = {
+        chatroomId: chatroomId,
+        senderId: userId,
+        text: messageText,
+        senderUsername: this.currentUser()!.username!,
+      };
+
+      const tempMessageId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      const optimisticMessage: Message = {
+        ...messageToSend,
+        id: tempMessageId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        readBy: [userId],
+      };
+      this.messages.update(msgs => [...msgs, optimisticMessage]);
+      this.newMessageContent.set('');
+      setTimeout(() => this.scrollToBottom(), 0);
+
+      this.subscriptions.add(
+        this.chatroomService.sendMessage(messageToSend).subscribe({
+          next: (responseMessage) => {
+            this.messages.update(msgs =>
+               msgs.map(msg => (msg.id === tempMessageId) ? responseMessage : msg)
+            );
+          },
+          error: (err) => {
+            console.error('Failed to send message:', err);
+            this.error.set('Failed to send message. Please try again.');
+            this.messages.update(msgs => msgs.filter(msg => msg.id !== tempMessageId));
+          }
+        })
+      );
+    }
+  }
+
+  isMyMessage(senderId: string): boolean {
+    return senderId === this.currentUser()!.id;
+  }
+
+  messageTrackBy(index: number, message: Message): string {
+    return message.id;
+  }
+
+  scrollToBottom(): void {
+    if (this.messageContainer && this.messageContainer.nativeElement) {
+      try {
+        this.messageContainer.nativeElement.scrollTop = this.messageContainer.nativeElement.scrollHeight;
+      } catch (err) {
+        console.error('Failed to scroll to bottom:', err);
+      }
+    }
+  }
+
+  backToChatList(): void {
+    const userId = this.currentUser()!.id;
+    const userRole = this.currentUser()!.role; 
+
+    if (userId && userRole) {
+      if (userRole === 'provider') {
+        this.router.navigate(['/provider', userId, 'chatrooms']);
+      } else if (userRole === 'seeker') {
+        this.router.navigate(['/seeker', userId, 'chatrooms']);
+      } else {
+        console.warn(`Unrecognized user role: ${userRole}. Navigating to generic chatrooms list.`);
+        this.router.navigate(['/chatrooms']);
+      }
+    } else {
+      console.warn('Current user ID or role is not available. Cannot navigate back to a specific chat list.');
+      this.router.navigate(['/chatrooms']);
+    }
+  }
+
+  ngOnDestroy(): void {
+    console.log('ChatroomComponent destroyed.');
+    this.subscriptions.unsubscribe();
+    const currentChatroomId = this.chatroomId();
+    if (currentChatroomId) {
+      this.chatroomService.leaveChatroomSocket(currentChatroomId);
+      console.log(`Left chatroom socket channel: ${currentChatroomId}`);
+    }
   }
 }

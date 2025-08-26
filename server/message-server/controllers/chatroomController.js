@@ -5,7 +5,7 @@ const { getIO } =require ('../../websocket/socketServer');
 exports.createChatroom = async (req, res) => {
   try {
     const { name, jobId, customerId, providerId } = req.body;
-    console.log("req from createchatroom",req);
+    console.log("req from createchatroom",req.body);
 
     if (!name || !customerId || !providerId) {
       return res.status(400).json({ message: 'Missing required chatroom fields: name, customerId, or providerId' });
@@ -36,6 +36,7 @@ exports.getChatroomsForProvider = async (req, res) => {
 
     const chatrooms = await Chatroom.findAll({
       where: { providerId: providerId },
+      order: [['lastActivityAt', 'DESC']],
     });
 
     if (chatrooms && chatrooms.length > 0) {
@@ -58,6 +59,7 @@ exports.getChatroomsForCustomer = async (req, res) => {
 
     const chatrooms = await Chatroom.findAll({
       where: { customerId: customerId },
+      order: [['lastActivityAt', 'DESC']],
     });
 
     if (chatrooms && chatrooms.length > 0) {

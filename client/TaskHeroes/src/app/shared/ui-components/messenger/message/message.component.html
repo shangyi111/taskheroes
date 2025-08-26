@@ -1,0 +1,21 @@
+<div
+  class="message-bubble"
+  [ngClass]="{'sent': isSentMessage, 'received': !isSentMessage}"
+>
+  <div class="message-content">
+    <ng-container *ngIf="!isSentMessage">
+      <span class="message-sender">{{ message.senderUsername }}</span>
+    </ng-container>
+
+    <p>{{ message.text }}</p>
+
+  </div>
+
+  <div class="message-meta">
+    <span class="message-timestamp">{{ message.createdAt | date:'shortTime' }}</span>
+
+    <ng-container *ngIf="isSentMessage && message.readBy && message.readBy.length > 1">
+      <i class="material-icons icon-read">done_all</i>
+    </ng-container>
+  </div>
+</div>

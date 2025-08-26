@@ -107,7 +107,7 @@ export class OrdersComponent {
 
     this.socketSubscriptions.push(
       this.socketIoService.onUserEvent<{ jobId: number }>('job_deleted').subscribe((data) => {
-        this.jobs = this.jobs.filter((job:Job) => job.id != data.jobId.toString());
+        this.jobs = this.jobs.filter((job:Job) => String(job.id) != data.jobId.toString());
         console.log('Job Deleted (Real-time):', data.jobId);
         // If using OnPush, trigger change detection here
       })

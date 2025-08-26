@@ -38,6 +38,11 @@ const Chatroom = sequelize.define('Chatroom', {
     allowNull: false,
     defaultValue: DataTypes.NOW,
   },
+  lastActivityAt: { 
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+  },
 });
 
 module.exports = Chatroom;
