@@ -26,7 +26,7 @@ export class SocketIoService implements OnDestroy {
     this.subscriptions.push(
       this.userDataService.userData$.subscribe((user) => {
         if (user?.id) {
-          this.socket.auth = { userId: user.id }; // optional: include userId as auth
+          this.socket.auth = { userId: user.id }; 
           this.connect(user.id);
         }
       })

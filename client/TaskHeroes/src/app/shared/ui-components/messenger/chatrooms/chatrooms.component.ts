@@ -35,8 +35,8 @@ export class ChatroomsComponent implements OnInit, OnDestroy {
   private initUserAndChatrooms(): void {
     this.subscriptions.push(
       this.userDataService.userData$.subscribe(user => {
-        this.user.set(user); // Set the public user signal
-        this.currentUserRole.set(user?.role || null); // Set the public role signal
+        this.user.set(user); 
+        this.currentUserRole.set(user?.role || null); 
         const userId = user?.id;
         const role = user?.role;
         if (userId && role) {
@@ -54,7 +54,7 @@ export class ChatroomsComponent implements OnInit, OnDestroy {
     if(role=="provider"){
     this.subscriptions.push(
       this.chatRoomservice.getChatroomsByProviderId(userId!)
-        .subscribe(chatrooms=> {
+        .subscribe(chatrooms => {
           this.chatrooms.set(chatrooms);
         })
     )}else if(role==="seeker"){

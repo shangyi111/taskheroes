@@ -21,13 +21,14 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FormComponent } from 'src/app/shared/ui-components/th-form/form.component';
+import { ProviderCalendarComponent } from '../calendar/provider_calendar.component';
 
 @Component({
   selector: 'business_page',
   standalone: true,
   templateUrl: './business_page.component.html', 
   styleUrls: ['./business_page.component.scss'],
-  imports: [MatCardModule,FormComponent,MatIconModule,MatFormFieldModule, ReactiveFormsModule,MatInputModule,MatButtonModule,FormsModule,CommonModule,MatChipsModule, MatExpansionModule], // Import the required modules, including Router
+  imports: [MatCardModule,ProviderCalendarComponent,FormComponent,MatIconModule,MatFormFieldModule, ReactiveFormsModule,MatInputModule,MatButtonModule,FormsModule,CommonModule,MatChipsModule, MatExpansionModule], 
 })
 export class BusinessPageComponent {
   private socketIoService = inject(SocketIoService);

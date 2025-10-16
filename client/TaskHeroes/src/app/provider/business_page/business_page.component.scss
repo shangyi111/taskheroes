@@ -23,14 +23,17 @@
     }
   }
 
-}
-.business-card {
+}.business-card {
   display: flex;
+  flex-wrap: wrap; /* Allows wrapping on smaller screens */
+  gap: 20px;
   border: 1px solid var(--card-border);
   padding: var(--dashboard-padding);
-  margin-bottom: 10px;
-  align-items: center;
+  margin-top: 15px; /* Spacing between expansion panels */
+  border-radius: 8px;
   box-shadow: var(--card-shadow);
+  background-color: white;
+  align-items: flex-start; /* Aligns content to the top */
 }
 
 .business-card:hover {
@@ -38,12 +41,20 @@
   transition: var(--transition-default);
 }
 
+.business-info-container {
+  flex: 1 1 auto; /* Allows this container to grow and shrink */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
 .profile-picture {
-  margin-right: calc(var(--dashboard-padding) / 2);
   width: 80px;
   height: 80px;
   border-radius: 50%;
   overflow: hidden;
+  margin-bottom: 15px; /* Spacing below the image */
 }
 
 .profile-picture img {
@@ -53,7 +64,7 @@
 }
 
 .business-info {
-  flex-grow: 1;
+  width: 100%; /* Ensures the info section takes full width of its container */
 }
 
 .business-info p {
@@ -70,17 +81,32 @@
   color: var(--primary-blue);
 }
 
-.category {
-  color: var(--text-secondary);
-  font-size: var(--description-font-size);
-}
-
-.description {
+.category, .description, .address, .phone {
   font-size: var(--description-font-size);
   color: var(--text-secondary);
 }
 
-.address, .phone {
-  font-size: var(--description-font-size);
-  color: var(--text-secondary);
+.hourly-rate {
+  color: var(--primary-green);
+  font-size: var(--text-font-size);
+  font-weight: bold;
+}
+
+/* --- Calendar Component --- */
+.provider-calendar {
+  flex: 2 1 450px; /* Allows the calendar to grow, shrink, and have a base width */
+  max-width: 600px; /* Prevents the calendar from getting too wide */
+  align-self: flex-start; /* Ensures the calendar aligns with the top of the container */
+}
+
+/* --- Responsive Layout for Small Screens --- */
+@media (max-width: 768px) {
+  .business-card {
+    flex-direction: column;
+  }
+  
+  .business-info-container {
+    width: 100%;
+    margin-bottom: 20px;
+  }
 }

@@ -15,7 +15,6 @@ import { Message } from 'src/app/shared/models/message';
 export class MessageComponent implements OnInit {
   @Input({ required: true }) message!: Message;
   @Input() currentUserId: string | null = null;
-  @Input() currentUsername : string | null = null;
 
   isSentMessage: boolean = false;
 

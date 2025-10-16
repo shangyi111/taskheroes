@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const chatroomController = require('../controllers/chatroomController'); // Import chatroom controller
+const chatroomController = require('../controllers/chatroomController');
 
 
 // Routes for chatrooms list for certain provider

@@ -1,0 +1,237 @@
+.calendar-container {
+  font-family: var(--global-font-family);
+  max-width: var(--role-cards-max-width);
+  margin: 30px auto;
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  background-color: #fff;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--dashboard-padding);
+  background-color: var(--dashboard-bg);
+  border-bottom: 1px solid var(--card-border);
+  position: relative;
+}
+
+.header h2 {
+  font-size: var(--title-font-size);
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0;
+  flex-grow: 1;
+  text-align: center;
+}
+
+.settings-icon {
+  cursor: pointer;
+  margin-left:10px;
+  font-size: 24px;
+}
+
+.header button {
+  background: none;
+  border: 1px solid var(--card-border);
+  padding: 8px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: var(--transition-default);
+}
+
+.header button:hover {
+  background-color: #e9ecef;
+}
+
+.day-names {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  padding: 10px 0;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--card-border);
+}
+
+.days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  user-select: none;
+}
+
+.day {
+  min-height: 100px;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  cursor: pointer;
+  transition: var(--transition-default);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.day:hover:not(.disabled) {
+  background-color: #f1f7fe;
+}
+
+.day.disabled {
+  background-color: var(--dashboard-bg);
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+.day.booked {
+    background-color: #d1e7dd; 
+    color: #155724;
+    cursor: not-allowed;
+}
+
+.day.future-blocked {
+  background-color: #f5f5f5;
+  color: #a0a0a0;
+}
+
+.booked-status {
+    color: #155724;
+    font-weight: bold;
+}
+
+.day-number {
+  font-size: var(--description-font-size);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.price {
+  font-size: var(--description-font-size);
+  font-weight: 600;
+  color: var(--primary-blue);
+  margin-top: 5px;
+}
+
+.price.past-price {
+  color: #a0a0a0; 
+}
+
+.status {
+  font-size: 0.8rem;
+  color: #dc3545;
+  font-weight: 500;
+}
+
+.day.unavailable {
+  background-color: #f0f0f0;
+}
+
+.day.selected {
+  background-color: #cfe2ff;
+}
+
+.day.past {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+  pointer-events: none; 
+}
+
+/* Modal Styling */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: var(--card-shadow);
+  width: 90%;
+  max-width: 400px;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.date-range {
+  font-size: var(--description-font-size);
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.form-group input, .form-group select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modal-actions button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.save-btn {
+  background-color: var(--primary-blue);
+  color: #fff;
+}
+
+.cancel-btn {
+  background-color: #e9ecef;
+  color: var(--text-primary);
+}
+
+.tooltip {
+  position: absolute;
+  bottom: 100%; /* Position above the element */
+  left: 50%;
+  transform: translateX(-50%); /* Center horizontally */
+  background-color: #333;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  white-space: nowrap; /* Prevent text wrapping */
+  z-index: 10;
+  pointer-events: none; /* Allows mouse events on the element underneath */
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.day.booked:hover .tooltip {
+  opacity: 1;
+}

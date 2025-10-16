@@ -35,17 +35,25 @@
       ></th-form>
       }@else{
         <div class="business-card">
-          <div class="profile-picture">
-            <img src={{service.profilePicture}} alt="profile pic for ${service.businessName}">
+          <div class="business-info-container">
+            <div class="profile-picture">
+              <img src={{service.profilePicture}} alt="profile pic for ${service.businessName}">
+            </div>
+            <div class="business-info">
+              <p class="business-name">{{service.businessName}}</p>
+              <p class="hourly-rate">{{service.hourlyRate}}</p>
+              <p class="category">Category: {{service.category}}</p>
+              <p class="description">Description: {{service.description}}</p>
+              <p class="address">Provider address: {{service.businessAddress}}</p>
+              <p class="phone">Provider phone: {{service.phoneNumber}}</p>
+            </div>
           </div>
-          <div class="business-info">
-            <p class="business-name">{{service.businessName}}</p>
-            <p class="hourly-rate">{{service.hourlyRate}}</p>
-            <p class="category">Category: {{service.category}}</p>
-            <p class="description">Description: {{service.description}}</p>
-            <p class="address">Provider address: {{service.businessAddress}}</p>
-            <p class="phone">Provider phone: {{service.phoneNumber}}</p>
-          </div>
+          
+          <provider-calendar 
+            [serviceId]="service.id!" 
+            [providerId]="service.userId!" 
+            [basePrice]="service.hourlyRate!"
+          class="provider-calendar"></provider-calendar>
         </div>
       }
     </mat-expansion-panel>
