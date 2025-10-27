@@ -1,0 +1,77 @@
+/* src/app/features/service-details/service-details.component.scss */
+
+.service-details-container {
+  /* Keep container centered and spacious */
+  padding: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.combined-booking-card {
+  width: 100%;
+  padding: 0; /* Remove default mat-card padding here */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15); /* Make it stand out */
+}
+
+.card-content-wrapper {
+  display: flex;
+  flex-wrap: wrap; /* Allows columns to stack on small screens */
+  width: 100%;
+}
+
+.service-info-column {
+  flex: 1 1 400px; /* Takes up space, minimum 400px before wrapping */
+  padding: 20px;
+  border-right: 1px solid var(--card-border, #eee); /* Visual separator */
+}
+
+.calendar-booking-column {
+  flex: 2 1 600px; /* Takes up remaining space, minimum 600px */
+  padding: 20px;
+}
+
+.booking-title {
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--card-border, #eee);
+  font-size: 1.4rem;
+}
+
+/* --- Service Info Styles (Retained/Simplified) --- */
+.service-info-column .mat-card-header {
+    padding-left: 0;
+}
+
+.business-name {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--primary-blue, #007bff);
+}
+
+.pricing-info, .contact-info p {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+
+  mat-icon {
+    margin-right: 8px;
+    color: var(--text-secondary, #555);
+  }
+}
+
+/* Responsive adjustment for mobile screens */
+@media (max-width: 992px) {
+  .card-content-wrapper {
+    flex-direction: column; /* Stack vertically */
+  }
+  .service-info-column {
+    border-right: none;
+    border-bottom: 1px solid var(--card-border, #eee); /* Separator when stacked */
+    flex: none; /* Do not force width */
+    width: 100%;
+  }
+  .calendar-booking-column {
+    flex: none;
+    width: 100%;
+  }
+}

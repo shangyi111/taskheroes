@@ -11,6 +11,7 @@ const orderRoutes = require('./routes/order');
 const messageRoutes = require('./message-server/routes/message');
 const chatroomRoutes = require('./message-server/routes/chatroom');
 const calendarRoutes = require('./routes/calendar');
+const mapRoutes = require('./routes/map');
 const websocket = require('./websocket/socketServer');
 const sequelize = require('./config/db');
 const models = require('./models');
@@ -29,6 +30,7 @@ app.use('/api/order',orderRoutes);
 app.use('/api/message', messageRoutes);
 app.use('/api/chatroom',chatroomRoutes);
 app.use('/api/calendar', calendarRoutes);
+app.use('/api/map',mapRoutes);
 // Example protected route
 app.get('/api/protected', authenticateToken, (req, res) => {
   res.json({ message: 'Authenticated access granted', user: req.user });

@@ -74,9 +74,6 @@ exports.updateAvailabilityWindow = async (req, res) => {
     if (typeof availabilityWindowDays !== 'number' || availabilityWindowDays < 1) {
         return res.status(400).json({ message: 'Availability window must be a positive number.' });
     }
-    console.log("updateAvailabilityWindow req.params : ", req.params);
-    console.log("updateAvailabilityWindow req.body : ", req.body);
-    console.log("updateAvailabilityWindow req.user : ", req.user);
     // Perform a targeted update query
     const [updatedRows] = await Service.update(
         { availabilityWindowDays: availabilityWindowDays },

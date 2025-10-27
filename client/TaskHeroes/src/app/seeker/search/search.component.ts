@@ -48,4 +48,8 @@ export class SearchComponent {
     if (!userId) this.route.navigate(['/login']);
     this.route.navigate(['/user', userId, 'service', service.id, 'request']);
   }
+
+  viewServiceDetails(service: Service): void {
+    this.route.navigate(['service', service.id]); 
+  }
 }

@@ -105,8 +105,6 @@ exports.deleteJob = async (req, res) => {
 //delete order
 exports.deleteOrderByCustomerId = async (req, res) => {
   try {
-    console.log("testing req.params",req.params);
-    console.log("testing req.user",req.user);
     const job = await Job.findByPk(req.params.id);
     if (!job || job.customerId !== req.user.id) { // Ensure user owns the order
       return res.status(404).json({ message: 'Order not found or unauthorized' });
@@ -128,8 +126,6 @@ exports.deleteOrderByCustomerId = async (req, res) => {
 //delete job
 exports.deleteOrderByPerformerId = async (req, res) => {
   try {
-    console.log("testing req.params",req.params);
-    console.log("testing req.user",req.user);
     const job = await Job.findByPk(req.params.id);
     if (!job || job.performerId !== req.user.id) { // Ensure user owns the order
       return res.status(404).json({ message: 'Job not found or unauthorized' });

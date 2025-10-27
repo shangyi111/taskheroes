@@ -2,10 +2,9 @@
 
 <div class="service-results">
   @let services = services$ | async;
-  @let user = userData$ | async;
 
   @for (service of services; track service.id) {
-    <mat-card class="service-card">
+    <mat-card class="service-card" (click)="viewServiceDetails(service)">
       <div class="profile-side">
         <img class="profile-picture" [src]="service.profilePicture" alt="profile pic for {{ service.businessName }}">
         <div class="mat-card-header-text">
@@ -19,7 +18,6 @@
           <p>Provider address: {{ service.businessAddress }}</p>
           <p>Provider phone: {{ service.phoneNumber }}</p>
           <p>Provider hourly-rate: {{ service.hourlyRate }}</p>
-          <button mat-raised-button color="primary" (click)="request(service, user?.id)">Request</button>
         </mat-card-content>
       </div>
     </mat-card>

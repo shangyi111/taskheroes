@@ -10,7 +10,9 @@
       } @else {
         <mat-form-field>
           <mat-label>{{ field.label }}</mat-label>
-          <input matInput [type]="field.type" [formControlName]="field.name" />
+          <input matInput [type]="field.type" [formControlName]="field.name" 
+           [appAddressAutocomplete]="field.type === 'address' ? true : null" 
+           (addressSelected)="handleAddressOutput(field.name, $event)"/>
         </mat-form-field>
       }
     }

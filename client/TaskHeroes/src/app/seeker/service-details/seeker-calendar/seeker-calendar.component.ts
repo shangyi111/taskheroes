@@ -1,0 +1,290 @@
+import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, ViewChild, ElementRef,NgZone} from '@angular/core';
+import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
+
+import { CalendarDataService } from 'src/app/services/calendar-data.service';
+import { ProviderCalendar } from 'src/app/shared/models/calendar';
+
+// Define constants outside the class for clarity
+const TIME_FEE_THRESHOLD_MINUTES = 30; // 30 minutes one-way threshold
+const FEE_PER_MINUTE_EXCEEDED = 1.00; // $1.00 per minute exceeded
+
+@Component({
+  selector: 'seeker-calendar',
+  standalone: true,
+  templateUrl: './seeker-calendar.component.html',
+  styleUrls: ['./seeker-calendar.component.scss'],
+  imports: [CommonModule, FormsModule] 
+})
+export class SeekerCalendarComponent implements OnInit, OnDestroy {
+  currentMonth: Date = new Date();
+  daysInMonth: any[] = [];
+  
+  // Input from host component (ServiceDetailsComponent)
+  @Input() serviceId!: string;
+  @Input() providerId!: string;
+  @Input() serviceName!: string;
+  @Input() providerAddress: string = ''; 
+
+  // Data fetched from backend
+  basePrice: number = 0;
+  providerAvailability: { [key: string]: any } = {};
+  availabilityWindowDays: number = 90;
+
+  // Seeker's selected state
+  selectedDateData: any = null;
+  showTimeSlotModal: boolean = false; 
+  
+  // State for booking form inputs
+  seekerJobLocation: string | null = null;
+  selectedStartTime: string | null = '9:00 AM'; // Default start time
+  selectedDurationHours: number = 2; // Default duration
+  
+  // Calculation properties
+  calculatedDrivingTimeMinutes: number = 0; 
+  calculatedJobFee: number = 0;
+
+  @ViewChild('addressInput') addressInput!: ElementRef;
+
+  // New property for the Autocomplete instance
+  private autocomplete: google.maps.places.Autocomplete | undefined;
+  private calendarSubscription: Subscription | null = null;
+  
+  @Output() bookRequest = new EventEmitter<any>();
+
+  constructor(private calendarDataService: CalendarDataService, private ngZone: NgZone) {}
+
+  ngOnInit(): void {
+    this.fetchCalendarData();
+  }
+
+  ngOnDestroy(): void {
+    if (this.calendarSubscription) {
+      this.calendarSubscription.unsubscribe();
+    }
+  }
+
+  fetchCalendarData(): void {
+    const year = this.currentMonth.getFullYear();
+    const month = this.currentMonth.getMonth() + 1;
+    const formattedMonth = `${year}-${month.toString().padStart(2, '0')}`;
+
+    this.calendarSubscription = this.calendarDataService.getCalendarData(this.providerId, this.serviceId, formattedMonth)
+      .subscribe({
+        next: (data: ProviderCalendar) => {
+          this.basePrice = data.basePrice;
+          this.providerAvailability = data.availability;
+          this.availabilityWindowDays = data.availabilityWindow || 90;
+          this.generateCalendar();
+        },
+        error: (err) => {
+          console.error('Failed to fetch calendar data:', err);
+        }
+      });
+  }
+  
+  // Helper to generate the calendar days
+  generateCalendar(): void {
+    this.daysInMonth = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); 
+    const endDate = new Date(today.getTime());
+    endDate.setDate(today.getDate() + this.availabilityWindowDays);
+    
+    const year = this.currentMonth.getFullYear();
+    const month = this.currentMonth.getMonth();
+    const firstDayOfMonth = new Date(year, month, 1);
+    const lastDayOfMonth = new Date(year, month + 1, 0);
+    const numDays = lastDayOfMonth.getDate();
+    const startDayOfWeek = firstDayOfMonth.getDay();
+    const currentProviderAvailability = this.providerAvailability || {};
+
+    // Add placeholders
+    for (let i = 0; i < startDayOfWeek; i++) {
+      this.daysInMonth.push({ date: null, isCurrentMonth: false, isBookable: false });
+    }
+    
+    // Add actual days
+    for (let i = 1; i <= numDays; i++) {
+      const date = new Date(year, month, i);
+      const isPast = date.getTime() < today.getTime();
+      const isFutureBlocked = date.getTime() > endDate.getTime();
+      const formattedDate = this.formatDate(date);
+      
+      const dayAvailability = currentProviderAvailability[formattedDate];
+      const finalAvailability = (dayAvailability && typeof dayAvailability === 'object' && dayAvailability.status)
+        ? dayAvailability
+        : { isAvailable: !isFutureBlocked, status: isFutureBlocked ? 'unavailable' : 'available', customPrice: null };
+
+      const isBookable = finalAvailability.status === 'available' && !isPast && !isFutureBlocked;
+
+      this.daysInMonth.push({
+        date: date,
+        isCurrentMonth: true,
+        isBookable: isBookable,
+        isSelected: this.selectedDateData && this.selectedDateData.date.getTime() === date.getTime(),
+        availability: finalAvailability
+      });
+    }
+  }
+  
+  // Navigation
+  previousMonth(): void {
+    this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() - 1, 1);
+    this.selectedDateData = null; 
+    this.fetchCalendarData(); 
+  }
+  
+  nextMonth(): void {
+    this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 1);
+    this.selectedDateData = null; 
+    this.fetchCalendarData(); 
+  }
+  
+  initAutocomplete(): void {
+    // Check if the Google Maps library is loaded and the element is available
+    if (typeof google !== 'undefined' && this.addressInput) {
+      const inputElement = this.addressInput.nativeElement;
+      
+      this.autocomplete = new google.maps.places.Autocomplete(inputElement, {
+        types: ['address'], // Restrict predictions to physical addresses
+        componentRestrictions: { 'country': ['us'] } // Optional: Restrict to US
+      });
+
+      // Listener for when a place (address) is selected from the dropdown
+      this.autocomplete.addListener('place_changed', () => {
+                this.ngZone.run(() => {
+                    const place = this.autocomplete!.getPlace();
+                    
+                    // Update the ngModel (seekerJobLocation)
+                    this.seekerJobLocation = place.formatted_address || place.name;
+                    
+                    // Trigger the fee calculation chain
+                    this.handleTimeOrLocationChange(); 
+                }); // <--- END NGZONE.RUN
+            });
+    }
+  }
+  // Seeker interaction
+  selectDay(day: any): void {
+    if (!day.isBookable) {
+      this.selectedDateData = null;
+      this.showTimeSlotModal = false;
+      this.calculatedJobFee = 0;
+      this.generateCalendar(); 
+      return;
+    }
+    
+    // Toggle selection: If the same day is clicked, deselect and close modal
+    if (this.selectedDateData && this.selectedDateData.date.getTime() === day.date.getTime()) {
+      this.selectedDateData = null;
+      this.showTimeSlotModal = false;
+      this.calculatedJobFee = 0;
+    } else {
+      // Set New Selection and open modal
+      this.selectedDateData = day;
+      this.showTimeSlotModal = true; 
+      setTimeout(() => {
+        this.initAutocomplete();
+      }, 0);
+      // Recalculate based on new date and current time/location inputs
+      this.getDrivingTimeFromBackend(); 
+    }
+    
+    this.generateCalendar(); // Update calendar highlighting
+  }
+
+  // Handles location or time/duration input changes and triggers fee calculation
+  handleTimeOrLocationChange(): void {
+    if (this.selectedDateData) {
+      this.getDrivingTimeFromBackend();
+    }
+  }
+
+  // Calls backend service to get travel time
+  getDrivingTimeFromBackend(): void {
+    if (!this.providerAddress || !this.seekerJobLocation || !this.selectedDateData) {
+        this.calculatedDrivingTimeMinutes = 0;
+        this.calculateFee();
+        return;
+    }
+
+    this.calendarSubscription = this.calendarDataService.getDrivingTime(this.providerAddress, this.seekerJobLocation)
+        .subscribe({
+            next: (data) => {
+                this.calculatedDrivingTimeMinutes = data.roundTripTimeMinutes; 
+                this.calculateFee(); 
+            },
+            error: (err) => {
+                console.error("Failed to get driving time.", err);
+                this.calculatedDrivingTimeMinutes = 0; 
+                this.calculateFee();
+            }
+        });
+  }
+
+  calculateFee(): void {
+    const duration = this.selectedDurationHours || 0;
+    const hourlyRate = this.selectedDateData?.availability?.customPrice || this.basePrice || 0;
+    
+    if (duration < 1 || !this.selectedDateData) {
+        this.calculatedJobFee = 0;
+        return;
+    }
+
+    // --- 1. Calculate Travel Fee (Round Trip) ---
+    const totalDrivingTime = this.calculatedDrivingTimeMinutes; 
+    
+    const travelFee = this.calculatedTravelFees(totalDrivingTime);
+    
+    // --- 2. Calculate Labor Cost ---
+    const laborCost = duration * parseFloat(hourlyRate);
+    
+    // --- 3. Set Final Fee ---
+    this.calculatedJobFee = laborCost + travelFee!;
+  }
+  
+  calculatedTravelFees(totalDrivingTime:number): number {
+    const roundTripThreshold = TIME_FEE_THRESHOLD_MINUTES * 2; 
+     if (totalDrivingTime > roundTripThreshold) {
+        const exceededTime = totalDrivingTime - roundTripThreshold;
+        return exceededTime * FEE_PER_MINUTE_EXCEEDED;
+    } else return 0;
+  }
+  // Final action to emit booking request
+  sendBookingRequestFromModal(): void {
+    if (!this.selectedDateData || !this.selectedStartTime || this.selectedDurationHours < 1 || !this.seekerJobLocation || this.calculatedJobFee === 0) {
+      alert("Please ensure all booking details are filled and the fee is calculated.");
+      return;
+    }
+
+    const requestData = {
+      serviceId: this.serviceId,
+      providerId: this.providerId,
+      jobDate: this.selectedDateData.date,
+      startTime: this.selectedStartTime,
+      durationHours: this.selectedDurationHours,
+      jobLocation: this.seekerJobLocation, 
+      fee: this.calculatedJobFee, 
+      // seekerId (customerId) will be added by a job creation service
+    };
+    
+    this.bookRequest.emit(requestData);
+
+    // Close and reset state after successful request
+    this.closeTimeSlotModal();
+  }
+
+  // Modal actions
+  closeTimeSlotModal(): void {
+    this.showTimeSlotModal = false;
+    this.selectedDateData = null; // Clear date selection to hide modal
+    this.calculatedJobFee = 0;
+    this.generateCalendar();
+  }
+  
+  private formatDate(date: Date): string {
+    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+  }
+}

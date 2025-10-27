@@ -1,0 +1,101 @@
+<div class="calendar-container seeker-view">
+  
+  <div class="header">
+    <button (click)="previousMonth()">Previous</button>
+    <h2>{{ currentMonth | date:'MMMM yyyy' }}</h2>
+    <button (click)="nextMonth()">Next</button>
+  </div>
+
+  <div class="day-names">
+    <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+  </div>
+
+  <div class="days-grid">
+    @for (day of daysInMonth; track $index) {
+      <div
+        class="day"
+        [class.disabled]="!day.isCurrentMonth || !day.isBookable"
+        [class.selected]="day === selectedDateData"
+        [class.bookable]="day.isBookable"
+        [class.booked]="day.availability?.status === 'booked'"
+        (click)="selectDay(day)"
+      >
+        @if (day.date) {
+          <span class="day-number">{{ day.date.getDate() }}</span>
+          
+          @if (day.isBookable) {
+            <span class="price">
+              {{ day.availability.customPrice !== null ? (day.availability.customPrice | currency:'USD':'symbol':'1.0-0') : (basePrice | currency:'USD':'symbol':'1.0-0') }}
+            </span>
+          }
+          
+          @if (day.availability.status === 'booked') {
+            <span class="status booked-status">Booked</span>
+          } @else if (!day.isBookable && day.isCurrentMonth) {
+            <span class="status unavailable-status">N/A</span>
+          }
+        }
+      </div>
+    }
+  </div>
+</div>
+
+@if (showTimeSlotModal && selectedDateData) {
+  <div class="modal-overlay">
+    <div class="modal-content">
+      <button class="close-btn" (click)="closeTimeSlotModal()">&times;</button>
+      
+      <h3>Book {{ serviceName }} on {{ selectedDateData.date | date:'mediumDate' }}</h3>
+      
+      <div class="form-group">
+          <label for="jobLocation">Your Job Location:</label>
+          <input 
+            id="jobLocationAutocomplete" type="text" 
+            [(ngModel)]="seekerJobLocation" 
+            (input)="handleTimeOrLocationChange()" 
+            placeholder="Start typing your full address..."
+            #addressInput> </div>
+
+      <div class="job-time-selector">
+          <div class="form-group">
+              <label for="startTime">Start Time:</label>
+              <input id="startTime" type="time" [(ngModel)]="selectedStartTime" required>
+          </div>
+          
+          <div class="form-group">
+              <label for="durationHours">Duration (Hours):</label>
+              <input id="durationHours" type="number" [(ngModel)]="selectedDurationHours" (change)="calculateFee()" min="1" required>
+          </div>
+      </div>
+
+      <div class="fee-summary">
+          <p class="estimate-detail">
+              Base Hourly Rate: <span class="value">{{ selectedDateData.availability.customPrice !== null ? 
+                                (selectedDateData.availability.customPrice | currency:'USD':'symbol':'1.0-2') : 
+                                (basePrice | currency:'USD':'symbol':'1.0-2') 
+                                }}</span>
+          </p>
+          <p class="estimate-detail">
+              Estimated Driving Time (Round Trip): 
+              <span class="value">{{ calculatedDrivingTimeMinutes }} mins</span>
+          </p>
+           <p class="estimate-detail">
+              Estimated Traveling Fees: 
+              <span class="value">$ {{ calculatedTravelFees(calculatedDrivingTimeMinutes) }}</span>
+          </p>
+          <p class="estimate-text final-price">
+              Estimated Total Fee: 
+              <span class="value">{{ calculatedJobFee | currency:'USD':'symbol':'1.0-2' }}</span>
+          </p>
+      </div>
+      
+      <button 
+        class="request-btn" 
+        [disabled]="!selectedStartTime || selectedDurationHours < 1 || !seekerJobLocation || calculatedJobFee === 0" 
+        (click)="sendBookingRequestFromModal()">
+        Confirm & Send Request
+      </button>
+
+    </div>
+  </div>
+}

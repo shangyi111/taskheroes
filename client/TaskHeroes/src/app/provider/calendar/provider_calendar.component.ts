@@ -72,7 +72,6 @@ export class ProviderCalendarComponent implements OnInit {
         },
         error: (err) => {
           console.error('Failed to fetch calendar data:', err);
-          // Handle error (e.g., show an error message)
         }
       });
   }

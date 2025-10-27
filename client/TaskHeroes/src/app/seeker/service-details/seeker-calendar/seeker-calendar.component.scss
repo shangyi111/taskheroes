@@ -1,0 +1,223 @@
+/* --- Calendar Grid Container --- */
+.calendar-container {
+  font-family: Arial, sans-serif;
+  max-width: 100%;
+  margin: 0;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #fff;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.header h2 {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.header button {
+  background: none;
+  border: 1px solid #ccc;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.day-names, .days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+}
+
+.day-names {
+  padding: 8px 0;
+  font-weight: 600;
+  color: #6c757d;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* --- Individual Day Styles --- */
+.day {
+  min-height: 80px;
+  padding: 5px;
+  border: 1px solid #eee;
+  cursor: default;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  position: relative;
+  transition: background-color 0.2s;
+}
+
+/* Base styles for available/selectable dates */
+.day.bookable {
+  cursor: pointer;
+  background-color: #f0fff0; /* Light green hint for available */
+}
+
+.day.bookable:hover {
+  background-color: #e6ffe6;
+}
+
+/* Styles for the selected date */
+.day.selected {
+  background-color: var(--primary-blue, #007bff);
+  color: white;
+  border-color: var(--primary-blue, #007bff);
+}
+
+/* Styles for non-bookable dates */
+.day.disabled {
+  background-color: #fafafa;
+  color: #ccc;
+  cursor: not-allowed;
+  pointer-events: none; /* Disable all clicks/hovers */
+}
+
+/* Status: Booked */
+.day.booked {
+  background-color: #d1e7dd;
+  color: #155724;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* --- Text Styles --- */
+.day-number {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.price {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--primary-green, #28a745);
+}
+.day.selected .price {
+    color: white; /* Ensure price is visible on the blue selected background */
+}
+
+.status {
+  font-size: 0.8rem;
+  color: #dc3545; /* Color for 'N/A' or simple status */
+  font-weight: 500;
+}
+.status.booked-status {
+    color: #155724; /* Dark green for booked status text */
+    font-weight: bold;
+}
+
+
+/* --- Time Slot Selection Modal --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  max-width: 450px;
+  width: 90%;
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #555;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.job-time-selector {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+/* --- Fee Summary --- */
+.fee-summary {
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+    margin-bottom: 25px;
+}
+
+.estimate-detail {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 0.95rem;
+    color: #555;
+}
+
+.estimate-text {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--text-primary, #333);
+}
+
+.final-price .value {
+    color: var(--primary-green, #28a745);
+    font-size: 1.2rem;
+}
+
+/* --- Request Button --- */
+.request-btn {
+  padding: 10px 20px;
+  border: none;
+  background-color: var(--primary-green, #28a745);
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.request-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
