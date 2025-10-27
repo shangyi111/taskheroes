@@ -5,8 +5,15 @@ const Review = require('./review');
 const Chatroom = require('./chatroom');
 const ChatroomUser = require('./chatroomuser');
 const Message = require('./message');
+const Calendar = require('./calendar');
 
 // Define associations
+Calendar.belongsTo(User, { foreignKey: 'providerId' });
+Calendar.belongsTo(Service, { foreignKey: 'serviceId' });
+Calendar.belongsTo(Job, { foreignKey: 'jobId' });
+User.hasMany(Calendar, { foreignKey: 'providerId' });
+Service.hasMany(Calendar, { foreignKey: 'serviceId' });
+Job.hasOne(Calendar, { foreignKey: 'jobId' });
 Chatroom.belongsToMany(User, { through: ChatroomUser });
 Chatroom.hasMany(Message, {foreignKey:'chatroomId'});
 Message.belongsTo(Chatroom, { foreignKey:'chatroomId'});
@@ -34,4 +41,5 @@ module.exports = {
     Chatroom,
     ChatroomUser,
     Message,
+    Calendar,
 };

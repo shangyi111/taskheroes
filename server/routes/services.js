@@ -20,6 +20,9 @@ router.post('/', authMiddleware, servicesController.createService);
 // Update a service (protected)
 router.put('/:id', authMiddleware, servicesController.updateService);
 
+//Update only the Availability Window for a specific service (protected)
+router.put('/:id/availabilityWindow', authMiddleware, servicesController.updateAvailabilityWindow);
+
 // Delete a service (protected)
 router.delete('/:id', authMiddleware, servicesController.deleteService);
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -45,7 +45,7 @@ export class ProviderCalendarComponent implements OnInit {
 
   private calendarSubscription: Subscription | null = null;
 
-  constructor(private calendarDataService: CalendarDataService) {}
+  constructor(private calendarDataService: CalendarDataService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.fetchCalendarData();
@@ -62,11 +62,12 @@ export class ProviderCalendarComponent implements OnInit {
     const month = this.currentMonth.getMonth() + 1;
     const formattedMonth = `${year}-${month.toString().padStart(2, '0')}`;
 
-    this.calendarSubscription = this.calendarDataService.getCalendarData(this.providerId, formattedMonth)
+    this.calendarSubscription = this.calendarDataService.getCalendarData(this.providerId, this.serviceId,formattedMonth)
       .subscribe({
         next: (data: ProviderCalendar) => {
           this.basePrice = data.basePrice;
           this.providerAvailability = data.availability;
+          this.availabilityWindow = data.availabilityWindow || 90;
           this.generateCalendar();
         },
         error: (err) => {
@@ -78,7 +79,7 @@ export class ProviderCalendarComponent implements OnInit {
   
   // Helper to generate the calendar days
   generateCalendar(): void {
-    this.daysInMonth = [];
+    const newDaysInMonth: any[] = [];
     const today = new Date();
     today.setHours(0, 0, 0, 0); 
     const endDate = new Date(today.getTime());
@@ -93,7 +94,7 @@ export class ProviderCalendarComponent implements OnInit {
 
     // Add empty placeholders for days before the 1st
     for (let i = 0; i < startDayOfWeek; i++) {
-      this.daysInMonth.push({ 
+      newDaysInMonth.push({ 
         date: null, 
         isCurrentMonth: false ,
         isPast: true,
@@ -113,7 +114,7 @@ export class ProviderCalendarComponent implements OnInit {
       const finalAvailability = (dayAvailability && typeof dayAvailability === 'object')
       ? dayAvailability
       : { isAvailable: !isFutureBlocked, status: isFutureBlocked ? 'unavailable' : 'available',customPrice: null };
-      this.daysInMonth.push({
+      newDaysInMonth.push({
         date: date,
         isCurrentMonth: true,
         isPast: isPast,
@@ -122,6 +123,10 @@ export class ProviderCalendarComponent implements OnInit {
         availability: finalAvailability,
       });
     }
+
+    this.daysInMonth = newDaysInMonth; 
+    
+    this.cdr.detectChanges();
   }
 
   openSettingsModal(): void {
@@ -133,10 +138,24 @@ export class ProviderCalendarComponent implements OnInit {
   }
 
   saveSettings(): void {
-    // You would typically save this to a backend service here
-    // For now, it will just re-generate the calendar with the new setting
-    this.closeSettingsModal();
-    this.generateCalendar();
+    if (this.availabilityWindow < 1) {
+      console.error("Availability window must be a positive number.");
+      return;
+    }
+
+    this.calendarDataService.updateAvailabilityWindow(this.serviceId, this.availabilityWindow)
+      .subscribe({
+        next: (response) => {
+          console.log('Availability Window updated in backend:', response);
+          // After a successful save, close the modal and re-fetch ALL calendar data
+          this.closeSettingsModal();
+          this.fetchCalendarData(); 
+        },
+        error: (err) => {
+          console.error('Failed to save availability window:', err);
+          // Handle error (e.g., show error message)
+        }
+      });
   }
 
   // Helper to format date for key lookup
@@ -147,12 +166,12 @@ export class ProviderCalendarComponent implements OnInit {
   // Navigation
   previousMonth(): void {
     this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() - 1, 1);
-    this.generateCalendar();
+    this.fetchCalendarData();
   }
   
   nextMonth(): void {
     this.currentMonth = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 1);
-    this.generateCalendar();
+    this.fetchCalendarData();
   }
   
   // Drag & drop logic
@@ -226,7 +245,7 @@ export class ProviderCalendarComponent implements OnInit {
       availability: this.bulkAvailability
     };
     
-    this.calendarDataService.saveCalendarChanges(this.providerId, changes)
+    this.calendarDataService.saveCalendarChanges(this.providerId, this.serviceId, changes)
       .subscribe({
         next: (response) => {
           console.log('Changes saved successfully:', response);

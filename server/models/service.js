@@ -38,7 +38,12 @@ const Service = sequelize.define('Service', {
   hourlyRate:{
     type: DataTypes.DECIMAL(10, 2),
     allowNull: true,
-  }
+  },
+  availabilityWindowDays: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 90,
+  },
 });
   
 module.exports = Service;

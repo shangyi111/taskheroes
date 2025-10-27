@@ -65,6 +65,44 @@ exports.updateService = async (req, res) => {
   }
 };
 
+exports.updateAvailabilityWindow = async (req, res) => {
+  try {
+    const serviceId = req.params.id;
+    const { availabilityWindowDays } = req.body;
+    const userId = req.user.id;
+
+    if (typeof availabilityWindowDays !== 'number' || availabilityWindowDays < 1) {
+        return res.status(400).json({ message: 'Availability window must be a positive number.' });
+    }
+    console.log("updateAvailabilityWindow req.params : ", req.params);
+    console.log("updateAvailabilityWindow req.body : ", req.body);
+    console.log("updateAvailabilityWindow req.user : ", req.user);
+    // Perform a targeted update query
+    const [updatedRows] = await Service.update(
+        { availabilityWindowDays: availabilityWindowDays },
+        { 
+            where: { id: serviceId, userId: userId } // Security check: Ensure user owns service
+        }
+    );
+
+    if (updatedRows > 0) {
+        const updatedService = await Service.findByPk(serviceId);
+        res.status(200).json(updatedService);
+        sendServiceUpdated(updatedService); // Broadcast the change
+    } else {
+        res.status(404).json({ 
+            message: 'Service not found or user is not authorized to update this service.' 
+        });
+    }
+
+  } catch (error) {
+    console.error('Error updating availability window:', error);
+    // Note: If error.errors exists, it's a Sequelize validation error
+    const message = error.errors ? error.errors[0].message : error.message; 
+    res.status(500).json({ message: message });
+  }
+};
+
 // Delete a service
 exports.deleteService = async (req, res) => {
   try {
