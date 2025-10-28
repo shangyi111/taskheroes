@@ -83,15 +83,17 @@ export class SeekerCalendarComponent implements OnInit, OnDestroy {
         }
       });
   }
-  
-  // Helper to generate the calendar days
-  generateCalendar(): void {
+
+generateCalendar(): void {
     this.daysInMonth = [];
     const today = new Date();
     today.setHours(0, 0, 0, 0); 
-    const endDate = new Date(today.getTime());
-    endDate.setDate(today.getDate() + this.availabilityWindowDays);
     
+    // Define the default maximum bookable date
+    const maxBookableDate = new Date(today.getTime());
+    maxBookableDate.setDate(today.getDate() + this.availabilityWindowDays);
+    
+    // ... (rest of date and month setup) ...
     const year = this.currentMonth.getFullYear();
     const month = this.currentMonth.getMonth();
     const firstDayOfMonth = new Date(year, month, 1);
@@ -109,15 +111,31 @@ export class SeekerCalendarComponent implements OnInit, OnDestroy {
     for (let i = 1; i <= numDays; i++) {
       const date = new Date(year, month, i);
       const isPast = date.getTime() < today.getTime();
-      const isFutureBlocked = date.getTime() > endDate.getTime();
+      
+      // Check if the date is OUTSIDE the Provider's DEFAULT window
+      const isOutsideDefaultWindow = date.getTime() > maxBookableDate.getTime(); 
       const formattedDate = this.formatDate(date);
       
       const dayAvailability = currentProviderAvailability[formattedDate];
-      const finalAvailability = (dayAvailability && typeof dayAvailability === 'object' && dayAvailability.status)
-        ? dayAvailability
-        : { isAvailable: !isFutureBlocked, status: isFutureBlocked ? 'unavailable' : 'available', customPrice: null };
+      
+      let finalAvailability;
 
-      const isBookable = finalAvailability.status === 'available' && !isPast && !isFutureBlocked;
+      // 1. Check for EXPLICIT BACKEND DATA (Overrides window check)
+      if (dayAvailability && typeof dayAvailability === 'object' && dayAvailability.status) {
+          finalAvailability = dayAvailability;
+      } 
+      // 2. Check the DEFAULT window boundary
+      else if (isOutsideDefaultWindow) {
+          // If there's NO explicit data AND it's outside the default window, it's unavailable
+          finalAvailability = { isAvailable: false, status: 'unavailable', customPrice: null };
+      } 
+      // 3. Default to available (within the window AND no explicit data saying otherwise)
+      else {
+          finalAvailability = { isAvailable: true, status: 'available', customPrice: null };
+      }
+
+      // Day is bookable ONLY IF it's not past and has 'available' status
+      const isBookable = !isPast && finalAvailability.status === 'available';
 
       this.daysInMonth.push({
         date: date,

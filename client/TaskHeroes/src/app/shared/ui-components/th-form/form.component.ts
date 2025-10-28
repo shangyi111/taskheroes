@@ -63,13 +63,13 @@ export class FormComponent {
     }
 
     onSubmit(): void {
-        if (this.formGroup.valid) { // Use formGroup
+        if (this.formGroup.valid) {
         this.formSubmit.emit(this.formGroup);
         }
     }
 
     clearForm(): void {
-    this.formGroup.reset(); // Use formGroup
+    this.formGroup.reset();
     this.formClear.emit();
     }
 
