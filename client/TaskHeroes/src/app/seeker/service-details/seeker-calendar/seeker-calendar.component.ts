@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, ViewChild, E
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
-
+import { environment } from 'src/environments/environment';
 import { CalendarDataService } from 'src/app/services/calendar-data.service';
 import { ProviderCalendar } from 'src/app/shared/models/calendar';
 
@@ -141,10 +141,38 @@ export class SeekerCalendarComponent implements OnInit, OnDestroy {
     this.selectedDateData = null; 
     this.fetchCalendarData(); 
   }
-  
+
+  private loadGoogleMapsScript(callback: () => void): void {
+    // Check if the script is already loaded (i.e., 'google' object exists)
+    if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+      callback(); // Script is loaded, run the callback immediately
+      return;
+    }
+    
+    // Check if the script is already being added to avoid duplicates
+    if (document.getElementById('google-maps-script')) {
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.id = 'google-maps-script';
+    // Use the API key from your environment file here
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${environment.googleMapsApiKey}&libraries=places`;
+    script.async = true;
+    script.defer = true;
+    
+    // Once the script loads, execute the callback (initAutocomplete)
+    script.onload = () => {
+      this.ngZone.run(() => {
+        callback(); 
+      });
+    };
+    
+    document.head.appendChild(script);
+  }
   initAutocomplete(): void {
     // Check if the Google Maps library is loaded and the element is available
-    if (typeof google !== 'undefined' && this.addressInput) {
+    if (typeof google !== 'undefined' && this.addressInput && this.addressInput.nativeElement) {
       const inputElement = this.addressInput.nativeElement;
       
       this.autocomplete = new google.maps.places.Autocomplete(inputElement, {
@@ -185,9 +213,13 @@ export class SeekerCalendarComponent implements OnInit, OnDestroy {
       // Set New Selection and open modal
       this.selectedDateData = day;
       this.showTimeSlotModal = true; 
-      setTimeout(() => {
-        this.initAutocomplete();
-      }, 0);
+      this.loadGoogleMapsScript(() => {
+          // Since the address input is in the modal, ensure the modal is open 
+          // before calling initAutocomplete
+          if (this.showTimeSlotModal) {
+            this.initAutocomplete();
+          }
+      });
       // Recalculate based on new date and current time/location inputs
       this.getDrivingTimeFromBackend(); 
     }
