@@ -1,21 +1,18 @@
-<div
-  class="message-bubble"
-  [ngClass]="{'sent': isSentMessage, 'received': !isSentMessage}"
->
-  <div class="message-content">
-    <ng-container *ngIf="!isSentMessage">
-      <span class="message-sender">{{ message.senderUsername }}</span>
-    </ng-container>
-
-    <p>{{ message.text }}</p>
-
+<div 
+  class="message-container"
+  [class.sent]="isSentMessage()"
+  [class.received]="!isSentMessage()">
+  
+  <div *ngIf="!isSentMessage()" class="message-avatar">
+    <img [src]="senderAvatarUrl() || 'assets/img/default-avatar.png'" alt="Sender Avatar" class="avatar-img">
   </div>
-
-  <div class="message-meta">
-    <span class="message-timestamp">{{ message.createdAt | date:'shortTime' }}</span>
-
-    <ng-container *ngIf="isSentMessage && message.readBy && message.readBy.length > 1">
-      <i class="material-icons icon-read">done_all</i>
-    </ng-container>
+  
+  <div class="message-bubble-group">
+    <div class="message-bubble">
+      <p class="message-text">{{ message.text }}</p>
+    </div>
+    <div class="message-timestamp">
+      {{ message.createdAt | date:'shortTime' }}
+    </div>
   </div>
 </div>

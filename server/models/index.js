@@ -1,5 +1,6 @@
 const User = require('./user');
 const Job = require('./job');
+const UserProfile = require('./userProfile');
 const Service = require('./service');
 const Review = require('./review');
 const Chatroom = require('./chatroom');
@@ -8,12 +9,22 @@ const Message = require('./message');
 const Calendar = require('./calendar');
 
 // Define associations
+User.hasOne(UserProfile, {
+    foreignKey: 'userId',
+    onDelete: 'CASCADE' 
+});
+UserProfile.belongsTo(User, {
+    foreignKey: 'userId'
+});
 Calendar.belongsTo(User, { foreignKey: 'providerId' });
 Calendar.belongsTo(Service, { foreignKey: 'serviceId' });
 Calendar.belongsTo(Job, { foreignKey: 'jobId' });
 User.hasMany(Calendar, { foreignKey: 'providerId' });
 Service.hasMany(Calendar, { foreignKey: 'serviceId' });
 Job.hasOne(Calendar, { foreignKey: 'jobId' });
+Chatroom.belongsTo(User, { foreignKey: 'customerId', as: 'Customer' });
+Chatroom.belongsTo(User, { foreignKey: 'providerId', as: 'Provider' });
+Chatroom.belongsTo(Job, { foreignKey: 'jobId', as: 'Job' });
 Chatroom.belongsToMany(User, { through: ChatroomUser });
 Chatroom.hasMany(Message, {foreignKey:'chatroomId'});
 Message.belongsTo(Chatroom, { foreignKey:'chatroomId'});

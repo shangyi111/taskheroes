@@ -9,7 +9,11 @@ import { Observable, of } from 'rxjs';
 
 import { SeekerCalendarComponent } from 'src/app/seeker/service-details/seeker-calendar/seeker-calendar.component';
 import { BusinessService } from 'src/app/services/business.service';
+import { JobService } from 'src/app/services/job.service';
+import { UserDataService } from 'src/app/services/user_data.service';
 import { Service } from 'src/app/shared/models/service';
+import { Job } from 'src/app/shared/models/job';
+import { User } from 'src/app/shared/models/user';
 
 @Component({
   selector: 'app-service-details',
@@ -28,15 +32,17 @@ export class ServiceDetailsComponent implements OnInit {
   
   // Observables for data streaming
   service$: Observable<Service | null> = of(null);
+  user: User | null = null;
+  serviceId: string = '';
+  providerId: string = '';
   
   private route = inject(ActivatedRoute);
   private serviceDataService = inject(BusinessService);
-  
-  // Local state for calendar inputs
-  serviceId: string = '';
-  providerId: string = '';
+  private jobService = inject(JobService);
+  private userService = inject(UserDataService);
 
   ngOnInit(): void {
+    this.user = this.userService.getUserData();
     // 1. Get the serviceId from the route parameters
     this.service$ = this.route.paramMap.pipe(
       switchMap(params => {
@@ -58,10 +64,18 @@ export class ServiceDetailsComponent implements OnInit {
     );
   }
   
-  handleBookingSubmission(requestData: any): void {
-    console.log('Booking Request Submitted:', requestData);
-    // TODO: Implement logic to call a service to create a new job/order in the backend
-    // Example: this.jobsService.createJob(requestData);
-    alert(`Booking requested for ${requestData.jobDate}. Price: ${requestData.price}`);
-  }
+  // ParentComponent.ts
+handleBookingSubmission(bookingDetails: Job) {
+  // This is where the actual backend service call happens
+  this.jobService.createJob(bookingDetails).subscribe({
+    next: (response) => {
+      console.log('Booking submitted successfully!', response);
+      // Show success message, redirect to confirmation page
+    },
+    error: (err) => {
+      console.error('Booking failed:', err);
+      // Show error message
+    }
+  });
+}
 }

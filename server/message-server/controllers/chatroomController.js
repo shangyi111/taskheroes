@@ -1,6 +1,66 @@
 
-const { Chatroom, ChatroomUser } = require ('../../models');
+const { Chatroom, ChatroomUser, Job, User } = require ('../../models');
 const { getIO } =require ('../../websocket/socketServer');
+
+
+const getChatroomIncludes = () => {
+  return [
+    {
+      model: User,
+      as: 'Customer', // Must match your association alias
+      attributes: ['id', 'username', 'profilePicture'],
+      required: true,
+    },
+    {
+      model: User,
+      as: 'Provider', // Must match your association alias
+      attributes: ['id', 'username', 'profilePicture'],
+      required: true,
+    },
+    {
+      model: Job,
+      as: 'Job', // Must match your association alias
+      attributes: [
+        ['jobTitle', 'jobTitle'],
+        ['jobDate', 'jobDate'], 
+        ['fee', 'fee'],
+        ['location', 'jobLocation'],
+        ['jobDescription', 'jobDescription'],
+        ['jobStatus', 'jobStatus'],
+      ],
+      required: false, // Job is optional (can be null for general chats)
+    }
+  ];
+};
+
+// --- Helper function to map the joined data into the Frontend's ExtendedChatroom format ---
+// This is the CRITICAL step to match the frontend structure
+const mapChatroomData = (chatroom) => {
+    if (!chatroom) return null;
+    
+    // Convert Sequelize instance to plain object
+    const data = chatroom.get({ plain: true });
+
+    return {
+        // Core Chatroom Fields
+        ...data,
+        jobId: data.jobId, // Ensure jobId is present
+        
+        // User Context (Provider/Seeker)
+        customerUsername: data.Customer.username,
+        providerUsername: data.Provider.username,
+        customerProfilePicture: data.Customer.profilePicture,
+        providerProfilePicture: data.Provider.profilePicture,
+        
+        // Job Context (from Job model, if it exists)
+        jobTitle: data.Job?.jobTitle || null,
+        jobDate: data.Job?.jobDate || null,
+        jobStatus: data.Job?.jobStatus || null,
+        jobLocation: data.Job?.jobLocation || null,
+        fee: data.Job?.fee || null,
+        description: data.Job?.description || null,
+    };
+};
 
 exports.createChatroom = async (req, res) => {
   try {
@@ -17,10 +77,13 @@ exports.createChatroom = async (req, res) => {
       customerId,
       providerId,
     });
+    chatroom = await Chatroom.findByPk(chatroom.id, { include: getChatroomIncludes() });
+    
+    const mappedChatroom = mapChatroomData(chatroom);
+    
+    getIO().emit('chatroomCreated', mappedChatroom);
 
-    getIO().emit('chatroomCreated', chatroom);
-
-    res.status(201).json(chatroom);
+    res.status(201).json(mappedChatroom);
   } catch (err) {
     console.error('Error creating chatroom:', err);
     res.status(500).json({ message: 'Internal Server Error', error: err.message });
@@ -36,11 +99,13 @@ exports.getChatroomsForProvider = async (req, res) => {
 
     const chatrooms = await Chatroom.findAll({
       where: { providerId: providerId },
+      include: getChatroomIncludes(),
       order: [['lastActivityAt', 'DESC']],
     });
 
     if (chatrooms && chatrooms.length > 0) {
-      res.json(chatrooms);
+      const mappedChatrooms = chatrooms.map(mapChatroomData);
+      res.json(mappedChatrooms);
     } else {
       res.status(404).json({ message: 'No chatrooms found for this provider' });
     }
@@ -59,11 +124,13 @@ exports.getChatroomsForCustomer = async (req, res) => {
 
     const chatrooms = await Chatroom.findAll({
       where: { customerId: customerId },
+      include: getChatroomIncludes(),
       order: [['lastActivityAt', 'DESC']],
     });
 
     if (chatrooms && chatrooms.length > 0) {
-      res.json(chatrooms);
+      const mappedChatrooms = chatrooms.map(mapChatroomData);
+      res.json(mappedChatrooms);
     } else {
       res.status(404).json({ message: 'No chatrooms found for this customer' });
     }
@@ -126,9 +193,11 @@ exports.getChatroomById = async (req, res) => {
     if (!chatroomId) {
       return res.status(400).json({ message: 'Chatroom ID is required' });
     }
-    const chatroom = await Chatroom.findByPk(chatroomId);
+    const chatroom = await Chatroom.findByPk(chatroomId, {
+      include: getChatroomIncludes(),
+    });
     if (chatroom) {
-      res.json(chatroom);
+      res.json(mapChatroomData(chatroom));
     } else {
       res.status(404).json({ message: 'Chatroom not found' });
     }

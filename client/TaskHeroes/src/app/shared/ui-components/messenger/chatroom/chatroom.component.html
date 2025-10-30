@@ -1,17 +1,23 @@
 <div class="chatroom-container">
     <div class="chatroom-main">
         <header class="chat-header">
-            <button class="mobile-menu-toggle">
-                <i class="material-icons" (click)="backToChatList()">arrow_back</i>
+            <button class="mobile-menu-toggle" (click)="backToChatList()">
+                <i class="material-icons">arrow_back</i>
             </button>
-            <h1 class="chat-title">{{ chatroom()?.name || 'Loading Chat...' }}</h1>
+            <div class="chat-title-group">
+                <h1 class="chat-title">{{ chatPartnerName() }}</h1>
+                <p class="chat-subtitle">
+                    {{ jobDetails().jobDate ? (jobDetails().jobDate | date:'mediumDate') : 'Date TBD' }} | {{ jobDetails().serviceName }}
+                </p>
+            </div>
             <div class="chat-options">
-                <p>details</p>
+                <p class="detail-link" (click)="openDetailsModal()">details</p>
             </div>
         </header>
 
-        <main class="message-area" #messageContainer> <div *ngIf="isLoading()">
-                <p>Loading messages...</p>
+        <main class="message-area" #messageContainer>
+            <div *ngIf="isLoading()">
+                <p class="loading-message">Loading messages...</p>
             </div>
             <div *ngIf="error()" class="error-message">
                 <p>{{ error() }}</p>
@@ -21,11 +27,12 @@
             <ng-container *ngFor="let message of messages(); trackBy: messageTrackBy">
                 <th-message
                 [message]="message"
-                [currentUserId]="currentUser()? currentUser()!.id! : null">
+                [currentUserId]="currentUser()? currentUser()!.id! : null"
+                [chatPartnerAvatarUrl]="chatPartnerAvatarUrl()" 
                 ></th-message>
             </ng-container>
 
-            </main>
+        </main>
 
         <footer class="message-input-area">
             <div class="input-actions">
@@ -42,5 +49,27 @@
                 <i class="material-icons">send</i>
             </button>
         </footer>
+    </div>
+
+    <div class="modal-overlay" *ngIf="showDetailsModal()">
+        <div class="modal-content">
+            <button class="close-btn" (click)="closeDetailsModal()">&times;</button>
+            <h3>Job Details & Booking Info</h3>
+            <hr>
+            <p><strong>Service:</strong> {{ jobDetails().serviceName }}</p>
+            <p><strong>Date:</strong> {{ jobDetails().jobDate | date:'fullDate' }}</p>
+            <!-- <p><strong>Status:</strong> {{ jobDetails().status || chatroom()?.jobStatus || 'Awaiting Confirmation' }}</p> -->
+            <p><strong>Location:</strong> {{ jobDetails().location || chatroom()?.jobLocation || 'Not provided' }}</p>
+            
+            <p>
+                <strong>Fee Quoted:</strong> 
+                {{ jobDetails().fee ? (jobDetails().fee | currency:'USD':'symbol':'1.0-2') : 'TBD' }}
+            </p>
+            
+            <div class="modal-notes">
+                <h4>Job Description:</h4>
+                <p>{{ jobDetails().description || 'No detailed description available.' }}</p>
+            </div>
+        </div>
     </div>
 </div>

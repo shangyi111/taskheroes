@@ -8,6 +8,7 @@ const servicesRoutes = require('./routes/services');
 const reviewsRoutes = require('./routes/reviews');
 const jobsRoutes = require('./routes/jobs');
 const orderRoutes = require('./routes/order');
+const userRoutes = require('./routes/users');
 const messageRoutes = require('./message-server/routes/message');
 const chatroomRoutes = require('./message-server/routes/chatroom');
 const calendarRoutes = require('./routes/calendar');
@@ -31,6 +32,7 @@ app.use('/api/message', messageRoutes);
 app.use('/api/chatroom',chatroomRoutes);
 app.use('/api/calendar', calendarRoutes);
 app.use('/api/map',mapRoutes);
+app.use('/api/user',userRoutes);
 // Example protected route
 app.get('/api/protected', authenticateToken, (req, res) => {
   res.json({ message: 'Authenticated access granted', user: req.user });

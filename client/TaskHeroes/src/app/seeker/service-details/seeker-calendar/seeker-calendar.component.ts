@@ -4,7 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { CalendarDataService } from 'src/app/services/calendar-data.service';
-import { ProviderCalendar } from 'src/app/shared/models/calendar';
+import { CalendarAvailability, ProviderCalendar } from 'src/app/shared/models/calendar';
+import { Job } from 'src/app/shared/models/job';
+import { User } from 'src/app/shared/models/user';
+import { Service } from 'src/app/shared/models/service';
 
 // Define constants outside the class for clarity
 const TIME_FEE_THRESHOLD_MINUTES = 30; // 30 minutes one-way threshold
@@ -22,10 +25,8 @@ export class SeekerCalendarComponent implements OnInit, OnDestroy {
   daysInMonth: any[] = [];
   
   // Input from host component (ServiceDetailsComponent)
-  @Input() serviceId!: string;
-  @Input() providerId!: string;
-  @Input() serviceName!: string;
-  @Input() providerAddress: string = ''; 
+  @Input() service!: Service;
+  @Input() user!: User;
 
   // Data fetched from backend
   basePrice: number = 0;
@@ -39,7 +40,8 @@ export class SeekerCalendarComponent implements OnInit, OnDestroy {
   // State for booking form inputs
   seekerJobLocation: string | null = null;
   selectedStartTime: string | null = '9:00 AM'; // Default start time
-  selectedDurationHours: number = 2; // Default duration
+  selectedDurationHours: number = 2; 
+  seekerJobDescription: string = '';
   
   // Calculation properties
   calculatedDrivingTimeMinutes: number = 0; 
@@ -70,7 +72,7 @@ export class SeekerCalendarComponent implements OnInit, OnDestroy {
     const month = this.currentMonth.getMonth() + 1;
     const formattedMonth = `${year}-${month.toString().padStart(2, '0')}`;
 
-    this.calendarSubscription = this.calendarDataService.getCalendarData(this.providerId, this.serviceId, formattedMonth)
+    this.calendarSubscription = this.calendarDataService.getCalendarData(this.service.userId, this.service.id!, formattedMonth)
       .subscribe({
         next: (data: ProviderCalendar) => {
           this.basePrice = data.basePrice;
@@ -254,13 +256,13 @@ generateCalendar(): void {
 
   // Calls backend service to get travel time
   getDrivingTimeFromBackend(): void {
-    if (!this.providerAddress || !this.seekerJobLocation || !this.selectedDateData) {
+    if (!this.service.businessAddress || !this.seekerJobLocation || !this.selectedDateData) {
         this.calculatedDrivingTimeMinutes = 0;
         this.calculateFee();
         return;
     }
 
-    this.calendarSubscription = this.calendarDataService.getDrivingTime(this.providerAddress, this.seekerJobLocation)
+    this.calendarSubscription = this.calendarDataService.getDrivingTime(this.service.businessAddress, this.seekerJobLocation)
         .subscribe({
             next: (data) => {
                 this.calculatedDrivingTimeMinutes = data.roundTripTimeMinutes; 
@@ -304,20 +306,24 @@ generateCalendar(): void {
   }
   // Final action to emit booking request
   sendBookingRequestFromModal(): void {
-    if (!this.selectedDateData || !this.selectedStartTime || this.selectedDurationHours < 1 || !this.seekerJobLocation || this.calculatedJobFee === 0) {
+    const isDescriptionMissing = !this.seekerJobDescription || this.seekerJobDescription.trim().length === 0;
+    if (!this.selectedDateData || !this.selectedStartTime || this.selectedDurationHours < 1 
+        || !this.seekerJobLocation || this.calculatedJobFee === 0 ||isDescriptionMissing) {
       alert("Please ensure all booking details are filled and the fee is calculated.");
       return;
     }
 
-    const requestData = {
-      serviceId: this.serviceId,
-      providerId: this.providerId,
+    const requestData :Job = {
+      serviceId: this.service.id,
+      performerId: this.service.userId,
       jobDate: this.selectedDateData.date,
-      startTime: this.selectedStartTime,
-      durationHours: this.selectedDurationHours,
-      jobLocation: this.seekerJobLocation, 
-      fee: this.calculatedJobFee, 
-      // seekerId (customerId) will be added by a job creation service
+      location: this.seekerJobLocation,
+      fee: this.calculatedJobFee.toFixed(2),
+      hourlyRate: Number(this.selectedDateData.availability.customPrice),
+      category:this.service.category,
+      jobTitle:this.service.businessName,
+      customerId:this.user.id,
+      description:this.seekerJobDescription.trim(),
     };
     
     this.bookRequest.emit(requestData);

@@ -6,6 +6,9 @@ const authMiddleware = require('../auth/authMiddleware');
 // Get all jobs
 router.get('/', jobsController.getAllJobs);
 
+// Get a job by job id
+router.get('/:id', jobsController.getJobById);
+
 // Get a specific job by provider userId
 router.get('/provider/:id', jobsController.getJobsByPerformerId);
 

@@ -31,10 +31,8 @@
           <mat-card-title class="booking-title">Select Availability & Book</mat-card-title>
           
           <seeker-calendar
-            [serviceId]="serviceId"
-            [providerId]="providerId"
-            [serviceName]="service.businessName!"
-            [providerAddress]="service.businessAddress!"
+            [service]="service"
+            [user]="user!"
             (bookRequest)="handleBookingSubmission($event)">
           </seeker-calendar>
         </div>

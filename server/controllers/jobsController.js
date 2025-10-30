@@ -5,6 +5,22 @@ const {
   sendJobDeleted,
 } = require('../websocket/handlers/jobHandler');
 
+
+exports.getJobById = async (req, res) => {
+  try {
+    const jobId = req.params.id;
+    const job = await Job.findByPk(jobId);
+    
+    if (job) {
+      res.json(job);
+    } else {
+      res.status(404).json({ message: 'Job not found' });
+    }
+  } catch (error) {
+    console.error("Error retrieving job by ID:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
 // Get all jobs
 exports.getAllJobs = async (req, res) => {
   try {
@@ -19,6 +35,7 @@ exports.getAllJobs = async (req, res) => {
 // Get a specific job by ID
 exports.getJobsByPerformerId = async (req, res) => {
   try {
+    console.log("req,res", req.params)
     const job = await Job.findAll({where:
                                     {performerId:req.params.id}
                                   });

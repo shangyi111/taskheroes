@@ -7,12 +7,23 @@
           <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-datepicker #picker></mat-datepicker>
         </mat-form-field>
-      } @else {
-        <mat-form-field>
+      }@else if (field.type === 'address') {
+        <mat-form-field appearance="outline">
           <mat-label>{{ field.label }}</mat-label>
-          <input matInput [type]="field.type" [formControlName]="field.name" 
-           [appAddressAutocomplete]="field.type === 'address' ? true : null" 
-           (addressSelected)="handleAddressOutput(field.name, $event)"/>
+          <input matInput 
+           [type]="field.type" 
+           [formControlName]="field.name" 
+           appAddressAutocomplete 
+           (addressSelected)="handleAddressOutput(field.name, $event)"
+          />
+        </mat-form-field>
+      }@else {
+        <mat-form-field appearance="outline">
+          <mat-label>{{ field.label }}</mat-label>
+          <input matInput 
+           [type]="field.type" 
+           [formControlName]="field.name"
+          />
         </mat-form-field>
       }
     }

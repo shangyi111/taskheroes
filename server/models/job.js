@@ -56,8 +56,11 @@ const Job = sequelize.define('Job', {
   zipCode:{
     type:DataTypes.INTEGER,
     allowNull:true,
-  }
-  // Add any other relevant job fields here
+  },
+  location: {//jobLocation
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 });
 
 module.exports = Job;
