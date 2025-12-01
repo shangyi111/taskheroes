@@ -72,6 +72,35 @@ mat-card-subtitle {
   font-size: 0.9em;
 }
 
+.category-chip-container {
+   margin-top: 5px; 
+}
+
+.modern-display-tag {
+     /* 1. Appearance: Flat and Minimal */
+    border: solid 1px lightgray ;
+    box-shadow: none ;
+    background-color: #f0f0f0 ; /* Very light gray for neutrality */
+    
+    /* 2. Text and Sizing */
+    color: var(--text-secondary, #555); /* Gray text to feel less like a button */
+    font-size: 0.8em; /* Slightly smaller for a label feel */
+    font-weight: 500;
+    line-height: 24px;
+    height: 28px; 
+    border-radius: 4px; /* Soft corners */
+    
+    /* 3. CRUCIAL: Non-Interactive Cues */
+    cursor: default;
+    padding: 0 10px;
+}
+
+.modern-display-tag :hover,
+.modern-display-tag :focus {
+    background-color: default;
+    outline: none;
+}
+
 .business-info {
   flex-grow: 1; /* Take remaining width */
   width: 65%; /* Set the width of the right side */
@@ -89,3 +118,21 @@ mat-card-content button {
     bottom: 20px;
     right: 20px;
 }
+
+.service-card mat-card-content p.service-rating {
+    /* Override the default paragraph margin for the rating line */
+    margin-top: 10px;
+    margin-bottom: 10px;
+    display: flex; /* Aligns the icon and text perfectly */
+    align-items: center;
+    font-size: 1em;
+}
+
+.service-card .service-rating mat-icon {
+    color: orange; /* Highlight the star icon */
+    font-size: 1.1em;
+    width: auto;
+    height: auto;
+    margin-right: 4px;
+    line-height: 1; /* Aligns vertically with the text */
+} 

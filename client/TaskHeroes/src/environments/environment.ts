@@ -5,6 +5,5 @@ export const environment = {
     jwtStorageKey: 'myapp_jwt', // Key to store JWT token in localStorage/sessionStorage
     appName: 'TaskHeroes', // For branding or meta info
     googleMapsApiKey:'AIzaSyCXVK-Zf_-i71AaS0yOf6byA1Jxt_0C-Uk',
-
   };
   

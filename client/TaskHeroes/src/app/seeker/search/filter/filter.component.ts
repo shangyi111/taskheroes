@@ -7,6 +7,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 
 interface Category {
   value: string;
@@ -23,15 +24,18 @@ interface Category {
     MatSelectModule,
     ReactiveFormsModule,
     MatButtonModule,
-    MatCardModule],
+    MatCardModule,
+    MatIconModule
+  ],
 })
 export class FilterComponent {
   private fb = inject(FormBuilder);
+  showAdvanced: boolean = false;
   filterForm: FormGroup = this.fb.group({
     category: [[]], // Use an array for multi-select categories
     zipcode: [''],
     radius: [null],
-    query: [''], // For keyword search (jobTitle, description)
+    query: [''], 
     minHourlyRate: [null],
     maxHourlyRate: [null],
     sortBy: [''],
@@ -61,6 +65,9 @@ export class FilterComponent {
 
   @Output() filtersChanged = new EventEmitter<any>();
 
+  toggleAdvanced(): void {
+    this.showAdvanced = !this.showAdvanced;
+  }
   resetFilters(): void {
     this.filterForm.reset({ category: [], zipcode: '', radius: null, query: '', minHourlyRate: null, maxHourlyRate: null, sortBy: '', sortOrder: 'asc' });
   }

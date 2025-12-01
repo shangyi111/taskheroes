@@ -5,4 +5,5 @@ export interface Review {
     rating?:number;
     review?:string;
     serviceId?:string,
+    addedDate?:string,
   }

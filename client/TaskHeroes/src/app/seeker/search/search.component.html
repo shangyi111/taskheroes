@@ -9,15 +9,26 @@
         <img class="profile-picture" [src]="service.profilePicture" alt="profile pic for {{ service.businessName }}">
         <div class="mat-card-header-text">
           <mat-card-title>{{ service.businessName }}</mat-card-title>
-          <mat-card-subtitle>Category: {{ service.category }}</mat-card-subtitle>
         </div>
       </div>
       <div class="business-info">
         <mat-card-content>
           <p>Description: {{ service.description }}</p>
           <p>Provider address: {{ service.businessAddress }}</p>
-          <p>Provider phone: {{ service.phoneNumber }}</p>
-          <p>Provider hourly-rate: {{ service.hourlyRate }}</p>
+          <p class="service-rating">
+            @if (service.averageRating !== null) { 
+              <mat-icon color="accent" style="vertical-align: middle;">star</mat-icon>
+              <strong>{{ service.averageRating }}</strong> / 5 
+              ({{ service.reviewCount }} reviews)
+            } @else {
+              <span class="no-reviews">No reviews yet.</span>
+            }
+          </p>
+          <div class="category-chip-container">
+            <mat-basic-chip class="modern-display-tag">
+                {{ service.category }}
+            </mat-basic-chip>
+          </div>
         </mat-card-content>
       </div>
     </mat-card>

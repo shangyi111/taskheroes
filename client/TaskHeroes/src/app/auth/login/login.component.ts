@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from 'src/app/auth/auth.service'; 
-import {User} from 'src/app/shared/models/user';
+import { User } from 'src/app/shared/models/user';
 import { UserDataService } from 'src/app/services/user_data.service';
 
 @Component({
@@ -10,6 +10,7 @@ import { UserDataService } from 'src/app/services/user_data.service';
   standalone: true,
   imports: [FormsModule, RouterLink],
   templateUrl: './login.component.html', 
+  styleUrl:'./login.component.scss',
 })
 export class LoginComponent {
   email = '';

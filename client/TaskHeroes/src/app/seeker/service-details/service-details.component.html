@@ -1,5 +1,10 @@
 @if (service$ | async; as service) {
   <div class="service-details-container">
+    <button mat-button class="back-to-search-link" (click)="goBackToSearch()">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Search Results
+    </button>
+    
     <mat-card class="combined-booking-card">
       
       <div class="card-content-wrapper">
@@ -8,7 +13,21 @@
           <mat-card-header>
             <img mat-card-avatar [src]="service.profilePicture" alt="Profile Picture">
             <mat-card-title class="business-name">{{ service.businessName }}</mat-card-title>
-            <mat-card-subtitle>Category: {{ service.category }}</mat-card-subtitle>
+            <mat-card-subtitle>
+              <div class="category-chip-container">
+                <mat-basic-chip class="modern-display-tag"> 
+                    {{ service.category }}
+                </mat-basic-chip>
+              </div>
+            </mat-card-subtitle>
+
+            @if (averageRating$ | async; as avg) {
+                <div class="rating-badge-container">
+                  <mat-icon class="rating-star">star</mat-icon>
+                  <span class="rating-score">{{ avg | number:'1.1-1' }}</span>
+                  <span class="review-count">({{ reviewCount$ | async }})</span>
+                </div>
+              }
           </mat-card-header>
           
           <mat-card-content>
@@ -39,6 +58,8 @@
 
       </div>
     </mat-card>
+
+    <app-service-reviews [serviceId]="service.id"></app-service-reviews>
   </div>
 } @else {
   <div class="loading-state">

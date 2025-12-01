@@ -1,5 +1,3 @@
-/* src/app/features/service-details/service-details.component.scss */
-
 .service-details-container {
   /* Keep container centered and spacious */
   padding: 30px;
@@ -35,6 +33,7 @@
   padding-bottom: 10px;
   border-bottom: 2px solid var(--card-border, #eee);
   font-size: 1.4rem;
+  font-family: "Helvetica Neue", Arial, sans-serif;
 }
 
 /* --- Service Info Styles (Retained/Simplified) --- */
@@ -46,6 +45,37 @@
   font-size: 1.5rem;
   font-weight: bold;
   color: var(--primary-blue, #007bff);
+  font-family: "Helvetica Neue", Arial, sans-serif;
+}
+
+.category-chip-container {
+    margin-top: 5px; 
+}
+
+.modern-display-tag {
+    /* 1. Appearance: Flat and Minimal */
+    border: solid 1px lightgray ;
+    box-shadow: none ;
+    background-color: #f0f0f0 ; /* Very light gray for neutrality */
+    
+    /* 2. Text and Sizing */
+    color: var(--text-secondary, #555); /* Gray text to feel less like a button */
+    font-size: 0.8em; /* Slightly smaller for a label feel */
+    font-weight: 500;
+    line-height: 24px;
+    height: 28px; 
+    border-radius: 4px; /* Soft corners */
+    
+    /* 3. CRUCIAL: Non-Interactive Cues */
+    cursor: default;
+    padding: 0 10px;
+}
+
+/* 4. Remove all interactive states (hover/focus) */
+.modern-display-tag:hover,
+.modern-display-tag:focus {
+    background-color: #f0f0f0;
+    outline: none;
 }
 
 .pricing-info, .contact-info p {
@@ -57,6 +87,58 @@
     margin-right: 8px;
     color: var(--text-secondary, #555);
   }
+}
+
+.rating-badge-container {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background-color: #f7f7f7; /* Light background for badge */
+    border-radius: 4px;
+    padding: 2px 8px;
+    margin-left: 10px; /* Space from business name */
+    height: 24px;
+}
+
+.rating-badge-container .rating-star {
+    font-size: 18px;
+    color: orange;
+}
+
+.rating-badge-container .rating-score {
+    font-weight: 700;
+    font-size: 0.9em;
+}
+
+.rating-badge-container .review-count {
+    color: var(--text-secondary);
+    font-size: 0.8em;
+}
+
+.back-to-search-link {
+    margin-bottom: 10px; /* Space above the main card */
+    text-transform: none; /* Keep text clean */
+    font-family: "Helvetica Neue", Arial, sans-serif;
+}
+
+.back-to-search-link.mat-mdc-button {
+    /* Set the desired text color with high specificity */
+    color: var(--text-secondary, #555); 
+    
+    /* Ensure no background color is visible (it should be transparent) */
+    background-color: transparent;
+}
+
+/* Ensure the icon color also inherits the text color */
+.back-to-search-link.mat-mdc-button mat-icon {
+    color: inherit;
+}
+
+.back-to-search-link mat-icon {
+    margin-right: 5px;
+    font-size: 20px;
+    height: 20px;
+    width: 20px;
 }
 
 /* Responsive adjustment for mobile screens */
@@ -72,6 +154,6 @@
   }
   .calendar-booking-column {
     flex: none;
-    width: 100%;
+    width: 90%;
   }
 }

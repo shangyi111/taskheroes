@@ -1,0 +1,101 @@
+.login-container {
+  max-width: 400px;
+  margin: 50px auto; 
+  padding: 40px; 
+  text-align: center;
+  color: var(--text-primary); 
+}
+
+/* --- Typography and Header --- */
+.login-container h1 {
+  /* Use your defined heading font size */
+  font-size: var(--heading-font-size);
+  font-weight: 300; 
+  /* Use your defined welcome margin */
+  margin-bottom: var(--welcome-margin-bottom);
+  letter-spacing: -0.5px; 
+}
+
+/* --- Form and Inputs --- */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  text-align: center;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 15px 10px;
+  /* Use a consistent border color */
+  border: 1px solid var(--card-border); 
+  border-radius: 4px;
+  transition: var(--transition-default); /* Use your general transition */
+  font-size: var(--text-font-size); /* Use a standard text size for input */
+}
+
+.input-group input:focus {
+  /* Use your primary accent color for focus state */
+  border-color: var(--primary-blue); 
+  outline: none;
+  /* Subtle glow using the primary accent */
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1); 
+}
+
+/* --- Submit Button --- */
+.submit-button {
+  padding: 15px;
+  /* Using a dark color for the button for high contrast */
+  background-color: var(--text-primary); 
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: var(--text-font-size);
+  font-weight: 500;
+  margin-top: 10px;
+  transition: background-color 0.2s;
+}
+
+.submit-button:hover {
+  /* Darker shade of the button color, or perhaps black */
+  background-color: #000; 
+}
+
+/* --- Error Message --- */
+.error-message {
+  /* Standard red for errors (assuming you'd define one like --error-red) */
+  color: #dc3545; 
+  margin-top: 0;
+  font-size: var(--description-font-size);
+  text-align: left;
+}
+
+/* --- Signup Link --- */
+.signup-link {
+  margin-top: 30px;
+  font-size: var(--description-font-size);
+}
+
+.signup-link a {
+  /* Use your primary accent color for links */
+  color: var(--primary-blue);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.signup-link a:hover {
+  text-decoration: underline;
+}
+
+/* Helper class for accessible but visually hidden elements */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+} 

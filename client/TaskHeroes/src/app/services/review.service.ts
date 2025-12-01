@@ -23,12 +23,8 @@ export class ReviewService {
     return this.http.get<Review>(`${this.API_URL}/${id}`);
   }
 
-  getAllReviewsByServiceId(serviceId:string):Observable<Review[]>{
-    return this.getAllReviews().pipe(
-      map((reviews: Review[]) => {
-        return reviews.filter((service: Review) => service.id === serviceId);
-      })
-    );
+  getAllReviewsByServiceId(serviceId: string): Observable<Review[]> {
+    return this.http.get<Review[]>(`${this.API_URL}/service/${serviceId}`);
   }
 
   createReview(serviceData: Review): Observable<Review> {

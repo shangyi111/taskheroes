@@ -1,22 +1,58 @@
-:host {
-    display: block;
+.search-bar-container {
+    padding: 20px 0;
     width: 100%;
-  }
-  
-  .filter-container {
-    display: flex; /* Use flexbox for horizontal arrangement */
-    flex-wrap: wrap; /* Allow items to wrap to the next line */
-    gap: 8px; /* Small gap between items */
-    padding: 16px;
-    margin-bottom: 20px;
-    border: 1px solid var(--card-border);
-    border-radius: 4px;
-    background-color: var(--dashboard-bg);
-    box-shadow: var(--card-shadow);
-  }
-  
-  mat-form-field {
-    flex: 1 1 auto; /* Allow items to grow and shrink, with a basis of 'auto' */
-    min-width: 150px; /* Reasonable minimum width */
-    max-width: 300px; /* Reasonable maximum width */
-  }
+    max-width: 600px; /* Use a reasonable max width */
+    margin: 0 auto;
+    font-family: var(--global-font-family);
+}
+
+/* --- Primary Row (Always Visible) --- */
+.primary-search-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 10px;
+}
+
+/* 1. Keyword Field (Should take up the most space) */
+.primary-search-field {
+    flex-grow: 1; 
+    min-width: 250px;
+}
+
+.primary-search-field ::ng-deep .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+    background-color: unset;
+}
+
+.primary-search-field .mat-mdc-text-field-wrapper {
+    /* Remove borders for a cleaner look */
+    border: none !important;
+    background-color: transparent !important;
+}
+
+/* 3. Actions */
+.primary-actions {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.search-button {
+    height: 48px; /* Match the height of the fields */
+    font-weight: 600;
+}
+
+/* --- Advanced Filters (Hidden Panel) --- */
+.advanced-filters-row {
+    padding: 10px;
+    /* Use CSS Grid for the hidden panel for perfect alignment */
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+    gap: 10px; 
+    border-radius: 8px;
+    align-items: center;
+}
+
+.advanced-filters-row .small-field {
+    width: 100%;
+}

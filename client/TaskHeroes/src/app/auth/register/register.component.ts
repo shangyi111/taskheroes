@@ -1,14 +1,15 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import {User} from 'src/app/shared/models/user';
+import { User } from 'src/app/shared/models/user';
 import { AuthService } from 'src/app/auth/auth.service';
 
 @Component({
   selector: 'app-register',
   standalone: true,
   imports: [FormsModule, RouterLink],
-  templateUrl: './register.component.html', // Pointing to the HTML file in the same directory
+  templateUrl: './register.component.html',
+  styleUrl: './register.component.scss',
 })
 export class RegistrationComponent {
   email = '';
