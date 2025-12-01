@@ -9,6 +9,9 @@ router.get('/', reviewsController.getAllReviews);
 // Get a specific review by ID
 router.get('/:id', reviewsController.getReviewById);
 
+// Get reviews by service Id
+router.get('/service/:serviceId', reviewsController.getReviewsByServiceId);
+
 // Create a new review (protected)
 router.post('/', authMiddleware, reviewsController.createReview);
 

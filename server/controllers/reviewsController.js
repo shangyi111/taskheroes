@@ -82,3 +82,34 @@ exports.deleteReview = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Get all reviews for a specific Service ID
+exports.getReviewsByServiceId = async (req, res) => {
+  try {
+    const { serviceId } = req.params;
+
+    // 1. Validate the input ID
+    if (!serviceId || isNaN(parseInt(serviceId))) {
+      return res.status(400).json({ message: 'Invalid service ID provided.' });
+    }
+
+    // 2. Find all reviews matching the serviceId column
+    const reviews = await Review.findAll({
+      where: {
+        serviceId: serviceId
+      },
+      order: [['addedDate', 'DESC']], // Order by date (newest first)
+    });
+
+    // 3. Return the results
+    if (reviews.length > 0) {
+      res.json(reviews);
+    } else {
+      // Return an empty array and 200 status if no reviews are found
+      res.json([]); 
+    }
+  } catch (error) {
+    console.log("Error inside getReviewsByServiceId:", error);
+    res.status(500).json({ message: 'Failed to retrieve reviews for the service.' });
+  }
+};

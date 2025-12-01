@@ -21,6 +21,7 @@ exports.getJobById = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 // Get all jobs
 exports.getAllJobs = async (req, res) => {
   try {
