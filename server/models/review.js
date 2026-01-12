@@ -41,8 +41,8 @@ const Review = sequelize.define('Review', {
     type: DataTypes.INTEGER,
     allowNull: true,
     validate: {
-      min: 1, // Minimum rating
-      max: 5, // Maximum rating (adjust as needed)
+      min: 1,
+      max: 5,
     },
   },
   review: {

@@ -230,7 +230,7 @@ export class ChatroomComponent implements OnInit, OnDestroy {
 
     this.chatroomMessageSubscription = this.chatroomService.onNewMessage().pipe(
       tap(message => console.log('Received ANY message from socket:', message)),
-      filter(message => message.chatroomId === this.chatroomId()),
+      filter(message => message.chatroomId === chatroomId),
       tap(message => {
         console.log('Received new real-time message:', message);
         this.messages.update(msgs => {

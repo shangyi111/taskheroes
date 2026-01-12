@@ -59,7 +59,7 @@
 
 .submit-button:hover {
   /* Darker shade of the button color, or perhaps black */
-  background-color: #000; 
+  background-color: var(--text-secondary); 
 }
 
 /* --- Error Message --- */

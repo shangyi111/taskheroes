@@ -1,4 +1,4 @@
-const { Job } = require('../models');
+const { Job } = require('../models/job');
 const {
   sendJobUpdated,
   sendJobCreated,

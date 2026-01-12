@@ -1,68 +1,75 @@
 @if (service$ | async; as service) {
-  <div class="service-details-container">
-    <button mat-button class="back-to-search-link" (click)="goBackToSearch()">
-      <mat-icon>arrow_back</mat-icon>
-      Back to Search Results
-    </button>
-    
-    <mat-card class="combined-booking-card">
-      
-      <div class="card-content-wrapper">
-        
-        <div class="service-info-column">
-          <mat-card-header>
-            <img mat-card-avatar [src]="service.profilePicture" alt="Profile Picture">
-            <mat-card-title class="business-name">{{ service.businessName }}</mat-card-title>
-            <mat-card-subtitle>
-              <div class="category-chip-container">
-                <mat-basic-chip class="modern-display-tag"> 
-                    {{ service.category }}
-                </mat-basic-chip>
-              </div>
-            </mat-card-subtitle>
+<div class="service-details-container">
+  <button mat-button class="back-to-search-link" (click)="goBackToSearch()">
+    <mat-icon>arrow_back</mat-icon>
+    Back to Search Results
+  </button>
 
-            @if (averageRating$ | async; as avg) {
-                <div class="rating-badge-container">
-                  <mat-icon class="rating-star">star</mat-icon>
-                  <span class="rating-score">{{ avg | number:'1.1-1' }}</span>
-                  <span class="review-count">({{ reviewCount$ | async }})</span>
+  <mat-card class="combined-booking-card">
+    <div class="card-content-wrapper">
+      
+      <div class="service-info-column">
+        <div class="header-section">
+          <img class="business-avatar" [src]="service.profilePicture" alt="Profile">
+          <div class="header-text">
+            <h1 class="business-name">{{ service.businessName }}</h1>
+            <div class="badge-row">
+              <span class="category-tag">{{ service.category }}</span>
+              @if (averageRating$ | async; as avg) {
+                <div class="mini-rating">
+                  <mat-icon>star</mat-icon>
+                  <strong>{{ avg | number:'1.1-1' }}</strong>
+                  <span class="total-count">({{ reviewCount$ | async }})</span>
                 </div>
               }
-          </mat-card-header>
-          
-          <mat-card-content>
-            <h3>About the Service</h3>
-            <p>{{ service.description }}</p>
-            
-            <div class="pricing-info">
-              <mat-icon>attach_money</mat-icon>
-              <span>Base Hourly Rate: **{{ service.hourlyRate | currency:'USD':'symbol':'1.0-2' }}**</span>
             </div>
-            
-            <div class="contact-info">
-              <p><mat-icon>location_on</mat-icon> Address: {{ service.businessAddress }}</p>
-              <p><mat-icon>phone</mat-icon> Phone: {{ service.phoneNumber }}</p>
-            </div>
-          </mat-card-content>
+          </div>
         </div>
 
-        <div class="calendar-booking-column">
-          <mat-card-title class="booking-title">Select Availability & Book</mat-card-title>
-          
+        <div class="content-block">
+          <h3>About the Service</h3>
+          <p class="description">{{ service.description }}</p>
+        </div>
+
+        <div class="content-block price-highlight">
+          <div class="price-pill">
+            <mat-icon>payments</mat-icon>
+            <div class="price-details">
+              <span class="label">Base Hourly Rate</span>
+              <span class="amount">{{ service.hourlyRate | currency }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-block contact-section">
+          <div class="contact-row">
+            <mat-icon>place</mat-icon>
+            <span>{{ service.businessAddress }}</span>
+          </div>
+          <div class="contact-row">
+            <mat-icon>call</mat-icon>
+            <span>{{ service.phoneNumber }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="calendar-booking-column">
+        <div class="booking-header">
+          <h2>Select Availability & Book</h2>
+          <p>Choose a date to see available time slots</p>
+        </div>
+        <div class="calendar-card">
           <seeker-calendar
             [service]="service"
             [user]="user!"
             (bookRequest)="handleBookingSubmission($event)">
           </seeker-calendar>
         </div>
-
       </div>
-    </mat-card>
 
-    <app-service-reviews [serviceId]="service.id"></app-service-reviews>
-  </div>
-} @else {
-  <div class="loading-state">
-    <p>Loading service details...</p>
-  </div>
+    </div>
+  </mat-card>
+
+  <app-service-reviews [serviceId]="service.id"></app-service-reviews>
+</div>
 }

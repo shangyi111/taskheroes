@@ -52,7 +52,7 @@
           <provider-calendar 
             [serviceId]="service.id!" 
             [providerId]="service.userId!" 
-            [basePrice]="service.hourlyRate!"
+            [basePrice]="service.hourlyRate || 150"
           class="provider-calendar"></provider-calendar>
         </div>
       }

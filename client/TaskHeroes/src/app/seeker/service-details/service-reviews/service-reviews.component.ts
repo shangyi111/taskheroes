@@ -1,12 +1,16 @@
 import { Component, Input, OnInit, inject, numberAttribute } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common'; // Include DatePipe for HTML template
 import { Observable, of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
+import { forkJoin } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
 import { ReviewService } from 'src/app/services/review.service';
+import { UserDataService } from 'src/app/services/user_data.service';
 import { Review } from 'src/app/shared/models/review';
 import { map, shareReplay } from 'rxjs/operators';
 import { MatCardModule } from '@angular/material/card';
 
+export type EnrichedReview = Review & { reviewerUsername?: string };
 @Component({
   selector: 'app-service-reviews',
   standalone: true,  
@@ -19,7 +23,8 @@ export class ServiceReviewsComponent implements OnInit {
   @Input({ required: true, transform: numberAttribute }) serviceId!: string;
   
   private reviewService = inject(ReviewService);
-  reviews$: Observable<Review[]> = of([]);
+  private userDataService = inject(UserDataService);
+  reviews$: Observable<EnrichedReview[]> = of([]);
   averageRating$: Observable<number> = of(0);
 
   ngOnInit(): void {
@@ -31,7 +36,22 @@ export class ServiceReviewsComponent implements OnInit {
       
       this.reviews$ = reviewsData$.pipe(
         // Ensure only reviews with text content are shown in the list
-        map(reviews => reviews.filter(r => r.review && r.review.length > 0)) 
+        map(reviews => reviews.filter(r => r.review && r.review.length > 0)),
+        switchMap(reviews => {
+        if (reviews.length === 0) return of([]);
+
+        // Create an array of Observables (one for each user fetch)
+        const userFetches = reviews.map(review =>
+          this.userDataService.getUserById(review.reviewerId!).pipe(
+            map(user => ({
+              ...review,
+              reviewerUsername: user ? user.username : 'Anonymous User'
+            } as EnrichedReview))
+          )
+        );
+
+        return forkJoin(userFetches);
+      })
       );
 
       this.averageRating$ = reviewsData$.pipe(

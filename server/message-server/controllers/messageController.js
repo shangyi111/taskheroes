@@ -52,6 +52,7 @@ exports.saveMessage = async (req,res) => {
     const messageToSend = {
       // Include all saved message properties (like ID, timestamps)
       ...savedMessage.dataValues,
+      chatroomId: String(savedMessage.chatroomId),
       senderUsername: senderUsername, // Use 'senderUsername' to match frontend interface
       text: decryptedText, // Use 'text' to match frontend interface, contains decrypted content
     };

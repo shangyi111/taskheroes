@@ -1,14 +1,14 @@
 const authMiddleware = require('../auth/authMiddleware'); 
-const User = require('../models'); 
+const User = require('../models/user'); 
 
 exports.getUserById = async (req, res) => {
     try {
-        const user = await User.findById(req.params.id);
+        const user = await User.findByPk(req.params.id);
 
         if (!user) {
             return res.status(404).json({ error: 'User not found.' });
         }
-        
+
         // CRUCIAL: Return a SANITIZED profile with only public fields
         res.status(200).json({
             id: user.id,
@@ -18,6 +18,7 @@ exports.getUserById = async (req, res) => {
             // Do NOT include password hash, email (unless public), or sensitive tokens
         });
     } catch (error) {
+        console.error("FULL ERROR LOG:", error);
         res.status(500).json({ error: 'Server error retrieving user profile.' });
     }
 };

@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { User } from 'src/app/shared/models/user';
 import { catchError } from 'rxjs/operators';
 
-const API_BASE_URL = '/api/user';
+const API_BASE_URL = 'http://localhost:3000/api/user';
 @Injectable({
   providedIn: 'root',
 })

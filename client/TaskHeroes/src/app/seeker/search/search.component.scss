@@ -80,7 +80,7 @@ mat-card-subtitle {
      /* 1. Appearance: Flat and Minimal */
     border: solid 1px lightgray ;
     box-shadow: none ;
-    background-color: #f0f0f0 ; /* Very light gray for neutrality */
+    font-family:"Helvetica Neue", Arial, sans-serif;
     
     /* 2. Text and Sizing */
     color: var(--text-secondary, #555); /* Gray text to feel less like a button */

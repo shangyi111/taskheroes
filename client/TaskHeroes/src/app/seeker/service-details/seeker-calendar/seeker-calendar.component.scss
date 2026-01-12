@@ -6,7 +6,7 @@
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   overflow: hidden;
-  background-color: #fff;
+  background-color:#ffffff;
 }
 
 .header {
@@ -14,7 +14,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 15px;
-  background-color: #f8f9fa;
+  background-color: #ffffff;;
   border-bottom: 1px solid #e0e0e0;
 }
 
@@ -26,9 +26,10 @@
 
 .header button {
   background: none;
-  border: 1px solid #ccc;
+  border: 1px solid #d0d5dd;
   padding: 6px 12px;
   border-radius: 6px;
+  color: #344054;
   cursor: pointer;
   transition: background-color 0.2s;
 }
@@ -50,7 +51,6 @@
 .day {
   min-height: 80px;
   padding: 5px;
-  border: 1px solid #eee;
   cursor: default;
   display: flex;
   flex-direction: column;
@@ -118,6 +118,12 @@
     font-weight: bold;
 }
 
+.status.unavailable-status {
+  color: #9ca3af; /* Soft grey instead of red */
+  font-size: 0.75rem;
+  font-weight: 400;
+  opacity: 0.6;
+}
 
 /* --- Time Slot Selection Modal --- */
 .modal-overlay {
@@ -164,12 +170,14 @@
     font-weight: 500;
 }
 
+.form-group textarea,
 .form-group input {
     width: 100%;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
     box-sizing: border-box;
+    height:36px;
 }
 
 .job-time-selector {

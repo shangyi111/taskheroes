@@ -57,7 +57,7 @@ export class RequestComponent {
         { name: 'location', label: 'Job location', type: 'text', validators: [] },
         { name: 'zipCode', label: 'Zip code', type: 'number', validators: [] },
         { name: 'phoneNumber', label: 'Phone Number', type: 'tel', validators: [] },
-        { name: 'description', label: 'Description', type: 'text', validators: [] },
+        { name: 'description', label: 'Description', type: 'textarea', validators: [] },
         { name: 'fee', label: 'Budget', type: 'number', validators: [] },
         { name: 'hourlyRate', label: 'Hourly Rate', type: 'number', validators: [] },
         { name: 'jobDate', label: 'Job date', type: 'date', validators: [Validators.required] },
