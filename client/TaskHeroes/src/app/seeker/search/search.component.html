@@ -5,36 +5,45 @@
 
   @for (service of services; track service.id) {
     <mat-card class="service-card" (click)="viewServiceDetails(service)">
-      <div class="profile-side">
+      <div class="avatar-side">
         <img class="profile-picture" [src]="service.profilePicture" alt="profile pic for {{ service.businessName }}">
-        <div class="mat-card-header-text">
-          <mat-card-title>{{ service.businessName }}</mat-card-title>
+      </div>
+
+      <div class="business-info">
+        <div class="info-header">
+          <h3 class="business-name">{{ service.businessName }}</h3>
+          <div class="rating-badge">
+            @if (service.averageRating !== null) { 
+              <mat-icon>star</mat-icon>
+              <strong>{{ service.averageRating }}</strong>
+              <span class="review-count">({{ service.reviewCount }})</span>
+            } @else {
+              <span class="no-reviews">New Provider</span>
+            }
+          </div>
+        </div>
+
+        <p class="description">{{ service.description }}</p>
+        
+        <div class="meta-details">
+          <div class="location">
+            <mat-icon>place</mat-icon> {{ service.businessAddress }}
+          </div>
+          <div class="category-chip-container">
+            <span class="modern-display-tag">{{ service.category }}</span>
+          </div>
         </div>
       </div>
-      <div class="business-info">
-        <mat-card-content>
-          <p>Description: {{ service.description }}</p>
-          <p>Provider address: {{ service.businessAddress }}</p>
-          <p class="service-rating">
-            @if (service.averageRating !== null) { 
-              <mat-icon color="accent" style="vertical-align: middle;">star</mat-icon>
-              <strong>{{ service.averageRating }}</strong> / 5 
-              ({{ service.reviewCount }} reviews)
-            } @else {
-              <span class="no-reviews">No reviews yet.</span>
-            }
-          </p>
-          <div class="category-chip-container">
-            <mat-basic-chip class="modern-display-tag">
-                {{ service.category }}
-            </mat-basic-chip>
-          </div>
-        </mat-card-content>
+
+      <div class="action-side">
+        <button class="view-btn">View Details</button>
       </div>
     </mat-card>
   }
 
   @if (!services?.length) {
-    <p>No services found.</p>
+    <div class="empty-state">
+      <p>No services found matching your criteria.</p>
+    </div>
   }
 </div>

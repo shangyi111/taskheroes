@@ -1,34 +1,39 @@
 <header>
-  <nav>
+  <nav class="nav-container">
     @if (isLoggedIn()) {
       @if (this.userData$ | async; as user) {
-        @let userId = user.id;
-        <span class="logo">
-          <a [routerLink]="['/user', userId]">TaskHeroes <span>{{user.role}}</span></a>
-        </span>
-        <span class="menu">
+        <div class="logo-group">
+          <a [routerLink]="['/user', user.id]" class="brand">TaskHeroes</a>
+          <span class="role-badge">{{ user.role }}</span>
+        </div>
+
+        <div class="menu">
           @if (user.role === 'seeker') {
-            <a [routerLink]="['/user', userId, 'seeker']">Search</a>
-            <a [routerLink]="['/user', userId, 'seeker','orders']">Orders</a>
-            <a [routerLink]="['/seeker', userId, 'chatrooms']">Messages</a>
-            <a [routerLink]="['/user', userId, 'profile']">Profile</a>
-          } @else if (user.role === 'provider') {
-            <a [routerLink]="['/user', userId, 'provider']">Business Page</a>
-            <a [routerLink]="['/user', userId, 'provider','jobs']">Orders</a>
-            <a [routerLink]="['/provider', userId, 'chatrooms']">Messages</a>
-            <a [routerLink]="['/user', userId, 'profile']">Profile</a>
+            <a [routerLink]="['/user', user.id, 'seeker']">Search</a>
+            <a [routerLink]="['/user', user.id, 'seeker','orders']">Orders</a>
+            <a [routerLink]="['/seeker', user.id, 'chatrooms']">Messages</a>
+          } @else {
+            <a [routerLink]="['/user', user.id, 'provider']">Business Page</a>
+            <a [routerLink]="['/user', user.id, 'provider','jobs']">Jobs</a>
+            <a [routerLink]="['/provider', user.id, 'chatrooms']">Messages</a>
           }
-        </span>
+          <a [routerLink]="['/user', user.id, 'profile']">Profile</a>
+
+          <div class="nav-divider"></div>
+
+          <button class="switch-btn" (click)="toggleRole(user)">
+            Switch to {{ user.role === 'seeker' ? 'Provider' : 'Seeker' }}
+          </button>
+
+          <button class="logout-btn" (click)="logout()">Logout</button>
+        </div>
       }
-      <button (click)="logout()">Logout</button>
     } @else {
-      <span class="logo">
-        <a routerLink="/login">TaskHeroes</a>
-      </span>
-      <span class="menu">
+      <a routerLink="/login" class="brand">TaskHeroes</a>
+      <div class="menu">
         <a routerLink="/login">Login</a>
-        <a routerLink="/register">Register</a>
-      </span>
+        <a routerLink="/register" class="register-link">Register</a>
+      </div>
     }
   </nav>
 </header>

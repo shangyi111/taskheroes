@@ -3,6 +3,7 @@ import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { MatIconModule } from '@angular/material/icon';
 import { CalendarDataService } from 'src/app/services/calendar-data.service';
 import { CalendarAvailability, ProviderCalendar } from 'src/app/shared/models/calendar';
 import { Job } from 'src/app/shared/models/job';
@@ -18,7 +19,7 @@ const FEE_PER_MINUTE_EXCEEDED = 1.00; // $1.00 per minute exceeded
   standalone: true,
   templateUrl: './seeker-calendar.component.html',
   styleUrls: ['./seeker-calendar.component.scss'],
-  imports: [CommonModule, FormsModule] 
+  imports: [CommonModule, FormsModule, MatIconModule, CurrencyPipe, DatePipe], 
 })
 export class SeekerCalendarComponent implements OnInit, OnDestroy {
   currentMonth: Date = new Date();

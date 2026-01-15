@@ -5,14 +5,19 @@ body { margin: 0; font-family:  "Helvetica Neue", Arial, sans-serif;}
 
 :root {
     // Colors
-    --dashboard-bg: #f9f9f9;
+    --dashboard-bg: white;
     --text-primary:#5F9EA0;
     --text-secondary: #7A9192;
+    --rating-tag-text:#856404;
+    --rating-icon: #f79009;
     --primary-blue: #007bff;
     --primary-green: #28a745;
-    --card-border: #eee;
-    --card-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    --card-hover-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    --blue-gray:#44474e;
+    --slate-grey: #7A9192;
+    --card-border:#5F9EA0;
+    --card-shadow:0 4px 14px 0 rgba(79, 122, 123, 0.12);
+    --card-hover-shadow: 0 16px 32px -8px rgba(79, 122, 123, 0.22);
+    --icon:aquamarine;
   
     // Fonts
     --global-font-family:"Helvetica Neue", 'Arial', sans-serif;
@@ -38,3 +43,50 @@ body { margin: 0; font-family:  "Helvetica Neue", Arial, sans-serif;}
     // Transitions
     --transition-default: transform 0.3s ease, box-shadow 0.3s ease;
   }
+
+  /* --- Global Material Overrides (High Specificity) --- */
+
+// Target the overlay container to force font inheritance
+body .cdk-overlay-container {
+  font-family: var(--global-font-family);
+}
+
+// Target the Select Panel by combining the element and the Material classes
+body .mat-mdc-select-panel.mat-mdc-select-panel {
+  background-color: var(--dashboard-bg);
+  border-radius: 10px;
+  box-shadow: var(--card-hover-shadow);
+  padding: 4px 0;
+
+  // Individual Options
+  .mat-mdc-option {
+    min-height: 40px;
+    
+    .mdc-list-item__primary-text {
+      font-family: var(--global-font-family);
+      font-size: 13px;
+      color: var(--blue-gray);
+    }
+
+    // Hover State
+    &:hover:not(.mdc-list-item--disabled) {
+      background-color: rgba(95, 158, 160, 0.08);
+    }
+
+    // Selected/Active State
+    &.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+      background-color: rgba(95, 158, 160, 0.12);
+
+      .mdc-list-item__primary-text {
+        color: var(--text-primary); // CadetBlue
+        font-weight: 600;
+      }
+
+      // Checkbox color for multiple-select
+      .mdc-checkbox__native-control:enabled:checked ~ .mdc-checkbox__background {
+        background-color: var(--text-primary);
+        border-color: var(--text-primary);
+      }
+    }
+  }
+}

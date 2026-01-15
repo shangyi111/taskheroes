@@ -1,11 +1,13 @@
 import { Component, EventEmitter,Output, inject } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { trigger, transition, style, animate } from '@angular/animations';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -16,6 +18,7 @@ interface Category {
 
 @Component({
   selector: 'th-filter',
+  standalone: true, 
   templateUrl: './filter.component.html',
   styleUrls: ['./filter.component.scss'],
   imports:[MatFormFieldModule,
@@ -25,8 +28,20 @@ interface Category {
     ReactiveFormsModule,
     MatButtonModule,
     MatCardModule,
-    MatIconModule
+    MatIconModule,
+    MatChipsModule
   ],
+  animations: [
+    trigger('fadeInSlide', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(-10px)' }),
+        animate('200ms ease-out', style({ opacity: 1, transform: 'translateY(0)' })),
+      ]),
+      transition(':leave', [
+        animate('150ms ease-in', style({ opacity: 0, transform: 'translateY(-10px)' }))
+      ])
+    ])
+  ]
 })
 export class FilterComponent {
   private fb = inject(FormBuilder);
@@ -52,9 +67,8 @@ export class FilterComponent {
   ];
   radiusOptions: number[] = [5, 10, 25, 50, 100];
   sortOptions: { value: string; viewValue: string }[] = [
-    { value: 'jobTitle', viewValue: 'Job Title' },
+    { value: 'businessName', viewValue: 'Business Name' },
     { value: 'hourlyRate', viewValue: 'Hourly Rate' },
-    { value: 'createdAt', viewValue: 'Date Posted' },
     // Add more sorting options
   ];
   sortOrderOptions: { value: string; viewValue: string }[] = [
@@ -70,6 +84,7 @@ export class FilterComponent {
   }
   resetFilters(): void {
     this.filterForm.reset({ category: [], zipcode: '', radius: null, query: '', minHourlyRate: null, maxHourlyRate: null, sortBy: '', sortOrder: 'asc' });
+    this.submitFilters();
   }
   formatFilters(formValue: any): any {
     const filters: any = {};
@@ -100,5 +115,54 @@ export class FilterComponent {
 
   submitFilters(): void {
     this.filtersChanged.emit(this.formatFilters(this.filterForm.value));
+  }
+
+  // Helper to count active filters for the @if condition
+getActiveFilterCount(): number {
+  return this.getActiveChips().length;
+}
+
+// Logic to generate the chips based on current form state
+getActiveChips() {
+  const chips: any[] = [];
+  const val = this.filterForm.value;
+
+  // Add chip for keyword
+  if (val.query) {
+    chips.push({ id: 'q', key: 'query', label: `Keyword: ${val.query}` });
+  }
+
+  // Add chip for zipcode
+  if (val.zipcode) {
+    chips.push({ id: 'z', key: 'zipcode', label: `Zip: ${val.zipcode}` });
+  }
+
+  // Add chips for categories (since it's an array)
+  if (val.category && val.category.length > 0) {
+    val.category.forEach((cat: string) => {
+      chips.push({ 
+        id: `cat-${cat}`, 
+        key: 'category', 
+        value: cat, 
+        label: cat.charAt(0).toUpperCase() + cat.slice(1) 
+      });
+    });
+  }
+
+  return chips;
+}
+
+// Logic to remove a filter when a chip is clicked
+removeFilter(key: string, value?: any): void {
+    if (key === 'category') {
+      const currentCategories = this.filterForm.get('category')?.value as string[];
+      const updated = currentCategories.filter(c => c !== value);
+      this.filterForm.patchValue({ category: updated });
+    } else {
+      this.filterForm.get(key)?.reset();
+    }
+    
+    // Re-submit automatically to refresh the list
+    this.submitFilters(); 
   }
 }

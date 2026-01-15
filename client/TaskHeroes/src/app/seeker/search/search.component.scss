@@ -12,127 +12,138 @@ mat-card-subtitle {
 
 /* Styles for the Service Results Container */
 .service-results {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 10px;
-  padding: var(--dashboard-padding);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 0 20px;
 }
 
-/* Styles for Individual Service Cards (using mat-card) */
 .service-card {
-  display: flex; /* Enable flexbox for the card */
+  display: flex;
   flex-direction: row;
-  border: 1px solid var(--card-border);
-  align-items: flex-start; /* Align items to the top */
-  box-shadow: var(--card-shadow);
-  transition: var(--transition-default);
-  padding: var(--dashboard-padding);
-  margin-bottom: 10px;
+  align-items: center;
+  padding: 24px;
+  background:var(--dashboard-bg);
+  border-radius: 16px;
+  cursor: pointer;
+  box-shadow:none;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              border 0.3s ease;
+  border: 1px solid transparent;
+
+  &:hover {
+    transform: translateY(-3px);
+    transition: all 0.3s ease-in-out rgba(226, 232, 240, 0.8);
+    border: 1px solid rgba(226, 232, 240, 0.8) ;
+    box-shadow: var(--card-hover-shadow);
+  }
 }
 
-.service-card:hover {
-  box-shadow: var(--card-hover-shadow);
-  transform: translateY(-2px);
+/* LEFT COLUMN: Fixed Square Avatar */
+.avatar-side {
+  flex: 0 0 100px;
+  margin-right: 24px;
+
+  .profile-picture {
+    width: 100px;
+    height: 100px;
+    border-radius: 12px; // Squircle look
+    object-fit: cover;
+    box-shadow: var(--card-shadow);
+  }
 }
 
-.profile-side {
-  display: flex; /* Enable flexbox for the profile picture and header */
-  flex-direction: column; /* Stack picture and header vertically */
-  align-items: flex-start; /* Align items to the left */
-  margin-right: calc(var(--dashboard-padding) / 2);
-  width: 35%; /* Set the width of the left side */
-  flex-shrink: 0; /* Prevent shrinking */
+/* CENTER COLUMN: Flexbox Growth */
+.business-info {
+  flex: 1;
+
+  .info-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 8px;
+
+    .business-name {
+      margin: 0;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+  }
+
+  .description {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 12px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; // Trim long text
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .meta-details {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    color: var(--text-secondary); 
+    font-size: 0.85rem;
+
+    .location {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      mat-icon { font-size: 16px; width: 16px; height: 16px; }
+    }
+  }
 }
 
-.profile-picture {
-  width: auto;
-  min-height: 142px;
-  max-width: 100%;
-  height: auto;
-  border-radius: 50%;
-  overflow: hidden;
-  margin-bottom: calc(var(--dashboard-padding) / 4);
+/* RIGHT COLUMN: Action */
+.action-side {
+  padding-left: 20px;
+  
+  .view-btn {
+    border: 1px solid var(--text-primary);
+    background: transparent;
+    color: var(--text-primary);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.2s;
+
+    &:hover {
+      background: var(--text-primary);
+      color: var(--dashboard-bg);
+    }
+  }
 }
 
-.profile-picture img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+/* REUSABLE MINI BADGE */
+.rating-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--dashboard-bg);
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid #fec84b;
+  font-size: 0.8rem;
+  color:var(--rating-tag-text);
 
-mat-card-title {
-  font-size: 1.2em;
-  font-weight: bold;
-  color: var(--text-primary);
-  margin-bottom: 2px;
-}
-
-mat-card-subtitle {
-  color: var(--text-secondary);
-  font-size: 0.9em;
-}
-
-.category-chip-container {
-   margin-top: 5px; 
+  mat-icon { color: var(--rating-icon); font-size: 14px; width: 14px; height: 14px; }
+  .review-count { color: var(--rating-tag-text); opacity: 0.7; }
+  .no-reviews { color: var(--rating-tag-text); font-weight: 500; }
 }
 
 .modern-display-tag {
-     /* 1. Appearance: Flat and Minimal */
-    border: solid 1px lightgray ;
-    box-shadow: none ;
-    font-family:"Helvetica Neue", Arial, sans-serif;
-    
-    /* 2. Text and Sizing */
-    color: var(--text-secondary, #555); /* Gray text to feel less like a button */
-    font-size: 0.8em; /* Slightly smaller for a label feel */
-    font-weight: 500;
-    line-height: 24px;
-    height: 28px; 
-    border-radius: 4px; /* Soft corners */
-    
-    /* 3. CRUCIAL: Non-Interactive Cues */
-    cursor: default;
-    padding: 0 10px;
+  background: #f2f4f7;
+  padding: 3px 8px;
+  border-radius: 4px;
+  color: #344054;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
-
-.modern-display-tag :hover,
-.modern-display-tag :focus {
-    background-color: default;
-    outline: none;
-}
-
-.business-info {
-  flex-grow: 1; /* Take remaining width */
-  width: 65%; /* Set the width of the right side */
-}
-
-mat-card-content p {
-  margin-bottom: calc(var(--dashboard-padding) / 6);
-  color: var(--text-secondary);
-  font-family: var(--global-font-family);
-  font-size: 0.9em;
-}
-
-mat-card-content button {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-}
-
-.service-card mat-card-content p.service-rating {
-    /* Override the default paragraph margin for the rating line */
-    margin-top: 10px;
-    margin-bottom: 10px;
-    display: flex; /* Aligns the icon and text perfectly */
-    align-items: center;
-    font-size: 1em;
-}
-
-.service-card .service-rating mat-icon {
-    color: orange; /* Highlight the star icon */
-    font-size: 1.1em;
-    width: auto;
-    height: auto;
-    margin-right: 4px;
-    line-height: 1; /* Aligns vertically with the text */
-} 

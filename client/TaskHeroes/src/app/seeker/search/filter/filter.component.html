@@ -1,94 +1,93 @@
-<div class="search-bar-container" [formGroup]="filterForm">
-  
-  <div class="primary-search-row">
+<div class="search-bar-wrapper">
+  <div class="search-bar-container" [formGroup]="filterForm">
     
-    <mat-form-field class="primary-search-field">
+    <div class="primary-search-row">
+      <mat-icon class="search-icon">search</mat-icon>
       <input 
-        matInput 
+        class="custom-search-input"
         [formControlName]="'query'" 
         placeholder="Search keywords or service (e.g., handyman, cleaning)..."
+        (keyup.enter)="submitFilters()"
       >
-    </mat-form-field>
-    
-    <div class="primary-actions">
+      
+      <div class="primary-actions">
         <button mat-flat-button color="primary" type="submit" (click)="submitFilters()" class="search-button">
-            Search
+          Search
         </button>
-        <button mat-icon-button (click)="toggleAdvanced()" class="advanced-toggle" title="More Filters">
-            <mat-icon>filter_list</mat-icon>
+        <button mat-icon-button (click)="toggleAdvanced()" 
+                [class.active]="showAdvanced"
+                class="advanced-toggle" 
+                title="More Filters">
+          <mat-icon>{{ showAdvanced ? 'expand_less' : 'filter_list' }}</mat-icon>
         </button>
+      </div>
     </div>
+
+    @if (getActiveFilterCount() > 0) {
+      <div class="active-chips-container" @fadeInSlide>
+        <mat-chip-set aria-label="Active Filters">
+          @for (chip of getActiveChips(); track chip.id) {
+            <mat-chip-row (removed)="removeFilter(chip.key, chip.value)">
+              {{ chip.label }}
+              <button matChipRemove [attr.aria-label]="'remove ' + chip.label">
+                <mat-icon>cancel</mat-icon>
+              </button>
+            </mat-chip-row>
+          }
+        </mat-chip-set>
+      </div>
+    }
+    @if (showAdvanced) {
+      <div class="advanced-filters-row" @fadeInSlide>
+        <mat-form-field appearance="outline" class="small-field" subscriptSizing="dynamic">
+          <mat-label>Zip Code</mat-label>
+          <input matInput [formControlName]="'zipcode'" placeholder="12345">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="small-field" subscriptSizing="dynamic">
+          <mat-label>Category</mat-label>
+          <mat-select [formControlName]="'category'" multiple>
+            @for (category of categories; track category.value) {
+              <mat-option [value]="category.value">{{ category.viewValue }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="small-field" subscriptSizing="dynamic">
+          <mat-label>Radius</mat-label>
+          <mat-select [formControlName]="'radius'">
+            <mat-option [value]="null">Any distance</mat-option>
+            @for (mile of radiusOptions; track mile) {
+              <mat-option [value]="mile">{{ mile }} miles</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        
+        <div class="rate-range-group">
+          <mat-form-field appearance="outline" class="range-field" subscriptSizing="dynamic">
+              <mat-label>Min Rate</mat-label>
+              <input matInput type="number" [formControlName]="'minHourlyRate'" placeholder="0">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="range-field" subscriptSizing="dynamic">
+              <mat-label>Max Rate</mat-label>
+              <input matInput type="number" [formControlName]="'maxHourlyRate'" placeholder="100+">
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="small-field" subscriptSizing="dynamic" >
+            <mat-label>Sort By</mat-label>
+            <mat-select [formControlName]="'sortBy'">
+                <mat-option value="">Default</mat-option>
+                @for (option of sortOptions; track option.value) {
+                  <mat-option [value]="option.value">{{ option.viewValue }}</mat-option>
+                }
+            </mat-select> 
+        </mat-form-field>
+
+        <div class="reset-container">
+           <button mat-button (click)="resetFilters()" class="reset-button">Reset All</button>
+        </div>
+      </div>
+    }
   </div>
-
-  @if (showAdvanced) {
-    <div class="advanced-filters-row">
-      <mat-form-field appearance="outline" class="small-field">
-        <input 
-          matInput 
-          [formControlName]="'zipcode'" 
-          placeholder="Zip Code" 
-          size="5"
-        >
-      </mat-form-field>
-      
-      <mat-form-field appearance="outline" class="small-field">
-        <mat-label>Category</mat-label>
-        <mat-select [formControlName]="'category'" multiple>
-          @for (category of categories; track category.value) {
-            <mat-option [value]="category.value">
-              {{ category.viewValue }}
-            </mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="small-field">
-        <mat-label>Radius (miles)</mat-label>
-        <mat-select [formControlName]="'radius'">
-          <mat-option [value]="null">Any distance</mat-option>
-          @for (mile of radiusOptions; track mile) {
-            <mat-option [value]="mile">
-              {{ mile }} miles
-            </mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-      
-      <mat-form-field appearance="outline" class="small-field">
-          <mat-label>Min Rate</mat-label>
-          <input matInput type="number" [formControlName]="'minHourlyRate'" placeholder="$0">
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="small-field">
-          <mat-label>Max Rate</mat-label>
-          <input matInput type="number" [formControlName]="'maxHourlyRate'" placeholder="$100+">
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="small-field">
-          <mat-label>Sort By</mat-label>
-          <mat-select [formControlName]="'sortBy'">
-              <mat-option value="">Default</mat-option>
-              @for (option of sortOptions; track option.value) {
-                <mat-option [value]="option.value">
-                  {{ option.viewValue }}
-                </mat-option>
-              }
-          </mat-select> 
-      </mat-form-field>
-      
-      <mat-form-field appearance="outline" class="small-field">
-          <mat-label>Order</mat-label>
-          <mat-select [formControlName]="'sortOrder'">
-              @for (option of sortOrderOptions; track option.value) {
-                <mat-option [value]="option.value">
-                  {{ option.viewValue }}
-                </mat-option>
-              }
-          </mat-select> 
-      </mat-form-field>
-
-      <button mat-button (click)="resetFilters()" class="reset-button">Reset Filters</button>
-    </div>
-  }
-
 </div>

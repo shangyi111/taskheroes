@@ -1,49 +1,103 @@
 header {
-  background-color: white;
-  padding: 1rem;
+  background-color: #ffffff;
+  padding: 0 2rem;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: var(--card-shadow);
 }
 
-nav {
+.nav-container {
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.logo {
-  font-size: 1.5rem;
-  font-weight: bold;
+.logo-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .brand {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-primary); // CadetBlue
+    text-decoration: none;
+    margin: 0;
+  }
+
+  .role-badge {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    background: rgba(95, 158, 160, 0.1);
+    color: var(--text-primary);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
 }
 
 .menu {
   display: flex;
   align-items: center;
+  gap: 10px;
+
+  a {
+    color: var(--blue-gray);
+    font-weight: 500;
+    font-size: 0.9rem;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: all 0.2s;
+
+    &:hover {
+      color: var(--text-primary);
+      background: rgba(95, 158, 160, 0.05);
+    }
+  }
 }
 
-a,
-button {
-  margin-left: 1rem;
-  padding: 0.5rem 1rem;
-  text-decoration: none;
-  border: none;
-  background-color: transparent;
-  cursor: pointer;
-  font-size: 1rem;
+.nav-divider {
+  width: 1px;
+  height: 24px;
+  background: #e2e8f0;
+  margin: 0 10px;
 }
 
-a {
+/* --- Action Buttons --- */
+.switch-btn {
+  background: transparent;
+  border: 1px solid var(--text-primary);
   color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: var(--text-primary);
+    color: #ffffff;
+  }
 }
 
-button {
-  background-color: #e74c3c;
-  color: white;
-  border-radius: 4px;
-}
+.logout-btn {
+  background-color: #f2f4f7;
+  color: #44474e;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
 
-button:hover {
-  background-color: #c0392b;
-}
-
-a:hover {
-  text-decoration: none;
+  &:hover {
+    background-color: #fee4e2;
+    color: #d92d20; // Soft red logout
+  }
 }

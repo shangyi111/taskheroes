@@ -50,8 +50,10 @@
   transition: var(--transition-default);
   padding: var(--dashboard-padding);
   text-align: center;
-  border: 1px solid var(--card-border);
+  border: none;
+  box-shadow: var(--card-shadow);
   box-sizing: border-box;
+  background-color: var(--dashboard-bg);
 }
 
 .role-card:hover {

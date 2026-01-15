@@ -1,58 +1,163 @@
-.search-bar-container {
-    padding: 20px 0;
+/* --- Main Container & Layout --- */
+.search-bar-wrapper {
+  padding: 20px;
+  font-family: var(--global-font-family);
+
+  .search-bar-container {
     width: 100%;
-    max-width: 600px; /* Use a reasonable max width */
+    max-width: 900px; 
     margin: 0 auto;
-    font-family: var(--global-font-family);
+    background: var(--dashboard-bg);
+    border-radius: 12px;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+
+    input.custom-search-input {
+        font-family: var(--global-font-family);
+        color: #98A2B3;
+        font-size: 0.95rem;
+    }
+  }
 }
 
-/* --- Primary Row (Always Visible) --- */
+/* --- Primary Row (The Search Bar) --- */
 .primary-search-row {
+  display: flex;
+  align-items: center;
+  padding: 4px 16px;
+  gap: 12px;
+
+  .search-icon {
+    color: var(--text-secondary);
+  }
+
+  .custom-search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    height: 48px;
+    font-size: 0.95rem;
+  }
+
+  .search-button {
+    background-color: var(--text-primary);
+    color:var(--dashboard-bg);
+    border:1px solid var(--text-primary);
+   
+    height: 40px;
+    border-radius: 20px; // Pill shape for modern look
+    padding: 0 16px;
+    font-weight: 500;
+    font-family: var(--global-font-family);
+
+    &:hover {
+       background-color: transparent;
+       color:var(--text-secondary);
+    }
+  }
+  .primary-actions {
     display: flex;
-    align-items: baseline;
-    gap: 10px;
-    padding: 10px;
-}
-
-/* 1. Keyword Field (Should take up the most space) */
-.primary-search-field {
-    flex-grow: 1; 
-    min-width: 250px;
-}
-
-.primary-search-field ::ng-deep .mdc-text-field--filled:not(.mdc-text-field--disabled) {
-    background-color: unset;
-}
-
-.primary-search-field .mat-mdc-text-field-wrapper {
-    /* Remove borders for a cleaner look */
-    border: none !important;
-    background-color: transparent !important;
-}
-
-/* 3. Actions */
-.primary-actions {
-    display: flex;
-    gap: 5px;
     align-items: center;
+  }
 }
 
-.search-button {
-    height: 48px; /* Match the height of the fields */
-    font-weight: 600;
-}
-
-/* --- Advanced Filters (Hidden Panel) --- */
+/* --- Advanced Slim Row --- */
 .advanced-filters-row {
-    padding: 10px;
-    /* Use CSS Grid for the hidden panel for perfect alignment */
-    display: grid; 
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
-    gap: 10px; 
-    border-radius: 8px;
-    align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background-color: var(--dashboard-bg);
+
+  /* Specificity: element + class to override Material without !important */
+  mat-form-field.small-field,
+  mat-form-field.range-field {
+    flex: 1;
+    min-width: 130px;
+    
+    /* Target the container height */
+    ::ng-deep .mat-mdc-text-field-wrapper {
+      height: 40px;
+      background-color: var(--dashboard-bg);
+    }
+
+    /* Vertical centering of label and input */
+    ::ng-deep .mat-mdc-form-field-flex {
+      height: 40px;
+      align-items: center;
+    }
+
+    ::ng-deep .mat-mdc-form-field-infix {
+      padding: 0; // Some padding is hardcoded in MDC, but we keep it minimal
+      min-height: auto;
+      display: flex;
+      align-items: center;
+    }
+
+    ::ng-deep .mat-mdc-floating-label {
+      top: 20px;
+      font-size: 13px;
+      color: var(--blue-gray);
+      font-family: var(--global-font-family);
+    }
+    
+    ::ng-deep .mat-mdc-select-value {
+      font-size: 13px;
+      font-family: var(--global-font-family);
+    }
+  }
+
+  .rate-range-group {
+    display: flex;
+    gap: 8px;
+    flex: 1.5;
+    max-width: 280px;
+  }
+
+  .reset-container {
+    margin-left: auto;
+    
+    .reset-button {
+      font-size: 12px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      font-weight: 700;
+      font-family: var(--global-font-family);
+      
+      &:hover {
+        color: var(--text-primary);
+        background-color: transparent;
+      }
+    }
+  }
 }
 
-.advanced-filters-row .small-field {
-    width: 100%;
+/* --- Chips Row --- */
+.active-chips-container {
+  padding: 8px 16px;
+  background-color: var(--dashboard-bg);
+  border-top: 1px solid rgba(226, 232, 240, 0.3);
+
+  mat-chip-row {
+    --mdc-chip-container-height: 28px;
+    font-size: 12px;
+    background-color: rgba(95, 158, 160, 0.05);
+    border: 1px solid rgba(95, 158, 160, 0.2);
+    color: var(--blue-gray);
+    font-family: var(--global-font-family);
+
+    ::ng-deep .mdc-evolution-chip__text-label {
+      font-family: var(--global-font-family);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    mat-icon {
+      color: var(--text-secondary);
+      &:hover { color: #e11d48; }
+    }
+  }
 }

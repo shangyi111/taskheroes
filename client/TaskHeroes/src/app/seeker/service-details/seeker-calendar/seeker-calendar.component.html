@@ -1,9 +1,13 @@
 <div class="calendar-container seeker-view">
   
   <div class="header">
-    <button (click)="previousMonth()">Previous</button>
+    <button (click)="previousMonth()">
+      <mat-icon style="vertical-align: middle;">chevron_left</mat-icon> Prev
+    </button>
     <h2>{{ currentMonth | date:'MMMM yyyy' }}</h2>
-    <button (click)="nextMonth()">Next</button>
+    <button (click)="nextMonth()">
+      Next <mat-icon style="vertical-align: middle;">chevron_right</mat-icon>
+    </button>
   </div>
 
   <div class="day-names">
@@ -23,16 +27,14 @@
         @if (day.date) {
           <span class="day-number">{{ day.date.getDate() }}</span>
           
-          @if (day.isBookable) {
+          @if (day.isBookable && day.availability?.status !== 'booked') {
             <span class="price">
               {{ day.availability.customPrice !== null ? (day.availability.customPrice | currency:'USD':'symbol':'1.0-0') : (basePrice | currency:'USD':'symbol':'1.0-0') }}
             </span>
           }
-          
-          @if (day.availability.status === 'booked') {
-            <span class="status booked-status">Booked</span>
-          } @else if (!day.isBookable && day.isCurrentMonth) {
-            <span class="status unavailable-status">N/A</span>
+
+          @if (day.availability?.status === 'booked') {
+            <div class="booked-dot"></div>
           }
         }
       </div>
