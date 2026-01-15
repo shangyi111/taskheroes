@@ -1,61 +1,51 @@
-<mat-accordion class="addAccordion">
-  <mat-expansion-panel [(expanded)]="addServicePanelOpenState">
-    <mat-expansion-panel-header>
-      <mat-panel-title>Add new service</mat-panel-title>
-    </mat-expansion-panel-header>
-    <th-form 
-    actionName="Create"
-    [fields]="formFields" 
-    (formSubmit)="onAddSubmit($event)" 
-    (formClear)="clearForm()"></th-form>
-  </mat-expansion-panel>
-</mat-accordion>
+<div class="business-page-wrapper">
+  <div class="management-header">
+    <div class="header-text">
+      <h2>My Services</h2>
+      <p>Manage your offerings and availability</p>
+    </div>
+    <button class="add-service-btn" (click)="openAddServiceModal()">
+      <mat-icon>add</mat-icon> Add New Service
+    </button>
+  </div>
 
-@for (service of services; track service.id) {
-  <mat-accordion class="editAccordion">
-    <mat-expansion-panel 
-    [(expanded)]="editOpenStates()[service.id!]"
-    (opened)="setEditPanelOpen(service.id!, true)"
-    (closed)="setEditPanelOpen(service.id!, false)">
-      <mat-expansion-panel-header>
-        <mat-panel-title> {{ service.businessName }} </mat-panel-title>
-        <div class="actions">
-          <mat-icon fontIcon="edit" color="warn" (click)="editService(service); $event.stopPropagation()"></mat-icon>
-          <mat-icon fontIcon="delete" color="primary" (click)="deleteService(service.id!); $event.stopPropagation()"></mat-icon>
+  <div class="service-results">
+    @for (service of services(); track service.id) {
+      <mat-card class="service-card" (click)="manageService(service.id!)">
+        <div class="avatar-side">
+          <img class="profile-picture" [src]="service.profilePicture" alt="profile pic for {{ service.businessName }}">
         </div>
-      </mat-expansion-panel-header>
-      @if (serviceBeingEdited && serviceBeingEdited.id === service.id) {
-        <th-form
-        [fields]="formFields"
-        actionName="Update"
-        [data]="serviceBeingEdited"
-        (formSubmit)="onEditSubmit($event, service)"
-        (formClear)="clearForm()"
-        (cancel)="cancel()"
-      ></th-form>
-      }@else{
-        <div class="business-card">
-          <div class="business-info-container">
-            <div class="profile-picture">
-              <img src={{service.profilePicture}} alt="profile pic for ${service.businessName}">
-            </div>
-            <div class="business-info">
-              <p class="business-name">{{service.businessName}}</p>
-              <p class="hourly-rate">{{service.hourlyRate}}</p>
-              <p class="category">Category: {{service.category}}</p>
-              <p class="description">Description: {{service.description}}</p>
-              <p class="address">Provider address: {{service.businessAddress}}</p>
-              <p class="phone">Provider phone: {{service.phoneNumber}}</p>
+
+        <div class="business-info">
+          <div class="info-header">
+            <h3 class="business-name">{{ service.businessName }}</h3>
+            <div class="category-chip-container">
+               <span class="modern-display-tag">{{ service.category }}</span>
             </div>
           </div>
+
+          <p class="description">{{ service.description }}</p>
           
-          <provider-calendar 
-            [serviceId]="service.id!" 
-            [providerId]="service.userId!" 
-            [basePrice]="service.hourlyRate || 150"
-          class="provider-calendar"></provider-calendar>
+          <div class="meta-details">
+            <div class="rate">
+              <strong>{{ service.hourlyRate | currency }}</strong> / hr
+            </div>
+            <div class="location">
+              <mat-icon>place</mat-icon> {{ service.zipCode }}
+            </div>
+          </div>
         </div>
-      }
-    </mat-expansion-panel>
-  </mat-accordion>
-}
+
+        <div class="action-side">
+          <button class="view-btn">Manage Service</button>
+        </div>
+      </mat-card>
+    }
+
+    @if (services().length === 0) {
+      <div class="empty-state">
+        <p>You haven't added any services yet.</p>
+      </div>
+    }
+  </div>
+</div>

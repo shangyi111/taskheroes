@@ -1,0 +1,67 @@
+<div class="manage-wrapper">
+  <div class="manage-header-nav">
+    <button mat-button (click)="goBack()" class="back-btn">
+      <mat-icon>arrow_back</mat-icon> Back to Dashboard
+    </button>
+  </div>
+
+  @if (service(); as s) {
+    <div class="manage-grid">
+      
+      <div class="main-content">
+        <div class="service-summary-card">
+          <img [src]="s.profilePicture" class="manage-avatar" alt="Service avatar">
+          <div class="header-info">
+            <h1 class="service-title">{{ s.businessName }}</h1>
+            <div class="category-badge">
+              <span class="modern-display-tag">{{ s.category }}</span>
+            </div>
+          </div>
+        </div>
+
+        <section class="info-section description-section">
+          <h3 class="section-label">Description</h3>
+          <p class="description-text">{{ s.description }}</p>
+        </section>
+
+        <section class="calendar-section">
+          <div class="section-header">
+            <h3>Manage Availability</h3>
+            <p>Click on dates to set hourly availability and pricing.</p>
+          </div>
+          <div class="calendar-container">
+            <provider-calendar 
+              [serviceId]="s.id!" 
+              [providerId]="s.userId!" 
+              [basePrice]="s.hourlyRate!">
+            </provider-calendar>
+          </div>
+        </section>
+      </div>
+
+      <aside class="admin-sidebar">
+        <div class="stats-card">
+          <div class="stat-row">
+            <span class="label">Hourly Rate</span>
+            <span class="value price">{{ s.hourlyRate | currency }}/hr</span>
+          </div>
+          <div class="stat-row">
+            <span class="label">Location</span>
+            <span class="value address">{{ s.businessAddress }}</span>
+          </div>
+        </div>
+
+        <div class="action-stack">
+          <button class="primary-edit-btn" (click)="openEditModal()">
+            <mat-icon>edit</mat-icon> Edit Service Details
+          </button>
+          
+          <button class="danger-outline-btn" (click)="deleteService()">
+            <mat-icon>delete</mat-icon> Delete Service
+          </button>
+        </div>
+      </aside>
+
+    </div>
+  }
+</div>

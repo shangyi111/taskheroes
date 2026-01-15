@@ -68,8 +68,8 @@ export class FormComponent {
     }
 
     clearForm(): void {
-    this.formGroup.reset();
-    this.formClear.emit();
+      this.formGroup.reset();
+      this.formClear.emit();
     }
 
     cancelForm():void{

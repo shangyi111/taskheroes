@@ -1,0 +1,41 @@
+.buttons-row {
+  display: flex;
+  justify-content: end;
+  margin-top: 32px;
+  width: 100%;
+  gap: 8px;
+}
+
+/* Base Pill Style using Specificity to override Material defaults */
+.btn-primary, .btn-secondary {
+  /* Dimensions and Shape */
+  height: 42px ;
+  padding: 0 28px ;
+  border-radius: 21px ; // Pill shape (Height / 2)
+  
+  /* Typography */
+  font-family: var(--global-font-family) ;
+  font-size: 0.95rem ;
+  font-weight: 500 ;
+  text-transform: none ; // Critical: prevents ALL CAPS
+  letter-spacing: normal ;
+
+  /* Border and Background */
+  border: 1px solid #d0d5dd ; // Light gray border from your screenshot
+  background-color: var(--dashboard-bg) ;
+  color: var(--text-primary); // The specific blue text
+  
+  transition: all 0.2s ease-in-out ;
+
+  &:hover {
+    background-color: #f9fafb ;
+    border-color: var(--text-primary); ;
+    transform: translateY(-1px);
+  }
+
+  /* Active state for a subtle 'pressed' effect */
+  &:active {
+    transform: translateY(0);
+    background-color: #f2f4f7;
+  }
+}

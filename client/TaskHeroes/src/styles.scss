@@ -90,3 +90,57 @@ body .mat-mdc-select-panel.mat-mdc-select-panel {
     }
   }
 }
+
+/* Target the modern dialog specifically using the panelClass */
+.th-modern-dialog {
+  /* 1. Rounded Corners & Padding for the Box */
+  .mat-mdc-dialog-container .mdc-dialog__surface {
+    border-radius: 32px; // Extra round for that modern look
+    padding: 20px;
+    background-color: #ffffff;
+  }
+
+  /* 2. Style the Header Title */
+  .mat-mdc-dialog-title {
+    font-family: var(--global-font-family);
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #344054; // Dark blue-gray
+    margin-bottom: 8px;
+    padding: 0 16px;
+  }
+
+  /* 3. Style the Content Area */
+  .mat-mdc-dialog-content {
+    padding: 16px !important; // Some Material defaults require one override here
+    font-family: var(--global-font-family);
+  }
+
+  /* 4. Force the Form Fields to match your slim search look */
+  .mat-mdc-form-field {
+    width: 100%;
+    
+    .mat-mdc-text-field-wrapper {
+      background-color: #ffffff;
+      border-radius: 12px;
+    }
+
+    .mat-mdc-floating-label {
+      font-family: var(--global-font-family);
+      font-weight: 500;
+    }
+  }
+
+  /* 5. Style the 'Update', 'Clear', 'Cancel' buttons */
+  .mat-mdc-dialog-actions {
+    padding: 20px 16px;
+    gap: 12px;
+
+    button {
+      border-radius: 20px;
+      padding: 10px 24px;
+      font-weight: 600;
+      text-transform: none; // Removes all-caps
+    }
+  }
+}

@@ -1,112 +1,186 @@
-.mat-expansion-panel-header {
+/* --- Layout Wrapper --- */
+.business-page-wrapper {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 0 20px;
+}
+
+/* --- Management Header --- */
+.management-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+
+  h2 {
+    margin: 0;
+    color: var(--blue-gray);
+    font-size: 1.8rem;
+    font-weight: 800;
+  }
+
+  p {
+    margin: 4px 0 0;
+    color: var(--text-secondary);
+  }
+}
+
+.add-service-btn {
+  background-color: var(--text-primary);
+  color: white;
+  border: none;
+  height: 44px;
+  padding: 0 24px;
+  border-radius: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--card-hover-shadow);
+    filter: brightness(1.1);
+  }
+}
+
+/* --- Reused Search Result Styles --- */
+.service-results {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 0 20px;
+}
+
+.service-card {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-between; 
-  font-family: var(--global-font-family);
+  padding: 24px;
+  background:var(--dashboard-bg);
+  border-radius: 16px;
+  cursor: pointer;
+  box-shadow:none;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              border 0.3s ease;
+  border: 1px solid transparent;
 
-  .provider-name {
-    flex-grow: 1; /* Allow the name to take up available space */
-    margin-right: 16px; /* Add some space between name and description */
-    font-family: var(--global-font-family);
+  &:hover {
+    transform: translateY(-3px);
+    transition: all 0.3s ease-in-out rgba(226, 232, 240, 0.8);
+    border: 1px solid rgba(226, 232, 240, 0.8) ;
+    box-shadow: var(--card-hover-shadow);
   }
+}
 
-  .actions {
+/* Reuse your Avatar, Business Info, and Action Side styles here ... */
+
+/* LEFT COLUMN: Fixed Square Avatar */
+.avatar-side {
+  flex: 0 0 100px;
+  margin-right: 24px;
+
+  .profile-picture {
+    width: 100px;
+    height: 100px;
+    border-radius: 12px; // Squircle look
+    object-fit: cover;
+    box-shadow: var(--card-shadow);
+  }
+}
+
+/* CENTER COLUMN: Flexbox Growth */
+.business-info {
+  flex: 1;
+
+  .info-header {
     display: flex;
     align-items: center;
-    margin-left: 16px; /* Add some space between description and actions */
+    gap: 15px;
+    margin-bottom: 8px;
 
-    mat-icon {
-      cursor: pointer;
-      font-size:18px;
-      margin-left: 8px; /* Space between icons */
+    .business-name {
+      margin: 0;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-primary);
     }
   }
 
-}.business-card {
-  display: flex;
-  flex-wrap: wrap; /* Allows wrapping on smaller screens */
-  gap: 20px;
-  border: 1px solid var(--card-border);
-  padding: var(--dashboard-padding);
-  margin-top: 15px; /* Spacing between expansion panels */
-  border-radius: 8px;
-  box-shadow: var(--card-shadow);
-  background-color: white;
-  align-items: flex-start; /* Aligns content to the top */
+  .description {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 12px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; // Trim long text
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .meta-details {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    color: var(--text-secondary); 
+    font-size: 0.85rem;
+
+     .rate strong {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+  }
+
+    .location {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      mat-icon { font-size: 16px; width: 16px; height: 16px; }
+    }
+  }
 }
 
-.business-card:hover {
-  box-shadow: var(--card-hover-shadow);
-  transition: var(--transition-default);
+/* RIGHT COLUMN: Action */
+.action-side {
+  padding-left: 20px;
+  
+  .view-btn {
+    border: 1px solid var(--text-primary);
+    background: transparent;
+    color: var(--text-primary);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.2s;
+
+    &:hover {
+      background: var(--text-primary);
+      color: var(--dashboard-bg);
+    }
+  }
 }
 
-.business-info-container {
-  flex: 1 1 auto; /* Allows this container to grow and shrink */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.empty-state {
   text-align: center;
-}
-
-.profile-picture {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  overflow: hidden;
-  margin-bottom: 15px; /* Spacing below the image */
-}
-
-.profile-picture img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.business-info {
-  width: 100%; /* Ensures the info section takes full width of its container */
-}
-
-.business-info p {
-  margin-bottom: calc(var(--dashboard-padding) / 4);
-  color: var(--text-primary);
-  font-family: var(--global-font-family);
-  font-size: calc(var(--text-font-size) * 0.8);
-}
-
-.business-name {
-  font-size: var(--title-font-size);
-  font-weight: bold;
-  margin-bottom: calc(var(--dashboard-padding) / 3);
-  color: var(--primary-blue);
-}
-
-.category, .description, .address, .phone {
-  font-size: var(--description-font-size);
+  padding: 60px;
+  background: rgba(226, 232, 240, 0.2);
+  border-radius: 16px;
+  border: 2px dashed rgba(226, 232, 240, 0.8);
   color: var(--text-secondary);
 }
 
-.hourly-rate {
-  color: var(--primary-green);
-  font-size: var(--text-font-size);
-  font-weight: bold;
-}
-
-/* --- Calendar Component --- */
-.provider-calendar {
-  flex: 2 1 450px; /* Allows the calendar to grow, shrink, and have a base width */
-  max-width: 600px; /* Prevents the calendar from getting too wide */
-  align-self: flex-start; /* Ensures the calendar aligns with the top of the container */
-}
-
-/* --- Responsive Layout for Small Screens --- */
-@media (max-width: 768px) {
-  .business-card {
-    flex-direction: column;
-  }
-  
-  .business-info-container {
-    width: 100%;
-    margin-bottom: 20px;
-  }
+.modern-display-tag {
+  background: #f2f4f7;
+  padding: 3px 8px;
+  border-radius: 4px;
+  color: #344054;
+  font-size: 0.75rem;
+  font-weight: 600;
 }

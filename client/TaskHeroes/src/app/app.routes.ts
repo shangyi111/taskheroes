@@ -10,6 +10,7 @@ import { ChatroomComponent } from './shared/ui-components/messenger/chatroom/cha
 import { BusinessPageComponent } from 'src/app/provider/business_page/business_page.component';
 import { ChatroomsComponent } from './shared/ui-components/messenger/chatrooms/chatrooms.component';
 import { OrdersComponent } from './seeker/orders/orders.component';
+import { ManageServiceComponent } from './provider/manage_service/manage_service.component';
 import { ServiceDetailsComponent } from './seeker/service-details/service-details.component';
 
 export const routes: Routes = [
@@ -29,6 +30,11 @@ export const routes: Routes = [
   {
     path: 'service/:serviceId',
     component: ServiceDetailsComponent,
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'user/:userId/provider/manage/:serviceId',
+    component: ManageServiceComponent,
     canActivate: [AuthGuard],
   },
   {

@@ -1,0 +1,42 @@
+<div class="dialog-container">
+  @if (isLoading()) {
+    <div class="shimmer-wrapper">
+      <div class="shimmer-card">
+        <div class="shimmer-item title"></div>
+        <div class="shimmer-grid">
+          <div class="shimmer-item box"></div>
+          <div class="shimmer-item box"></div>
+          <div class="shimmer-item box"></div>
+          <div class="shimmer-item box"></div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="dialog-content-wrapper" [class.is-loading]="isLoading()">
+    <header class="header-row">
+      <div class="title-section">
+        <h2 mat-dialog-title>
+          {{ isEditMode ? 'Edit Service Details' : 'Add New Service' }}
+        </h2>
+        <p class="subtitle">
+          Update your information to keep your profile accurate for seekers.
+        </p>
+      </div>
+      
+      <button mat-icon-button (click)="onClose()" class="close-btn" type="button">
+        <mat-icon>close</mat-icon>
+      </button>
+    </header>
+
+    <mat-dialog-content>
+      <th-form 
+        [fields]="formFields" 
+        [actionName]="isEditMode ? 'Update Service' : 'Create Service'"
+        [data]="initialData"
+        (formSubmit)="onAddSubmit($event)"
+        (cancel)="onClose()">
+      </th-form>
+    </mat-dialog-content>
+  </div>
+</div>
