@@ -38,6 +38,7 @@ export class ProviderCalendarComponent implements OnInit {
   @Input() basePrice!: number;
   
   providerAvailability: { [key: string]: any } = {};
+  externalConflicts: { [key: string]: any } = {};
 
   // Output for saving changes
   @Output() saveChanges = new EventEmitter<any>();
@@ -67,6 +68,7 @@ export class ProviderCalendarComponent implements OnInit {
         next: (data: ProviderCalendar) => {
           this.basePrice = data.basePrice;
           this.providerAvailability = data.availability;
+          this.externalConflicts = data.externalConflicts || {};
           this.availabilityWindow = data.availabilityWindow || 90;
           this.generateCalendar();
         },
@@ -108,18 +110,28 @@ export class ProviderCalendarComponent implements OnInit {
       const isPast = date.getTime() < today.getTime();
       const isFutureBlocked = date.getTime() > endDate.getTime();
       const formattedDate = this.formatDate(date);
-      const isSelected = this.selectedDates.some(d => d.getTime() === date.getTime());
-      const dayAvailability = currentProviderAvailability[formattedDate];
-      const finalAvailability = (dayAvailability && typeof dayAvailability === 'object')
-      ? dayAvailability
-      : { isAvailable: !isFutureBlocked, status: isFutureBlocked ? 'unavailable' : 'available',customPrice: null };
+      const currentServiceData = currentProviderAvailability[formattedDate];
+      const conflictData = this.externalConflicts[formattedDate];
+      let status = 'available';
+      if (currentServiceData) {
+        // If we have data in the DB (even for future blocked days), use its status
+        status = currentServiceData.status; 
+      } else if (conflictData) {
+        status = 'conflict';
+      } else if (isFutureBlocked || isPast) {
+        status = 'unavailable';
+      }
       newDaysInMonth.push({
         date: date,
         isCurrentMonth: true,
         isPast: isPast,
-        isSelected: isSelected,
-        isFutureBlocked: isFutureBlocked,
-        availability: finalAvailability,
+        isSelected: this.selectedDates.some(d => d.getTime() === date.getTime()),
+        status: status, // Unified status for UI classes
+        availability: currentServiceData || { 
+          isAvailable: status === 'available', 
+          customPrice: null,
+          status: status },
+        conflictInfo: conflictData || null // Service & Client details for "Busy" slots
       });
     }
 
@@ -145,8 +157,12 @@ export class ProviderCalendarComponent implements OnInit {
     this.calendarDataService.updateAvailabilityWindow(this.serviceId, this.availabilityWindow)
       .subscribe({
         next: (response) => {
-          console.log('Availability Window updated in backend:', response);
           // After a successful save, close the modal and re-fetch ALL calendar data
+          this.basePrice = response.basePrice;
+          this.providerAvailability = response.availability || {};
+          this.externalConflicts = response.externalConflicts || {};
+          this.availabilityWindow = response.availabilityWindow || 90;  
+          this.selectedDates = [];
           this.closeSettingsModal();
           this.fetchCalendarData(); 
         },
@@ -175,7 +191,7 @@ export class ProviderCalendarComponent implements OnInit {
   
   // Drag & drop logic
   startDrag(day: any): void {
-    if (!day.isCurrentMonth || day.isPast || day.availability.status === 'booked') return;
+    if (!day.isCurrentMonth || day.isPast || day.availability.status === 'booked'|| day.status === 'conflict') return;
     this.isDragging = true;
     this.startDate = day.date;
     this.endDate = day.date;
@@ -183,7 +199,7 @@ export class ProviderCalendarComponent implements OnInit {
   }
   
   onDrag(day: any): void {
-    if (!this.isDragging || !day.isCurrentMonth || day.isPast || day.availability.status === 'booked') return;
+    if (!this.isDragging || !day.isCurrentMonth || day.isPast || day.availability.status === 'booked'|| day.status === 'conflict') return;
     this.endDate = day.date;
     this.highlightDates();
   }

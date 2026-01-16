@@ -7,6 +7,28 @@
           <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-datepicker #picker></mat-datepicker>
         </mat-form-field>
+      } @else if (field.type === 'file') {
+        <div class="file-upload-container">
+          <mat-label class="custom-label">{{ field.label }}</mat-label>
+          <image-upload 
+            [isMultiple]="field.multiple!"
+            (imageUploaded)="handleImageUpdate($event, field.name, field.multiple)"
+            [folder]="field.folder || 'general'">
+          </image-upload>
+
+          @if (field.multiple && formGroup.get(field.name)?.value?.length) {
+            <div class="portfolio-grid">
+              @for (url of formGroup.get(field.name)?.value; track $index) {
+                <div class="thumb">
+                  <img [src]="url" />
+                  <button type="button" class="remove-btn" (click)="removeFile(field.name, $index)">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
       }@else if (field.type === 'address') {
         <mat-form-field appearance="outline">
           <mat-label>{{ field.label }}</mat-label>
@@ -16,6 +38,14 @@
            appAddressAutocomplete 
            (addressSelected)="handleAddressOutput(field.name, $event)"
           />
+        </mat-form-field>
+      }@else if (field.type === 'textarea') {
+        <mat-form-field appearance="outline">
+          <mat-label>{{ field.label }}</mat-label>
+          <textarea matInput 
+           [formControlName]="field.name" 
+           rows="4"
+          ></textarea>
         </mat-form-field>
       }@else {
         <mat-form-field appearance="outline">

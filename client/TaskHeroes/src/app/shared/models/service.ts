@@ -10,6 +10,7 @@ export interface Service {
     phoneNumber?: string;
     description?: string; 
     profilePicture?: string; 
+    portfolio?: string[];
     rating?:number;
     reviews?:Review[];
     jobs?:Job[];

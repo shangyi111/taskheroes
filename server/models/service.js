@@ -31,6 +31,10 @@ const Service = sequelize.define('Service', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  portfolio: {
+    type: DataTypes.JSON, // Stores an array of URLs: ["url1", "url2", "url3"]
+    defaultValue: []
+  },
   category: {
     type: DataTypes.STRING,
     allowNull: true,

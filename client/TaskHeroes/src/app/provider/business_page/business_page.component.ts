@@ -24,8 +24,7 @@ import { AddServiceDialogComponent } from '../add_service_dialog/add_service_dia
     MatCardModule, 
     MatButtonModule, 
     MatIconModule, 
-    MatDialogModule,
-    AddServiceDialogComponent
+    MatDialogModule
   ], 
 })
 export class BusinessPageComponent implements OnInit, OnDestroy {

@@ -6,6 +6,8 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core'; 
 import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatIcon, MatIconModule } from '@angular/material/icon';
+import { ImageUploadComponent } from '../image-upload/image-upload.component';
 import { AddressAutocompleteDirective, AddressDetails } from '../../directives/address-autocomplete.directive';
 
 export interface FormFieldConfig {
@@ -13,6 +15,8 @@ export interface FormFieldConfig {
   label: string;
   type: string;
   validators: ValidatorFn[];
+  multiple?: boolean;
+  folder?: string;
 }
 
 @Component({
@@ -21,8 +25,8 @@ export interface FormFieldConfig {
   styleUrls: ['./form.component.scss'],
   templateUrl: './form.component.html',
   imports: [ReactiveFormsModule, MatDatepickerModule,MatNativeDateModule,
-    MatFormFieldModule, MatInputModule, MatButtonModule, MatExpansionModule,
-    AddressAutocompleteDirective],
+    MatFormFieldModule, MatInputModule, MatButtonModule, MatExpansionModule,MatIconModule,
+    AddressAutocompleteDirective, ImageUploadComponent],
 })
 export class FormComponent {
     private formBuilder = inject(FormBuilder);
@@ -74,5 +78,33 @@ export class FormComponent {
 
     cancelForm():void{
       this.cancel.emit();
+    }
+
+    handleImageUpdate(newUrl: string, fieldName: string, isMultiple: boolean | undefined) {
+      if (isMultiple) {
+        const current = this.formGroup.get(fieldName)?.value || [];
+        this.formGroup.patchValue({ [fieldName]: [...current, newUrl] });
+      } else {
+        this.formGroup.patchValue({ [fieldName]: newUrl });
+      }
+      this.formGroup.get(fieldName)?.markAsDirty();
+    }
+
+    removeFile(fieldName: string, index: number) {
+      const current = [...(this.formGroup.get(fieldName)?.value || [])];
+      if (Array.isArray(current)) {
+        // 2. Create a shallow copy and remove the item
+        const updatedValues = [...current];
+        updatedValues.splice(index, 1);
+
+        // 3. Patch the value back. If empty, it becomes []
+        this.formGroup.patchValue({ [fieldName]: updatedValues });
+      } else {
+        // If it's a single profile picture, just set to null/empty string
+        this.formGroup.patchValue({ [fieldName]: '' });
+      }
+
+      // 4. Mark as dirty so the "Update Service" button becomes active
+      this.formGroup.get(fieldName)?.markAsDirty();
     }
 }

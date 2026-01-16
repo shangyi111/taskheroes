@@ -19,6 +19,7 @@ import { signal } from '@angular/core';
   templateUrl: './add_service_dialog.component.html',
   styleUrls: ['./add_service_dialog.component.scss']
 })
+
 export class AddServiceDialogComponent {
   public data = inject(MAT_DIALOG_DATA); 
   
@@ -38,9 +39,24 @@ export class AddServiceDialogComponent {
     { name: 'category', label: 'Category', type: 'text', validators: [Validators.required] },
     { name: 'hourlyRate', label: 'Hourly Rate', type: 'number', validators: [Validators.required] },
     { name: 'zipCode', label: 'Zip Code', type: 'text', validators: [] },
-    { name: 'description', label: 'Description', type: 'text', validators: [] },
-    { name: 'profilePicture', label: 'Profile Picture URL', type: 'url', validators: [] },
-  ];
+    { name: 'description', label: 'Description', type: 'textarea', validators: [] },
+    { 
+        name: 'profilePicture', 
+        label: 'Service Profile Photo', 
+        type: 'file', 
+        validators: [],
+        folder:'profile',
+        multiple: false,
+    },
+    { 
+        name: 'portfolio', 
+        label: 'Work Gallery (Upload up to 6 photos)', 
+        type: 'file', 
+        validators: [],
+        folder:'portfolios',
+        multiple: true 
+    }
+    ];
 
   onAddSubmit(formGroup: FormGroup) {
     if (formGroup.valid) {
@@ -55,12 +71,11 @@ export class AddServiceDialogComponent {
                     this.isLoading.set(false);
                     this.dialogRef.close(true);
                     },
-                    error: () => this.isLoading.set(false) // Stop shimmer on error
+                    error: () => this.isLoading.set(false)
                 });
           } else {
             this.businessService.createService(serviceData).subscribe(createdService => {
                 this.dialogRef.close(true);
-                // Navigate to management page so they can set the calendar immediately
                 this.router.navigate(['user', user.id, 'provider', 'manage', createdService.id]);
             });
         }

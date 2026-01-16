@@ -1,0 +1,21 @@
+<div class="upload-container">
+  <label class="upload-box" [class.has-image]="previewUrl">
+    <input type="file" (change)="onFileSelected($event)" accept="image/*" hidden>
+    
+    <ng-container *ngIf="!previewUrl; else previewTemplate">
+      <mat-icon>add_a_photo</mat-icon>
+      <span>Click to upload work</span>
+    </ng-container>
+
+    <ng-template #previewTemplate>
+      <img [src]="previewUrl" alt="Preview" class="preview-img">
+      <div class="overlay">
+        <mat-icon>edit</mat-icon>
+      </div>
+    </ng-template>
+  </label>
+
+  <div *ngIf="isUploading" class="progress-bar">
+    <div class="progress-fill"></div>
+  </div>
+</div>

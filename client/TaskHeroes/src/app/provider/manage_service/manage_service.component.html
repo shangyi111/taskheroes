@@ -24,6 +24,29 @@
           <p class="description-text">{{ s.description }}</p>
         </section>
 
+        @if (s.portfolio && s.portfolio.length > 0) {
+            <section class="info-section portfolio-section">
+                <div class="section-header-inline">
+                <h3 class="section-label">Work Gallery</h3>
+                <span class="count-tag">{{ s.portfolio.length }} Photos</span>
+                </div>
+                
+                <div class="manage-portfolio-grid">
+                @for (url of s.portfolio; track url) {
+                    <div class="portfolio-card">
+                    <img [src]="url.replace('/upload/', '/upload/w_300,h_300,c_fill,g_auto,f_auto,q_auto/')" 
+                        alt="Portfolio item">
+                    </div>
+                }
+                </div>
+            </section>
+        }@else {
+            <section class="info-section empty-portfolio" (click)="openEditModal()">
+                <mat-icon>add_a_photo</mat-icon>
+                <p>Add portfolio photos to show seekers your best work.</p>
+            </section>
+        }
+
         <section class="calendar-section">
           <div class="section-header">
             <h3>Manage Availability</h3>

@@ -1,104 +1,114 @@
-  <div class="calendar-container">
-    <div class="header">
-      <button (click)="previousMonth()">Previous</button>
+<div class="calendar-container">
+  <div class="header">
+    <div class="nav-controls">
+      <button mat-icon-button (click)="previousMonth()">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
       <h2>{{ currentMonth | date:'MMMM yyyy' }}</h2>
-      <button (click)="nextMonth()">Next</button>
-      <mat-icon class="settings-icon" (click)="openSettingsModal()">settings</mat-icon>
+      <button mat-icon-button (click)="nextMonth()">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
     </div>
-
-    @if (showSettingsModal) {
-    <div class="modal-overlay">
-      <div class="modal-content">
-        <h3>Calendar Settings</h3>
-        <div class="form-group">
-          <label for="availabilityWindow">Availability Window (days in advance):</label>
-          <input id="availabilityWindow" type="number" [(ngModel)]="availabilityWindow" min="1">
-        </div>
-        <div class="modal-actions">
-          <button class="save-btn" (click)="saveSettings()">Save</button>
-          <button class="cancel-btn" (click)="closeSettingsModal()">Cancel</button>
-        </div>
-      </div>
-    </div>
-    }
-
-    <div class="day-names">
-      <div>Sun</div>
-      <div>Mon</div>
-      <div>Tue</div>
-      <div>Wed</div>
-      <div>Thu</div>
-      <div>Fri</div>
-      <div>Sat</div>
-    </div>
-
-    <div class="days-grid"
-      (mouseleave)="endDrag()"
-      (mouseup)="endDrag()"
-    >
-      @for (day of daysInMonth; track $index) {
-        <div
-          class="day"
-          [class.disabled]="!day.isCurrentMonth"
-          [class.selected]="day.isSelected"
-          [class.available]="day.availability.isAvailable"
-          [class.unavailable]="!day.availability.isAvailable"
-          [class.past]="day.isPast"
-          [class.booked]="day.availability.status === 'booked'"
-          (mousedown)="startDrag(day)"
-          (mouseenter)="onDrag(day)"
-          (mouseup)="endDrag()"
-        >
-          @if (day.isCurrentMonth) {
-            <span class="day-number">{{ day.date.getDate() }}</span>
-            @if (day.availability.isAvailable) {
-              <span class="price"  [class.past-price]="day.isPast">
-                {{ day.availability.customPrice !== null ? (day.availability.customPrice | currency:'USD':'symbol':'1.0-0') : (basePrice | currency:'USD':'symbol':'1.0-0') }}
-              </span>
-            }
-            @if (day.availability.status === 'booked') {
-              <span class="status booked-status">Booked</span>
-              <div class="tooltip">{{ day.availability.bookingInfo }}</div>
-            }
-            @if (!day.availability.isAvailable && day.availability.status !== 'booked') {
-              <span class="status">X</span>
-            }
-          }
-        </div>
-      }
-    </div>
+    <button mat-button class="settings-btn" (click)="openSettingsModal()">
+      <mat-icon>settings</mat-icon>
+    </button>
   </div>
 
-  @if (showModal) {
-    <div class="modal-overlay">
-      <div class="modal-content">
-        <h3>Edit {{ selectedDates.length }} day@if (selectedDates.length > 1){s}</h3>
-        <p class="date-range">
-          {{ selectedDates.length > 0 ? (selectedDates[0] | date) : '' }} 
-          @if (selectedDates.length > 1) {
-            - {{ selectedDates[selectedDates.length - 1] | date }}
-          }
-        </p>
-
-        <div class="form-group">
-          <label for="bulkAvailability">Availability:</label>
-          <select id="bulkAvailability" [(ngModel)]="bulkAvailability">
-            <option [ngValue]="true">Available</option>
-            <option [ngValue]="false">Unavailable</option>
-          </select>
-        </div>
-
-        @if (bulkAvailability) {
-          <div class="form-group">
-            <label for="bulkPrice">Set Price:</label>
-            <input id="bulkPrice" type="number" [(ngModel)]="bulkPrice" placeholder="e.g., {{ basePrice }}">
-          </div>
-        }
-        
-        <div class="modal-actions">
-          <button class="save-btn" (click)="saveBulkChanges()">Save Changes</button>
-          <button class="cancel-btn" (click)="closeModal()">Cancel</button>
-        </div>
+  @if (showSettingsModal) {
+  <div class="modal-overlay">
+    <div class="modal-content settings-modal">
+      <h3>Calendar Settings</h3>
+      <div class="form-group">
+        <label>Availability Window (days in advance)</label>
+        <input type="number" [(ngModel)]="availabilityWindow" min="1">
+      </div>
+      <div class="modal-actions">
+        <button class="btn-primary" (click)="saveSettings()">Save</button>
+        <button class="btn-secondary" (click)="closeSettingsModal()">Cancel</button>
       </div>
     </div>
+  </div>
   }
+
+  <div class="day-names">
+    <div *ngFor="let day of ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']">{{day}}</div>
+  </div>
+
+  <div class="days-grid" (mouseleave)="endDrag()" (mouseup)="endDrag()">
+    @for (day of daysInMonth; track $index) {
+      <div
+        class="day"
+        [class.disabled]="!day.isCurrentMonth"
+        [class.selected]="day.isSelected"
+        [class.past]="day.isPast"
+        [class.status-booked]="day.status === 'booked'"
+        [class.status-conflict]="day.status === 'conflict'"
+        [class.status-unavailable]="day.status === 'unavailable'"
+        (mousedown)="startDrag(day)"
+        (mouseenter)="onDrag(day)"
+        (mouseup)="endDrag()"
+        (click)="onClick(day)"
+      >
+        @if (day.isCurrentMonth) {
+          <span class="day-number">{{ day.date.getDate() }}</span>
+          
+          @if (day.status === 'available') {
+            <span class="price" [class.past-price]="day.isPast">
+              {{ day.availability.customPrice !== null ? (day.availability.customPrice | currency:'USD':'symbol':'1.0-0') : (basePrice | currency:'USD':'symbol':'1.0-0') }}
+            </span>
+          }
+
+          @if (day.status === 'booked') {
+            <div class="status-tag internal">
+              <mat-icon>event_available</mat-icon>
+              <span>Booked</span>
+            </div>
+          }
+
+          @if (day.status === 'conflict') {
+            <div class="status-tag external">
+              <span class="service-name">{{ day.conflictInfo?.serviceName }}</span>
+              <span class="client-name">{{ day.conflictInfo?.clientName }}</span>
+            </div>
+          }
+
+          @if (day.status === 'unavailable') {
+            <span class="status-icon"><mat-icon>block</mat-icon></span>
+          }
+        }
+      </div>
+    }
+  </div>
+</div>
+
+@if (showModal) {
+  <div class="modal-overlay">
+    <div class="modal-content bulk-modal">
+      <h3>Edit {{ selectedDates.length }} day{{ selectedDates.length > 1 ? 's' : '' }}</h3>
+      <p class="date-range">
+        {{ selectedDates[0] | date:'mediumDate' }} 
+        {{ selectedDates.length > 1 ? ' - ' + (selectedDates[selectedDates.length - 1] | date:'mediumDate') : '' }}
+      </p>
+
+      <div class="form-group">
+        <label>Availability Status</label>
+        <select [(ngModel)]="bulkAvailability">
+          <option [ngValue]="true">Available</option>
+          <option [ngValue]="false">Unavailable</option>
+        </select>
+      </div>
+
+      @if (bulkAvailability) {
+        <div class="form-group">
+          <label>Custom Price ($)</label>
+          <input type="number" [(ngModel)]="bulkPrice" [placeholder]="basePrice">
+        </div>
+      }
+      
+      <div class="modal-actions">
+        <button class="btn-primary" (click)="saveBulkChanges()">Update Days</button>
+        <button class="btn-secondary" (click)="closeModal()">Discard</button>
+      </div>
+    </div>
+  </div>
+}
