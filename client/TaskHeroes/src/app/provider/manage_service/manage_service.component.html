@@ -75,11 +75,15 @@
         </div>
 
         <div class="action-stack">
-          <button class="primary-edit-btn" (click)="openEditModal()">
+          <button class="secondary-outline-btn primary-edit-btn" (click)="openEditModal()">
             <mat-icon>edit</mat-icon> Edit Service Details
           </button>
+
+          <a [href]="'/service/' + s.id" target="_blank" class="secondary-outline-btn preview-btn">
+            <mat-icon>open_in_new</mat-icon> Preview Public Page
+          </a>
           
-          <button class="danger-outline-btn" (click)="deleteService()">
+          <button class="secondary-outline-btn danger-outline-btn" (click)="deleteService()">
             <mat-icon>delete</mat-icon> Delete Service
           </button>
         </div>

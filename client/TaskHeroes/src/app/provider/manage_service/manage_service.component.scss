@@ -42,7 +42,7 @@
     margin: 0 0 8px 0; 
     font-size: 2.5rem; 
     font-weight: 800;
-    color: var(--blue-gray); 
+    color: var(--text-primary); 
     letter-spacing: -0.02em;
   }
 }
@@ -55,7 +55,7 @@
     font-size: 1.25rem;
     font-weight: 700;
     margin-bottom: 12px;
-    color: var(--blue-gray);
+    color: var(--text-primary);
   }
 
   .description-text {
@@ -109,6 +109,15 @@
       object-fit: cover;
     }
   }
+}
+
+.modern-display-tag {
+  background: #f2f4f7;
+  padding: 3px 8px;
+  border-radius: 4px;
+  color: #344054;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 /* --- Calendar Area --- */
@@ -172,7 +181,7 @@
   flex-direction: column;
   gap: 12px;
 
-  button {
+  .secondary-outline-btn {
     width: 100%;
     height: 54px;
     border-radius: 14px;
@@ -184,19 +193,34 @@
     gap: 10px;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  }
 
-  .primary-edit-btn { 
-    background: var(--text-primary); 
-    color: white; 
-    border: none;
-    &:hover { filter: brightness(1.05); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(95, 158, 160, 0.3); }
-  }
+    &.primary-edit-btn { 
+        background: var(--dashboard-bg); 
+        color:var(--text-primary);
+        border: none;
+        &:hover { filter: brightness(1.05); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(95, 158, 160, 0.3); }
+    }
 
-  .danger-outline-btn { 
-    background: white; 
-    border: 1px solid #fee4e2; 
-    color: #d92d20; 
-    &:hover { background: #fffbfa; border-color: #fda29b; }
+    &.danger-outline-btn { 
+        background: var(--dashboard-bg); 
+        border:none;
+        color: #d92d20; 
+         &:hover { filter: brightness(1.05); transform: translateY(-2px); box-shadow: 0 4px 12px pink; }
+    }
+
+    &.preview-btn {
+        background: var(--dashboard-bg);
+        color: var(--text-primary);
+        border: none;
+        text-decoration: none;
+        &:hover { filter: brightness(1.05); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(95, 158, 160, 0.3); }
+    }
+
+    mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+    }
+
   }
 }

@@ -31,6 +31,36 @@
           <p class="description">{{ service.description }}</p>
         </div>
 
+        @if (service.portfolio && service.portfolio.length > 0) {
+        <div class="content-block">
+          <h3>Work Gallery</h3>
+          <div class="portfolio-carousel">
+            <div class="main-image-container">
+              <img [src]="activeImageUrl" class="main-slide" alt="Portfolio work">
+              
+              @if (service.portfolio.length > 1) {
+                <button class="nav-btn prev" (click)="prevSlide(service.portfolio)">
+                  <mat-icon>chevron_left</mat-icon>
+                </button>
+                <button class="nav-btn next" (click)="nextSlide(service.portfolio)">
+                  <mat-icon>chevron_right</mat-icon>
+                </button>
+              }
+            </div>
+
+            <div class="thumbnail-row">
+              @for (img of service.portfolio; track img; let i = $index) {
+                <div class="thumb-item" 
+                      [class.active]="activeImageUrl === img"
+                      (click)="setActiveImage(img, i)">
+                  <img [src]="img.replace('/upload/', '/upload/w_100,h_100,c_fill,q_auto/')">
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+        }
+
         <div class="content-block price-highlight">
           <div class="price-pill">
             <mat-icon>payments</mat-icon>

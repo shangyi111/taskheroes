@@ -5,6 +5,8 @@ const calendarController = {
   getCalendar: async (req, res) => {
     try {
       const { providerId, serviceId } = req.params;
+      const requesterId = req.user?.id;
+      const isOwner = String(requesterId) === String(providerId);
       const { month } = req.query; // format: '2026-01'
       const [year, monthNum] = month.split('-');
       const startDate = `${year}-${monthNum}-01`;
@@ -26,7 +28,7 @@ const calendarController = {
           providerId: providerId,
           date: { [Op.gte]: startDate, [Op.lte]: endDate }
         },
-        include: [
+        include: isOwner ? [
           {
             model: Service,
             attributes: ['businessName']
@@ -39,7 +41,7 @@ const calendarController = {
               attributes: ['username'] 
             }]
           }
-        ]
+        ] : [],
       });
 
       const availability = {};
@@ -53,26 +55,31 @@ const calendarController = {
           availability[dateKey] = {
             isAvailable: entry.isAvailable,
             status: entry.status,
-            jobId: entry.jobId,
-            customPrice: entry.customPrice
+            customPrice: entry.customPrice,
+            ...(isOwner && { jobId: entry.jobId }) // Hide jobId from seekers
           };
-        } else if (entry.status === 'booked') {
-          // Conflict data for OTHER services owned by this provider
-          externalConflicts[dateKey] = {
-            status: 'conflict',
-            serviceName: entry.Service?.businessName || 'Other Service',
-            jobId: entry.jobId,
-            clientName: entry.Job?.Client 
-              ? `${entry.Job.Client.firstName} ${entry.Job.Client.lastName}` 
-              : 'Private Booking'
+        } else if (entry.status === 'booked' || !entry.isAvailable) {
+          // DATA FROM OTHER SERVICES (CONFLICTS)
+          // To a seeker, a conflict on another service just looks like 'unavailable'
+          availability[dateKey] = {
+            isAvailable: false,
+            status: 'unavailable' 
           };
+
+          // If owner, add the detailed conflict info
+          if (isOwner) {
+            availability[dateKey].conflictDetail = {
+              serviceName: entry.Service?.businessName,
+              clientName: entry.Job?.customer?.username
+            };
+          }
         }
       });
 
       res.status(200).json({ 
         basePrice: currentService.hourlyRate || 0, 
         availability, 
-        externalConflicts, 
+        isOwner,
         availabilityWindow: currentService.availabilityWindowDays || 90 
       });
 

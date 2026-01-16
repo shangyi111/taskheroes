@@ -43,6 +43,8 @@ export class ServiceDetailsComponent implements OnInit {
   user: User | null = null;
   serviceId: string = '';
   providerId: string = '';
+  activeImageUrl: string = '';
+  currentIndex: number = 0;
   
   private route = inject(ActivatedRoute);
   private serviceDataService = inject(BusinessService);
@@ -69,6 +71,9 @@ export class ServiceDetailsComponent implements OnInit {
           // 3. Extract the providerId once service data is available
           this.providerId = service.userId; // Assuming provider ID is stored as userId in your Service model
           this.fetchReviewStats(service.id!);
+          if (service.portfolio && service.portfolio.length > 0) {
+            this.activeImageUrl = service.portfolio[0];
+          }
         }
       })
     );
@@ -108,5 +113,20 @@ handleBookingSubmission(bookingDetails: Job) {
   goBackToSearch(): void {
     // Uses the browser's history API to go back one step
     this.location.back();
+  }
+
+  setActiveImage(url: string, index: number): void {
+    this.activeImageUrl = url;
+    this.currentIndex = index;
+  }
+
+  nextSlide(portfolio: string[]): void {
+    this.currentIndex = (this.currentIndex + 1) % portfolio.length;
+    this.activeImageUrl = portfolio[this.currentIndex];
+  }
+
+  prevSlide(portfolio: string[]): void {
+    this.currentIndex = (this.currentIndex - 1 + portfolio.length) % portfolio.length;
+    this.activeImageUrl = portfolio[this.currentIndex];
   }
 }
