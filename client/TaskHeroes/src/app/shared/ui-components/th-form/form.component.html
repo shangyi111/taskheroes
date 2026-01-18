@@ -18,9 +18,9 @@
 
           @if (field.multiple && formGroup.get(field.name)?.value?.length) {
             <div class="portfolio-grid">
-              @for (url of formGroup.get(field.name)?.value; track $index) {
+              @for (img of formGroup.get(field.name)?.value; track $index) {
                 <div class="thumb">
-                  <img [src]="url" />
+                  <img [src]="img.url" />
                   <button type="button" class="remove-btn" (click)="removeFile(field.name, $index)">
                     <mat-icon>close</mat-icon>
                   </button>

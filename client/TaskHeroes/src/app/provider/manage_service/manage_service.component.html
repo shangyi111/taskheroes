@@ -10,7 +10,7 @@
       
       <div class="main-content">
         <div class="service-summary-card">
-          <img [src]="s.profilePicture" class="manage-avatar" alt="Service avatar">
+          <img [src]="s.profilePicture?.url" class="manage-avatar" alt="Service avatar">
           <div class="header-info">
             <h1 class="service-title">{{ s.businessName }}</h1>
             <div class="category-badge">
@@ -32,9 +32,9 @@
                 </div>
                 
                 <div class="manage-portfolio-grid">
-                @for (url of s.portfolio; track url) {
+                @for (img of s.portfolio; track img.public_id) {
                     <div class="portfolio-card">
-                    <img [src]="url.replace('/upload/', '/upload/w_300,h_300,c_fill,g_auto,f_auto,q_auto/')" 
+                    <img [src]="img.url.replace('/upload/', '/upload/w_300,h_300,c_fill,g_auto,f_auto,q_auto/')" 
                         alt="Portfolio item">
                     </div>
                 }

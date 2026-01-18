@@ -15,6 +15,8 @@ exports.uploadPortfolioImage = async (req, res) => {
         const stream = cloudinary.uploader.upload_stream(
           { 
             folder: targetFolder,
+            tags: 'temp_upload',
+            resource_type: 'auto',
             // Optional: optimization settings
             transformation: [{ quality: "auto", fetch_format: "auto" }] 
           },
@@ -27,8 +29,9 @@ exports.uploadPortfolioImage = async (req, res) => {
       });
     };
 
+    console.log("before upload");
     const result = await uploadToCloudinary();
-    
+    console.log("Upload Result:", result);
     res.status(200).json({ 
       url: result.secure_url,
       public_id: result.public_id 

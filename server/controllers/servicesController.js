@@ -50,6 +50,7 @@ exports.updateService = async (req, res) => {
     const serviceId = req.params.id;
     const [updatedRowCount] = await Service.update(req.body, {
       where: { id: serviceId, userId: req.user.id }, // Ensure user owns the service
+      individualHooks: true,
       returning: true, // To get the updated record
     });
 

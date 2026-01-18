@@ -10,7 +10,7 @@
       
       <div class="service-info-column">
         <div class="header-section">
-          <img class="business-avatar" [src]="service.profilePicture" alt="Profile">
+          <img class="business-avatar" [src]="service.profilePicture?.url" alt="Profile">
           <div class="header-text">
             <h1 class="business-name">{{ service.businessName }}</h1>
             <div class="badge-row">
@@ -49,11 +49,11 @@
             </div>
 
             <div class="thumbnail-row">
-              @for (img of service.portfolio; track img; let i = $index) {
+              @for (img of service.portfolio; track img.public_id; let i = $index) {
                 <div class="thumb-item" 
-                      [class.active]="activeImageUrl === img"
-                      (click)="setActiveImage(img, i)">
-                  <img [src]="img.replace('/upload/', '/upload/w_100,h_100,c_fill,q_auto/')">
+                      [class.active]="activeImageUrl === img.url!"
+                      (click)="setActiveImage(img.url!, i)">
+                  <img [src]="img.url.replace('/upload/', '/upload/w_100,h_100,c_fill,q_auto/')">
                 </div>
               }
             </div>

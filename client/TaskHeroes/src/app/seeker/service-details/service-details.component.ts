@@ -18,6 +18,7 @@ import { Service } from 'src/app/shared/models/service';
 import { Job } from 'src/app/shared/models/job';
 import { User } from 'src/app/shared/models/user';
 import { ServiceReviewsComponent } from './service-reviews/service-reviews.component';
+import { AnalyzeResponse } from 'cloudinary';
 
 @Component({
   selector: 'app-service-details',
@@ -72,7 +73,8 @@ export class ServiceDetailsComponent implements OnInit {
           this.providerId = service.userId; // Assuming provider ID is stored as userId in your Service model
           this.fetchReviewStats(service.id!);
           if (service.portfolio && service.portfolio.length > 0) {
-            this.activeImageUrl = service.portfolio[0];
+            console.log('Portfolio exists:', service.portfolio);
+            this.activeImageUrl = service.portfolio[0].url;
           }
         }
       })
@@ -120,13 +122,13 @@ handleBookingSubmission(bookingDetails: Job) {
     this.currentIndex = index;
   }
 
-  nextSlide(portfolio: string[]): void {
+  nextSlide(portfolio: any[]): void {
     this.currentIndex = (this.currentIndex + 1) % portfolio.length;
-    this.activeImageUrl = portfolio[this.currentIndex];
+    this.activeImageUrl = portfolio[this.currentIndex].url!;
   }
 
-  prevSlide(portfolio: string[]): void {
+  prevSlide(portfolio: any[]): void {
     this.currentIndex = (this.currentIndex - 1 + portfolio.length) % portfolio.length;
-    this.activeImageUrl = portfolio[this.currentIndex];
+    this.activeImageUrl = portfolio[this.currentIndex].url!;
   }
 }

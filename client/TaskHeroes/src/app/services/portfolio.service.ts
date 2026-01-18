@@ -18,4 +18,11 @@ export class PortfolioService {
 
     return this.http.post<{ url: string, public_id: string }>(`${this.apiUrl}/upload`, formData);
   }
+
+  deleteImage(publicId: string): Observable<any> {
+    // Using request body for DELETE to pass the public_id
+    return this.http.delete(`${this.apiUrl}/delete`, { 
+        body: { public_id: publicId } 
+    });
+  }
 }

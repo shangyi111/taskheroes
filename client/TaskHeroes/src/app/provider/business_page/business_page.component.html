@@ -13,7 +13,7 @@
     @for (service of services(); track service.id) {
       <mat-card class="service-card" (click)="manageService(service.id!)">
         <div class="avatar-side">
-          <img class="profile-picture" [src]="service.profilePicture" alt="profile pic for {{ service.businessName }}">
+          <img class="profile-picture" [src]="service.profilePicture?.url" alt="profile pic for {{ service.businessName }}">
         </div>
 
         <div class="business-info">

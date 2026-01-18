@@ -8,7 +8,7 @@ const authenticateToken = require('../auth/authMiddleware');
 const storage = multer.memoryStorage();
 const upload = multer({ 
   storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 } // Limit: 5MB
+  limits: { fileSize: 10 * 1024 * 1024 } // Limit: 10MB
 });
 
 router.post('/upload', authenticateToken, upload.single('file'), async (req, res) => {
@@ -24,6 +24,7 @@ router.post('/upload', authenticateToken, upload.single('file'), async (req, res
         const stream = cloudinary.uploader.upload_stream(
           { 
             folder: targetFolder,
+             tags: 'temp_upload',
             transformation: [{ width: 1000, crop: "limit", quality: "auto" }] 
           },
           (error, result) => {
@@ -46,6 +47,27 @@ router.post('/upload', authenticateToken, upload.single('file'), async (req, res
   } catch (error) {
     console.error('Upload Error:', error);
     res.status(500).json({ message: 'Upload failed', error: error.message });
+  }
+});
+
+router.delete('/delete', authenticateToken, async (req, res) => {
+  try {
+    const { public_id } = req.body;
+
+    if (!public_id) {
+      return res.status(400).json({ message: 'No public_id provided' });
+    }
+
+    // 1. Delete from Cloudinary
+    const result = await cloudinary.uploader.destroy(public_id);
+
+    if (result.result === 'ok') {
+      return res.status(200).json({ message: 'Image deleted from Cloudinary' });
+    } else {
+      return res.status(400).json({ message: 'Cloudinary deletion failed', detail: result });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server Error', error: error.message });
   }
 });
 

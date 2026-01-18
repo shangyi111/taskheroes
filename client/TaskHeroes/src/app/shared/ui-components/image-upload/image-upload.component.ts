@@ -2,6 +2,7 @@ import { Component, EventEmitter, Output, Input } from '@angular/core';
 import { PortfolioService } from 'src/app/services/portfolio.service';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
+import { Image } from 'src/app/shared/models/service';
 
 
 @Component({
@@ -18,7 +19,7 @@ export class ImageUploadComponent {
   @Input() isMultiple: boolean = false;
   @Input() folder: string = 'general';
   @Input() maxSizeMB: number = 5;
-  @Output() imageUploaded = new EventEmitter<string>();
+  @Output() imageUploaded = new EventEmitter<Image>();
 
   constructor(private portfolioService: PortfolioService) {}
 
@@ -40,15 +41,16 @@ export class ImageUploadComponent {
       // 2. Upload to Cloudinary via Backend
       this.isUploading = true;
       this.portfolioService.uploadImage(file,this.folder).subscribe({
-        next: (res) => {
+        next: (res: Image) => {
           this.isUploading = false;
-          this.imageUploaded.emit(res.url); // Send the new CDN URL to the parent form
+          this.imageUploaded.emit(res); // Send the new CDN URL to the parent form
           if (this.isMultiple) {
             this.previewUrl = null; 
           }
         },
         error: (err) => {
           this.isUploading = false;
+          this.previewUrl = null;
           console.error('Upload failed', err);
         }
       });

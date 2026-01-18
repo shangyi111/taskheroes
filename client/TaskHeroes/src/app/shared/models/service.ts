@@ -1,6 +1,10 @@
 import {Review} from 'src/app/shared/models/review';
 import {Job} from 'src/app/shared/models/job';
 
+export interface Image{
+    url: string;
+    public_id: string;
+}
 export interface Service {
     id?:string;//service id
     userId: string;
@@ -9,8 +13,8 @@ export interface Service {
     zipCode?:number;
     phoneNumber?: string;
     description?: string; 
-    profilePicture?: string; 
-    portfolio?: string[];
+    profilePicture?: Image;
+    portfolio?: Image[];
     rating?:number;
     reviews?:Review[];
     jobs?:Job[];
