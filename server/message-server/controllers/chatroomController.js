@@ -1,5 +1,5 @@
 
-const { Chatroom, ChatroomUser, Job, User } = require ('../../models');
+const { Chatroom, ChatroomUser, Job, User, Service } = require ('../../models');
 const { getIO } =require ('../../websocket/socketServer');
 
 
@@ -29,23 +29,38 @@ const getChatroomIncludes = () => {
         ['jobStatus', 'jobStatus'],
       ],
       required: false, // Job is optional (can be null for general chats)
+      include: [
+        {
+          model: Service, // Use your model name (Business or Service)
+          as: 'Service',   // This must match the alias in your Job -> Service association
+          attributes: ['businessName'],
+        }
+      ]
     }
   ];
 };
 
 // --- Helper function to map the joined data into the Frontend's ExtendedChatroom format ---
 // This is the CRITICAL step to match the frontend structure
-const mapChatroomData = (chatroom) => {
+const mapChatroomData = (chatroom, currentUserId = null) => {
     if (!chatroom) return null;
     
     // Convert Sequelize instance to plain object
     const data = chatroom.get({ plain: true });
 
+    // If the viewer is the Provider, the "Name" is the Customer's username.
+    // If the viewer is the Customer, the "Name" is the Business Name from the Job's Service (if exists), otherwise the Provider's username.
+    let displayName = "Chatroom";
+    if (currentUserId) {
+        displayName = (currentUserId == data.providerId) 
+            ? data.Customer.username 
+            : data.Job?.Service?.businessName || data.Provider.username;
+    }
     return {
         // Core Chatroom Fields
         ...data,
         jobId: data.jobId, // Ensure jobId is present
-        
+        name: displayName,
         // User Context (Provider/Seeker)
         customerUsername: data.Customer.username,
         providerUsername: data.Provider.username,
@@ -59,6 +74,7 @@ const mapChatroomData = (chatroom) => {
         jobLocation: data.Job?.jobLocation || null,
         fee: data.Job?.fee || null,
         description: data.Job?.description || null,
+        lastReadByMe: currentUserId === data.providerId ? data.lastReadByProvider : data.lastReadByCustomer
     };
 };
 
@@ -71,7 +87,7 @@ exports.createChatroom = async (req, res) => {
       return res.status(400).json({ message: 'Missing required chatroom fields: name, customerId, or providerId' });
     }
 
-    const chatroom = await Chatroom.create({
+    let chatroom = await Chatroom.create({
       name,
       jobId: jobId || null,
       customerId,
@@ -104,7 +120,7 @@ exports.getChatroomsForProvider = async (req, res) => {
     });
 
     if (chatrooms && chatrooms.length > 0) {
-      const mappedChatrooms = chatrooms.map(mapChatroomData);
+      const mappedChatrooms = chatrooms.map(room => mapChatroomData(room, providerId));
       res.json(mappedChatrooms);
     } else {
       res.status(404).json({ message: 'No chatrooms found for this provider' });
@@ -129,7 +145,13 @@ exports.getChatroomsForCustomer = async (req, res) => {
     });
 
     if (chatrooms && chatrooms.length > 0) {
-      const mappedChatrooms = chatrooms.map(mapChatroomData);
+      const mappedChatrooms = chatrooms.map(room => {
+
+        const mapped = mapChatroomData(room, customerId);
+        // Logic: If activity is newer than the last time I read it, it's unread
+        mapped.hasUnread = room.lastActivityAt > (room.lastReadByCustomer || 0);
+        return mapped;
+      });
       res.json(mappedChatrooms);
     } else {
       res.status(404).json({ message: 'No chatrooms found for this customer' });
@@ -204,6 +226,27 @@ exports.getChatroomById = async (req, res) => {
   } catch (err) {
     console.error('Error retrieving chatroom by ID:', err);
     res.status(500).json({ message: 'Internal Server Error', error: err.message });
+  }
+};
+
+exports.markAsRead = async (req, res) => {
+  try {
+    const { chatroomId } = req.params;
+    const userId = req.user.id; // From your auth middleware
+
+    const chatroom = await Chatroom.findByPk(chatroomId);
+    if (!chatroom) return res.status(404).json({ message: 'Chatroom not found' });
+
+    // Update the correct column based on the user's role in this chat
+    if (userId === chatroom.customerId) {
+      await chatroom.update({ lastReadByCustomer: new Date() });
+    } else if (userId === chatroom.providerId) {
+      await chatroom.update({ lastReadByProvider: new Date() });
+    }
+
+    res.status(200).json({ message: 'Marked as read' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
 

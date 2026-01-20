@@ -33,13 +33,13 @@ export class JobService {
     return this.http.get<Job[]>(`${this.API_URL_SEEKER}/seeker/${customerId}`);
   }
 
-  createJob(jobData: Job): Observable<Job> {
+  createJob(jobData: Job): Observable<{job:Job, chatroomId:number}> {
     const token = localStorage.getItem(this.AUTH_TOKEN_KEY);
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     });
-    return this.http.post<any>(this.API_URL_PROVIDER, jobData, { headers });
+    return this.http.post<{ job: Job, chatroomId: number }>(this.API_URL_JOB, jobData, { headers });
   }
 
   updateJob(id: string, jobData: Job): Observable<Job> {
@@ -48,7 +48,7 @@ export class JobService {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     });
-    return this.http.put<any>(`${this.API_URL_PROVIDER}/${id}`, jobData, { headers });
+    return this.http.put<any>(`${this.API_URL_JOB}/${id}`, jobData, { headers });
   }
 
   deleteJob(id: string): Observable<Job> {

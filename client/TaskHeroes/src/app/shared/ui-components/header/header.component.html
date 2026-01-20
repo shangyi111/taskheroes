@@ -1,42 +1,67 @@
-<header>
+<header class="th-header">
   <nav class="nav-container">
-    @if (isLoggedIn()) {
-      @if (this.userData$ | async; as user) {
-        <div class="logo-group">
-          <a [routerLink]="['/user', user.id]" class="brand">TaskHeroes</a>
-          <span class="role-badge">{{ user.role }}</span>
-        </div>
+    <div class="logo-group">
+      <a routerLink="/search" class="brand">TaskHeroes</a>
+    </div>
 
-        <div class="menu">
-          @if (user.role === 'seeker') {
-            <a [routerLink]="['/user', user.id, 'seeker']">Search</a>
-            <a [routerLink]="['/user', user.id, 'seeker','orders']">Orders</a>
-            <a [routerLink]="['/seeker', user.id, 'chatrooms']">Messages</a>
+    <div class="menu">
+      @if (isLoggedIn()) {
+        @if (userData$ | async; as user) {
+          <a routerLink="/search" routerLinkActive="active-link">Search</a>
+          <a [routerLink]="getMessagesLink(user)" routerLinkActive="active-link">Messages</a>
+
+          @if (user.role === 'provider') {
+            <a [routerLink]="['/provider', user.id]" routerLinkActive="active-link">Business</a>
+            <a [routerLink]="['/provider', user.id, 'jobs']" routerLinkActive="active-link">Jobs</a>
           } @else {
-            <a [routerLink]="['/user', user.id, 'provider']">Business Page</a>
-            <a [routerLink]="['/user', user.id, 'provider','jobs']">Jobs</a>
-            <a [routerLink]="['/provider', user.id, 'chatrooms']">Messages</a>
+            <a [routerLink]="['/seeker', user.id, 'orders']" routerLinkActive="active-link">Orders</a>
           }
-          <a [routerLink]="['/user', user.id, 'profile']">Profile</a>
 
           <div class="nav-divider"></div>
 
-          <button class="switch-btn" (click)="toggleRole(user)">
+          <button class="role-switch-btn" 
+                  [class.is-provider]="user.role === 'provider'"
+                  (click)="toggleRole(user)">
+            <span class="icon">⇄</span>
             Switch to {{ user.role === 'seeker' ? 'Provider' : 'Seeker' }}
           </button>
 
-          <button class="logout-btn" (click)="logout()">Logout</button>
+          <div class="profile-container">
+            <button class="avatar-circle" (click)="toggleMenu()">
+              {{ (user.username || '').charAt(0).toUpperCase() }}
+            </button>
+          </div>
+          @if (isMenuOpen()) {
+            <div class="dropdown-menu">
+              <div class="dropdown-header">
+                <p class="user-display-name">{{ user.username }}</p>
+                <p class="user-email">{{ user.email }}</p>
+              </div>
+
+              <div class="menu-items">
+                <a [routerLink]="['/user', user.id, 'profile']" (click)="isMenuOpen.set(false)" class="menu-item">
+                  <span class="item-icon">👤</span> Account Settings
+                </a>
+                
+                <a [routerLink]="['/user', user.id, 'security']" (click)="isMenuOpen.set(false)" class="menu-item">
+                  <span class="item-icon">🔒</span> Password & Security
+                </a>
+
+                <div class="menu-divider"></div>
+
+                <button (click)="logout()" class="menu-item logout-item">
+                  <span class="item-icon">🚪</span> Logout
+                </button>
+              </div>
+            </div>
+          }
+        }
+      } @else {
+        <div class="auth-group">
+          <a routerLink="/login">Login</a>
+          <a routerLink="/register" class="btn-primary">Join TaskHeroes</a>
         </div>
       }
-    } @else {
-      <div class="logo-group">  
-        <a routerLink="/login" class="brand">TaskHeroes</a>
-      </div>
-      
-      <div class="menu">
-        <a routerLink="/login">Login</a>
-        <a routerLink="/register" class="register-link">Register</a>
-      </div>
-    }
+    </div>
   </nav>
 </header>

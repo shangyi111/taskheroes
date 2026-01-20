@@ -21,16 +21,40 @@ export class LoginComponent {
   private router = inject(Router);
 
   onSubmit() {
-    this.errorMessage = null;
-    const confidential:User = { email: this.email, password: this.password };
-    this.authService.login(confidential).subscribe({
-      next: (user:User) => {
-        this.userDataService.setUserData(user);
-        this.router.navigate([`/user/${user.id}`]);
-      },
-      error: (error) => {
-        this.errorMessage = error.error.message;
-      },
-    });
-  }
+  this.errorMessage = null;
+  const confidential: User = { email: this.email, password: this.password };
+  
+  this.authService.login(confidential).subscribe({
+    next: (user: User) => {
+      
+      // 2. Remember the role for this device
+      // You can check if a preference already exists, otherwise use the user's default
+      const storageRole = localStorage.getItem('preferred_role');
+      const userRole = user?.role;
+      let savedRole: string;
+
+      if (storageRole === 'provider' || userRole === 'provider') {
+        savedRole = 'provider';
+      } else if (storageRole === 'seeker' || userRole === 'seeker') {
+        savedRole = 'seeker';
+      } else {
+        // 3. Fallback: If it's the string "undefined", null, or anything else
+        savedRole = 'seeker';
+      }
+      localStorage.setItem('preferred_role', savedRole!);
+
+      const finalizedUser = { ...user, role: savedRole };
+      this.userDataService.setUserData(finalizedUser);
+      // 3. Smart Redirection based on stored role
+      if (savedRole === 'provider') {
+        this.router.navigate(['/provider', user.id]); 
+      } else {
+        this.router.navigate(['/search']); // Standard Seeker landing
+      }
+    },
+    error: (error) => {
+      this.errorMessage = error.error?.message || 'Login failed';
+    },
+  });
+}
 }

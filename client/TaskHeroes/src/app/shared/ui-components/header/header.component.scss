@@ -5,58 +5,48 @@ header {
   display: flex;
   align-items: center;
   border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-  box-shadow: var(--card-shadow);
+  position: relative;
+  z-index: 1000;
 }
 
 .nav-container {
   width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.logo-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  .brand {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: var(--text-primary); // CadetBlue
-    text-decoration: none;
-    margin: 0;
-  }
-
-  .role-badge {
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    background: rgba(95, 158, 160, 0.1);
-    color: var(--text-primary);
-    padding: 2px 8px;
-    border-radius: 4px;
-  }
+.brand {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #00a896; // TaskHeroes Teal
+  text-decoration: none;
 }
 
 .menu {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 
   a {
-    color: var(--blue-gray);
-    font-weight: 500;
-    font-size: 0.9rem;
+    color: #4a5568;
+    font-weight: 600;
+    font-size: 0.95rem;
     text-decoration: none;
-    padding: 8px 12px;
-    border-radius: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
     transition: all 0.2s;
 
     &:hover {
-      color: var(--text-primary);
-      background: rgba(95, 158, 160, 0.05);
+      color: #00a896;
+      background: rgba(0, 168, 150, 0.05);
+    }
+
+    &.active-link {
+      color: #00a896;
+      background: rgba(0, 168, 150, 0.08);
     }
   }
 }
@@ -68,36 +58,120 @@ header {
   margin: 0 10px;
 }
 
-/* --- Action Buttons --- */
-.switch-btn {
-  background: transparent;
-  border: 1px solid var(--text-primary);
-  color: var(--text-primary);
-  font-weight: 600;
-  font-size: 0.85rem;
-  padding: 6px 14px;
-  border-radius: 8px;
+/* Avatar and Dropdown */
+.profile-container {
+  position: relative;
+}
+
+.avatar-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #00a896;
+  color: white;
+  border: none;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 168, 150, 0.3);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  width: 200px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  border: 1px solid #edf2f7;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+
+  .dropdown-header {
+    padding: 12px;
+    border-bottom: 1px solid #f7fafc;
+    .user-display-name {
+      margin: 0;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #1a202c;
+    }
+    .user-email {
+      margin: 2px 0 0;
+      font-size: 0.8rem;
+      color: #718096;
+    }
+  }
+
+  .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      font-size: 0.9rem;
+      color: #4a5568;
+      text-decoration: none;
+      border-radius: 8px;
+      width: 100%;
+      text-align: left;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      transition: background 0.2s;
+
+      &:hover { background: #f7fafc; color: #00a896; }
+      
+      &.logout-item:hover {
+        background: #fff5f5;
+        color: #e53e3e;
+      }
+    }
+
+  .menu-divider { height: 1px; background: #edf2f7; margin: 4px 0; }
+}
+
+.role-switch-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  
+  // Default: Seeker looking to switch to Provider
+  background-color: #ffffff;
+  color: #00a896; // TaskHeroes Teal
+  border: 2px solid #00a896;
+
+  .icon { font-size: 1.1rem; }
 
   &:hover {
-    background: var(--text-primary);
+    background-color: #00a896;
     color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 168, 150, 0.2);
+  }
+
+  // Active Provider looking to switch to Seeker
+  &.is-provider {
+    color: #4a5568; // Professional Gray/Slate
+    border-color: #4a5568;
+    
+    &:hover {
+      background-color: #4a5568;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(74, 85, 104, 0.2);
+    }
   }
 }
 
-.logout-btn {
-  background-color: #f2f4f7;
-  color: #44474e;
-  font-weight: 600;
-  font-size: 0.85rem;
-  padding: 6px 14px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-
-  &:hover {
-    background-color: #fee4e2;
-    color: #d92d20; // Soft red logout
-  }
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

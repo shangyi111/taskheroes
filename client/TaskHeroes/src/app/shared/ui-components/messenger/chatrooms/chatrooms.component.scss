@@ -1,109 +1,100 @@
+.chatrooms-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
 
-.message-list-container {
-    padding: var(--dashboard-padding);
-    background-color: var(--dashboard-bg);
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .message-list {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 2rem 0;
-    flex-grow: 1;
-    overflow-y: auto;
-  }
-  
-  .message-item {
-    padding: 1rem;
-    background-color: #fff;
-    border: 1px solid var(--card-border);
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    box-shadow: var(--card-shadow);
-    animation: fadeIn 0.2s ease-in-out;
-  }
-  
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-5px);
+  .header-section {
+    margin-bottom: 1.5rem;
+    .chatrooms-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #333;
+      margin: 0;
     }
-    to {
-      opacity: 1;
-      transform: translateY(0);
+    .chat-count {
+      color: #666;
+      font-size: 0.9rem;
     }
   }
-  
-  .message-header {
-    display: flex;
-    align-items: baseline;
-    margin-bottom: 0.5rem;
+}
+
+.chat-list-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.chatroom-item {
+  display: flex;
+  align-items: center;
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background-color: #f0f9f8; // Light teal tint
   }
-  
-  .sender {
-    font-size: var(--text-font-size);
+
+  .avatar-circle {
+    width: 50px;
+    height: 50px;
+    background-color: #00a896; // Your TaskHeroes Teal
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
     font-weight: bold;
-    margin-right: 0.5rem;
-    color: var(--primary-blue);
+    margin-right: 1.25rem;
   }
-  
-  .timestamp {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-  }
-  
-  .message-content {
-    font-size: var(--text-font-size);
-    color: var(--text-primary);
-    p {
-      margin-bottom: 0;
+
+  .chatroom-info {
+    flex: 1;
+
+    .info-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.25rem;
+    }
+
+    .chatroom-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 0;
+      color: #2c3e50;
+    }
+
+    .job-badge {
+      font-size: 0.75rem;
+      background: #e0e0e0;
+      padding: 2px 8px;
+      border-radius: 4px;
+      color: #555;
+    }
+
+    .last-message {
+      margin: 0;
+      color: #7f8c8d;
+      font-size: 0.9rem;
     }
   }
-  
-  .empty-message {
-    font-size: var(--text-font-size);
-    color: var(--text-secondary);
-    text-align: center;
-  }
-  
-  .new-message-input-area {
-    display: flex;
-    gap: 0.5rem;
-  
-    input {
-      flex: 1;
-      padding: 0.75rem;
-      border: 1px solid var(--card-border);
-      border-radius: 6px;
-      font-size: 1rem;
-      &:focus {
-        outline: none;
-        border-color: var(--primary-blue);
-        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-      }
-    }
-  
-    button {
-      padding: 0.75rem 1.5rem;
-      background-color: var(--primary-blue);
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background-color 0.2s ease-in-out;
-      &:hover {
-        filter: brightness(90%);
-      }
-      &:disabled {
-        background-color: #cccccc;
-        cursor: not-allowed;
-        &:hover {
-          background-color: #cccccc;
-        }
-      }
-    }
-  }
-  
+}
+
+.divider {
+  border: 0;
+  border-top: 1px solid #eee;
+  margin: 0;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: #f9f9f9;
+  border-radius: 12px;
+  border: 2px dashed #ddd;
+
+  .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+}

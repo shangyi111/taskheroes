@@ -63,7 +63,6 @@ $breakpoint-md: 768px;
     box-shadow: var(--card-shadow);
 
     .mobile-menu-toggle {
-        display: none;
         @include button-reset();
         font-size: var(--title-font-size); /* Using a more appropriate font size from :root */
         color: var(--text-primary);

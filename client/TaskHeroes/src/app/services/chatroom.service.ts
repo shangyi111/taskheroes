@@ -132,4 +132,9 @@ export class ChatroomService {
     console.error(`Error in ChatroomService: ${errorMessage}`);
     return throwError(() => new Error(errorMessage));
   }
+
+  markAsRead(chatroomId: string, userId: string): Observable<any> {
+    // We pass the userId in the body so the backend knows which 'lastRead' column to update
+    return this.http.patch(`${this.CHATROOMS_API_URL}/${chatroomId}/read`, { userId });
+  }
 }

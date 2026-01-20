@@ -70,7 +70,7 @@ export class ChatroomsComponent implements OnInit, OnDestroy {
   goToChatroom(chatroom: Chatroom): void {
     const currentUserId = this.user()?.id; // Get the current user's ID from the signal
     if (currentUserId) {
-      this.router.navigate(['user',currentUserId,'job',chatroom.jobId,'chatroom',chatroom.id]);
+      this.router.navigate(['chatroom',chatroom.id]);
     } else {
       console.warn('Cannot navigate to chatroom: User ID or role not available.');
     }

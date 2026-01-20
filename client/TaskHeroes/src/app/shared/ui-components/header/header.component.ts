@@ -1,16 +1,15 @@
-import { Router,RouterLink,RouterModule} from '@angular/router';
-import { AuthService } from 'src/app/auth/auth.service'; 
-import { Component, inject, Pipe, PipeTransform } from '@angular/core';
-import { CommonModule } from '@angular/common'; 
+import { Component, inject, signal } from '@angular/core';
+import { Router, RouterLink, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
+import { AuthService } from 'src/app/auth/auth.service';
 import { UserDataService } from 'src/app/services/user_data.service';
-import {User} from 'src/app/shared/models/user';
-
+import { User } from 'src/app/shared/models/user';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterLink,CommonModule,RouterModule],
+  imports: [RouterLink, CommonModule, RouterModule],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
 })
@@ -18,28 +17,45 @@ export class HeaderComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
   private userDataService = inject(UserDataService);
-  readonly userData$ : Observable<User | null>= inject(UserDataService).userData$;
+  
+  readonly userData$: Observable<User | null> = this.userDataService.userData$;
+  
+  // Signal to manage the dropdown visibility
+  isMenuOpen = signal(false);
 
   isLoggedIn(): boolean {
     return this.authService.isAuthenticated();
   }
 
+  toggleMenu(): void {
+    this.isMenuOpen.update(v => !v);
+  }
+
+  getMessagesLink(user: User): any[] {
+    // Dynamic routing based on the active role
+    return [user.role === 'provider' ? '/provider' : '/seeker', user.id, 'chatrooms'];
+  }
+
   toggleRole(currentUser: User): void {
     if (!currentUser?.id) {
-      console.error('User ID is undefined. Redirecting to login.');
       this.logout();
       return;
     }
     const newRole = currentUser.role === 'seeker' ? 'provider' : 'seeker';
-    
-    // 1. Update the global state so the header UI updates immediately
+    localStorage.setItem('preferred_role', newRole);
     this.userDataService.updateUserData({ ...currentUser, role: newRole });
+    this.isMenuOpen.set(false); // Close menu after switching
 
-    // 2. Navigate the user to their new dashboard
-    this.router.navigate(['user', currentUser.id, newRole]);
+    // Redirect to the role's primary context
+    if (newRole === 'provider') {
+      this.router.navigate(['user', currentUser.id, 'provider']);
+    } else {
+      this.router.navigate(['/search']);
+    }
   }
 
   logout(): void {
+    this.isMenuOpen.set(false);
     this.authService.logout();
     this.router.navigate(['/login']);
   }

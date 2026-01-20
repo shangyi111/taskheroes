@@ -76,7 +76,7 @@ export class AddServiceDialogComponent {
           } else {
             this.businessService.createService(serviceData).subscribe(createdService => {
                 this.dialogRef.close(true);
-                this.router.navigate(['user', user.id, 'provider', 'manage', createdService.id]);
+                this.router.navigate(['provider', user.id, 'manage', createdService.id]);
             });
         }
         }

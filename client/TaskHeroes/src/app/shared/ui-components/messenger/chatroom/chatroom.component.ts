@@ -145,7 +145,15 @@ export class ChatroomComponent implements OnInit, OnDestroy {
           this.isLoading.set(true);
           this.error.set(null);
           
-          return this.loadChatroomAndMessages(chatroomId, userId);
+          return this.loadChatroomAndMessages(chatroomId, userId).pipe(
+            // Step B: TINY STEP - Mark as read in the background
+            tap(() => {
+              this.chatroomService.markAsRead(chatroomId, userId).subscribe({
+                next: () => console.log('Chat marked as read'),
+                error: (err) => console.error('Failed to mark as read', err)
+              });
+            })
+          );
         }),
         
         catchError(err => {
@@ -233,6 +241,10 @@ export class ChatroomComponent implements OnInit, OnDestroy {
       filter(message => message.chatroomId === chatroomId),
       tap(message => {
         console.log('Received new real-time message:', message);
+        const userId = this.currentUser()?.id;
+        if (userId) {
+            this.chatroomService.markAsRead(chatroomId, userId).subscribe();
+        }
         this.messages.update(msgs => {
           if (!msgs.some(m => m.id === message.id)) {
             return [...msgs, message];
@@ -308,23 +320,14 @@ export class ChatroomComponent implements OnInit, OnDestroy {
   }
 
   backToChatList(): void {
-    const userId = this.currentUser()!.id;
-    const userRole = this.currentUser()!.role; 
-    
-    if (userId && userRole) {
-      if (userRole === 'provider') {
-        this.router.navigate(['/provider', userId, 'chatrooms']);
-      } else if (userRole === 'seeker') {
-        this.router.navigate(['/seeker', userId, 'chatrooms']);
-      } else {
-        console.warn(`Unrecognized user role: ${userRole}. Navigating to generic chatrooms list.`);
-        this.router.navigate(['/chatrooms']);
-      }
-    } else {
-      console.warn('Current user ID or role is not available. Cannot navigate back to a specific chat list.');
-      this.router.navigate(['/chatrooms']);
-    }
+  const user = this.currentUser();
+  if (user?.id && user?.role) {
+    // Navigates to /seeker/:id/chatrooms or /provider/:id/chatrooms
+    this.router.navigate([`/${user.role}`, user.id, 'chatrooms']);
+  } else {
+    this.router.navigate(['/search']); // Safe fallback
   }
+}
 
   isMyMessage(senderId: string): boolean {
     return senderId === this.currentUser()!.id;

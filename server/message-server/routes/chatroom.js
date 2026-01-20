@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const chatroomController = require('../controllers/chatroomController');
+const authMiddleware = require('../../auth/authMiddleware');
 
 
 // Routes for chatrooms list for certain provider
@@ -19,5 +20,9 @@ router.route('/job/:jobId')
 
 router.route('')
   .post(chatroomController.createChatroom);
+
+// Mark chatroom as read (The new optimized feature)
+// Using PATCH because we are partially updating the chatroom record
+router.patch('/:chatroomId/read', authMiddleware, chatroomController.markAsRead);
 
 module.exports = router;

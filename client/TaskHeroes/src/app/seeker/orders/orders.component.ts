@@ -150,7 +150,7 @@ export class OrdersComponent {
       )
       .subscribe({
         next: (chatRoom: Chatroom) => {
-          this.router.navigate(['user', job.customerId, 'job', job.id, 'chatroom', chatRoom.id]);
+          this.router.navigate([ 'chatroom', chatRoom.id]);
         },
         error: (err) => {
           console.error('Failed to contact provider:', err);

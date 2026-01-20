@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { Location, CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -48,6 +49,7 @@ export class ServiceDetailsComponent implements OnInit {
   currentIndex: number = 0;
   
   private route = inject(ActivatedRoute);
+  private routeNavigator = inject(Router);
   private serviceDataService = inject(BusinessService);
   private reviewService = inject(ReviewService);
   private jobService = inject(JobService);
@@ -73,7 +75,6 @@ export class ServiceDetailsComponent implements OnInit {
           this.providerId = service.userId; // Assuming provider ID is stored as userId in your Service model
           this.fetchReviewStats(service.id!);
           if (service.portfolio && service.portfolio.length > 0) {
-            console.log('Portfolio exists:', service.portfolio);
             this.activeImageUrl = service.portfolio[0].url;
           }
         }
@@ -85,13 +86,14 @@ export class ServiceDetailsComponent implements OnInit {
 handleBookingSubmission(bookingDetails: Job) {
   // This is where the actual backend service call happens
   this.jobService.createJob(bookingDetails).subscribe({
-    next: (response) => {
+    next: (response:{job:Job, chatroomId:number}) => {
       console.log('Booking submitted successfully!', response);
-      // Show success message, redirect to confirmation page
+      // Show success message, redirect chatroom
+      this.routeNavigator.navigate(['/chatroom', response.chatroomId]);
     },
     error: (err) => {
       console.error('Booking failed:', err);
-      // Show error message
+      alert(err.error.message || 'Booking failed. Please try again.');
     }
   });
 }

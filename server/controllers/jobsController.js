@@ -1,10 +1,13 @@
-const { Job } = require('../models/job');
+const { Job, Chatroom } = require('../models');
 const {
   sendJobUpdated,
   sendJobCreated,
   sendJobDeleted,
 } = require('../websocket/handlers/jobHandler');
-
+const { Op } = require('sequelize');
+const {
+  sendChatroomCreated,
+} = require('../message-server/realtime/notification-handler');
 
 exports.getJobById = async (req, res) => {
   try {
@@ -69,12 +72,49 @@ exports.getJobsByCustomerId = async (req, res) => {
 // Create a new job
 exports.createJob = async (req, res) => {
   try {
-    const newJob = await Job.create({ ...req.body});
-    res.status(201).json(newJob);
+    // 2. Strict Check: Same customer, Same provider, Same service, Same day
+    const existingJob = await Job.findOne({
+      where: {
+        customerId: req.body.customerId,
+        performerId: req.body.performerId,
+        serviceId: req.body.serviceId,
+        jobStatus: {
+          [Op.not]: 'cancelled' // Allow a new request if the old one was cancelled
+        },
+        jobDate: req.body.jobDate,
+      }
+    });
+
+    if (existingJob) {
+      return res.status(400).json({ 
+        message: `You already have a ${existingJob.jobStatus} request for this service on ${existingJob.jobDate}.` 
+      });
+    }
+
+    // 2. Create the Job (defaultValue 'pending' handles the status)
+    const newJob = await Job.create({ ...req.body });
+    // 3. Create a NEW Chatroom for this specific Job
+    const chatroom = await Chatroom.create({
+      jobId: newJob.id,
+      customerId: req.body.customerId,
+      providerId: req.body.performerId,
+      name: `Chat for ${newJob.jobTitle || 'New Job'}` // Optional: give it a name
+    });
+
+    // 4. Return the consolidated response
+    res.status(201).json({ 
+      job: newJob, 
+      chatroomId: chatroom.id 
+    });
+
+    // 5. Trigger your real-time socket notification
     sendJobCreated(newJob);
+    sendChatroomCreated(chatroom); 
+
   } catch (error) {
-    console.log(error);
-    const message = error.errors[0].message;
+    console.error('Create Job Error:', error);
+    // Safety check for Sequelize error structure
+    const message = error.errors ? error.errors[0].message : 'Could not process request';
     res.status(400).json({ message });
   }
 };

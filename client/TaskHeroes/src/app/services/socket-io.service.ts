@@ -94,7 +94,6 @@ export class SocketIoService implements OnDestroy {
   onUserEvent<T>(type: string): Observable<T> {
     return new Observable<T>((subscriber) => {
       const handler = (payload: { type: string; data: T }) => {
-        console.log("testing handler", handler);
         if (payload.type === type) {
           subscriber.next(payload.data);
         }
