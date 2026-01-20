@@ -1,5 +1,7 @@
 const authService = require('./authService'); // Assuming you create this file
-
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client(process.env.GOOGLE_AUTH_CLIENT_ID);
+const User = require('../models/user');
 // Signup controller
 const signup = async (req, res) => {
   try {
@@ -28,4 +30,39 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { signup, login };
+const googleLogin = async (req, res) => {
+  const { idToken } = req.body;
+
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_AUTH_CLIENT_ID, 
+    });
+    const payload = ticket.getPayload();
+    
+    // payload contains: email, name, picture, sub (unique google id)
+    const { email, name, picture, sub } = payload;
+
+    // 1. Find or Create User in your DB
+    let user = await User.findOne({ where: { email } });
+    if (!user) {
+      user = await User.create({ 
+        username: name, 
+        email, 
+        googleId: sub,
+        profilePicture: picture,
+        role: 'seeker' // Default role, adjust as needed
+      });
+    }
+
+    // 2. Generate your own JWT for the session
+    const token = authService.generateToken(user);
+    res.json({ user, token });
+
+  } catch (error) {
+    console.log('Google login error: ', error);
+    res.status(401).json({ message: 'Invalid Google Token' });
+  }
+};
+
+module.exports = { signup, login, googleLogin };

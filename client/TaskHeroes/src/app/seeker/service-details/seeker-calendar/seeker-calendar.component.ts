@@ -323,7 +323,7 @@ generateCalendar(): void {
       hourlyRate: Number(this.selectedDateData.availability.customPrice),
       category:this.service.category,
       jobTitle:this.service.businessName,
-      customerId:this.user.id,
+      customerId:this.user?.id,
       description:this.seekerJobDescription.trim(),
     };
     

@@ -39,7 +39,6 @@ export const routes: Routes = [
   {
     path: 'service/:serviceId',
     component: ServiceDetailsComponent,
-    canActivate: [AuthGuard],
   },
   { 
     path: 'chatroom/:chatroomId', 

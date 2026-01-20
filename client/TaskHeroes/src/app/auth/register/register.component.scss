@@ -1,16 +1,21 @@
 :host {
   display: block;
-  width: 300px;
+  max-width: 400px;
   margin: 50px auto;
   padding: 20px;
-  border: 1px solid #ccc;
+  border:none;
   border-radius: 5px;
-  background-color: #f9f9f9;
+  background-color: var(--dashboard-bg);
 }
 
 h2 {
-  text-align: center;
-  margin-bottom: 20px;
+    font-size: var(--heading-font-size);
+    font-weight: 300;
+    margin-bottom: var(--welcome-margin-bottom);
+    letter-spacing: -0.5px;
+    color:var(--text-primary);
+    font-family:var(--global-font-family);
+    text-align: center;
 }
 
 form div {
@@ -21,6 +26,8 @@ label {
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
+  color: var(--text-primary);
+  font-family:var(--global-font-family);
 }
 
 input[type="text"],
@@ -31,33 +38,48 @@ input[type="email"] {
   border: 1px solid #ddd;
   border-radius: 3px;
   box-sizing: border-box;
+  font-family: var(--global-font-family);
 }
 
 button[type="submit"] {
-  background-color: #28a745;
+  background-color: var(--text-primary);
   color: white;
   padding: 10px 15px;
   border: none;
   border-radius: 3px;
   cursor: pointer;
   font-size: 1em;
+  width:97%;
 }
 
 button[type="submit"]:hover {
-  background-color: #1e7e34;
+  background-color: lightseagreen;
 }
 
 p {
   margin-top: 15px;
   text-align: center;
   font-size: 0.9em;
+  font-family: var(--global-font-family);
+  color: var(--text-primary);
 }
 
 a {
-  color: #28a745;
+  color: var(--primary-blue);
   text-decoration: none;
 }
 
 a:hover {
   text-decoration: underline;
 }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+} 

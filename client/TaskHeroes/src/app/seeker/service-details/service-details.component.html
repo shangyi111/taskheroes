@@ -103,3 +103,41 @@
   <app-service-reviews [serviceId]="service.id"></app-service-reviews>
 </div>
 }
+
+@if (showAuthOptions()) {
+  <div class="modal-overlay">
+    <div class="choice-card">
+      <button class="close-btn" (click)="showAuthOptions.set(false)">
+        <mat-icon>close</mat-icon>
+      </button>
+
+      <h2>Complete Your Request</h2>
+      <p>Sign in to message the provider directly and track your booking in real-time.</p>
+
+      <div class="actions">
+       <div id="google-btn-container"></div>
+
+        <button mat-stroked-button (click)="redirectToRegister()">
+          Create Account / Sign In
+        </button>
+
+        <div class="divider">
+          <span>OR</span>
+        </div>
+
+        <div class="guest-section">
+          <p class="guest-label">Continue as guest (email only)</p>
+          <div class="guest-input-group">
+            <input type="email" #guestEmail placeholder="Enter your email" />
+            <button mat-flat-button color="accent" 
+                    [disabled]="isSubmitting()"
+                    (click)="submitAsGuest(guestEmail.value)">
+              {{ isSubmitting() ? 'Sending...' : 'Send Request' }}
+            </button>
+          </div>
+          <small>Note: You won't be able to use the live chat as a guest.</small>
+        </div>
+      </div>
+    </div>
+  </div>
+}

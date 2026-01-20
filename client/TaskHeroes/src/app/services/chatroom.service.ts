@@ -5,6 +5,7 @@ import { Chatroom } from '../../app/shared/models/chatroom';
 import { Message } from '../shared/models/message';
 import { catchError, throwError } from 'rxjs';
 import { SocketIoService } from './socket-io.service';
+import { filter, take } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -86,7 +87,10 @@ export class ChatroomService {
    */
   joinChatroomSocket(chatroomId: string): void {
     // Ensure socket is connected before emitting
-    this.socketIoService.isConnected$.subscribe(connected => {
+    this.socketIoService.isConnected$.pipe(
+      filter(connected => connected === true), // Wait until connected is true
+      take(1) // Only do this once
+    ).subscribe(connected => {
       if (connected) {
         this.socketIoService.emit('joinChatroom', { chatroomId });
         console.log(`Emitting joinChatroom for ${chatroomId}`);

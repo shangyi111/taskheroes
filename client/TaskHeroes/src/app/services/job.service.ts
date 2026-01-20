@@ -10,7 +10,7 @@ import {map} from 'rxjs/operators';
 })
 
 export class JobService {
-  private readonly API_URL_PROVIDER = 'http://localhost:3000/api/provider/job';
+  private readonly API_URL_PROVIDER = 'http://localhost:3000/api/job';
   private readonly API_URL_JOB = 'http://localhost:3000/api/job';
   private readonly API_URL_SEEKER = 'http://localhost:3000/api/order';
   private readonly AUTH_TOKEN_KEY = AUTH_TOKEN_KEY;

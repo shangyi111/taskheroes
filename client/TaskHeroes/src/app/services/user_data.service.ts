@@ -3,14 +3,21 @@ import { BehaviorSubject , shareReplay, Observable, of} from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { User } from 'src/app/shared/models/user';
 import { catchError } from 'rxjs/operators';
+import { AUTH_TOKEN_KEY } from '../shared/constants';
 
 const API_BASE_URL = 'http://localhost:3000/api/user';
 @Injectable({
   providedIn: 'root',
 })
 export class UserDataService {
+  private readonly GUEST_USER: User = {
+    id: undefined,
+    role: 'seeker',
+    username: 'Guest'
+  };
+
   private http = inject(HttpClient);
-  private userDataSubject = new BehaviorSubject<User|null>({});
+  private userDataSubject = new BehaviorSubject<User|null>(this.GUEST_USER);
   userData$ = this.userDataSubject.asObservable().pipe(
       shareReplay({ bufferSize: 1, refCount: true })
   );
@@ -20,7 +27,8 @@ export class UserDataService {
   }
 
   getUserData(): User | null{
-    return this.userDataSubject.getValue();
+    const user = this.userDataSubject.getValue();
+    return user || this.GUEST_USER;
   }
 
   updateUserData(userData: Partial<User>): void {
@@ -31,6 +39,7 @@ export class UserDataService {
 
   removeUserData():void{
     this.userDataSubject.next(null);
+    localStorage.removeItem(AUTH_TOKEN_KEY);
   }
 
   /**

@@ -1,16 +1,16 @@
 <h2>Register</h2>
 <form (submit)="onSubmit()">
   <div>
-    <label for="email">Email:</label>
-    <input type="email" id="email" name="email" [(ngModel)]="email" required>
+    <label for="email" class="sr-only">Email:</label>
+    <input type="email" id="email" name="email" [(ngModel)]="email" placeholder="Email" required>
   </div>
   <div>
-    <label for="newUsername">Username:</label>
-    <input type="text" id="newUsername" name="newUsername" [(ngModel)]="newUsername" required>
+    <label for="newUsername" class="sr-only">Username:</label>
+    <input type="text" id="newUsername" name="newUsername" [(ngModel)]="newUsername" placeholder="Username" required>
   </div>
   <div>
-    <label for="newPassword">Password:</label>
-    <input type="password" id="newPassword" name="newPassword" [(ngModel)]="newPassword" required>
+    <label for="newPassword" class="sr-only">Password:</label>
+    <input type="password" id="newPassword" name="newPassword" [(ngModel)]="newPassword" placeholder="Password" required>
   </div>
   <button type="submit">Register</button>
   @if (errorMessage) {

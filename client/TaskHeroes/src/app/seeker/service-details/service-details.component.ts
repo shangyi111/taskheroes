@@ -1,26 +1,30 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal, ViewChild, ElementRef, AfterViewInit, effect } from '@angular/core';
 import { Location, CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { switchMap, tap } from 'rxjs/operators';
-import { Observable, of } from 'rxjs';
-import { ReviewService } from 'src/app/services/review.service';
-import { Review } from 'src/app/shared/models/review';
-import { map , shareReplay} from 'rxjs/operators';
-import { SeekerCalendarComponent } from 'src/app/seeker/service-details/seeker-calendar/seeker-calendar.component';
-import { BusinessService } from 'src/app/services/business.service';
 import { MatChipsModule } from '@angular/material/chips';
+import { Observable, of, throwError } from 'rxjs';
+import { switchMap, tap, map, shareReplay, catchError } from 'rxjs/operators';
+
+// Services & Models
+import { ReviewService } from 'src/app/services/review.service';
+import { BusinessService } from 'src/app/services/business.service';
 import { JobService } from 'src/app/services/job.service';
 import { UserDataService } from 'src/app/services/user_data.service';
+import { AuthService } from 'src/app/auth/auth.service'; // Added for Google Login
 import { Service } from 'src/app/shared/models/service';
 import { Job } from 'src/app/shared/models/job';
 import { User } from 'src/app/shared/models/user';
-import { ServiceReviewsComponent } from './service-reviews/service-reviews.component';
-import { AnalyzeResponse } from 'cloudinary';
+import { environment } from 'src/environments/environment';
+import { AUTH_TOKEN_KEY } from 'src/app/shared/constants';
 
+// Sub-components
+import { SeekerCalendarComponent } from 'src/app/seeker/service-details/seeker-calendar/seeker-calendar.component';
+import { ServiceReviewsComponent } from './service-reviews/service-reviews.component';
+// 1. Declare Google global (provided by the script in index.html)
+declare var google: any;
 @Component({
   selector: 'app-service-details',
   standalone: true,
@@ -37,42 +41,55 @@ import { AnalyzeResponse } from 'cloudinary';
   ],
 })
 export class ServiceDetailsComponent implements OnInit {
-  
   // Observables for data streaming
   service$: Observable<Service | null> = of(null);
   averageRating$: Observable<number> = of(0);
   reviewCount$: Observable<number> = of(0);
+  
+  // State Signals
   user: User | null = null;
   serviceId: string = '';
   providerId: string = '';
   activeImageUrl: string = '';
   currentIndex: number = 0;
   
+  // Enterprise UX Signals
+  showAuthOptions = signal(false);
+  isSubmitting = signal(false);
+
   private route = inject(ActivatedRoute);
   private routeNavigator = inject(Router);
   private serviceDataService = inject(BusinessService);
   private reviewService = inject(ReviewService);
   private jobService = inject(JobService);
   private userService = inject(UserDataService);
+  private authService = inject(AuthService);
   private location = inject(Location);
 
+  constructor() {
+    // 2. This effect watches the showAuthOptions signal. 
+    // When it turns TRUE, it waits a tick and then initializes the Google button.
+    effect(() => {
+      if (this.showAuthOptions()) {
+        // Small delay to ensure the DOM element inside @if is rendered
+        setTimeout(() => this.initializeGoogleButton(), 100);
+      }
+    });
+  }
   ngOnInit(): void {
     this.user = this.userService.getUserData();
-    // 1. Get the serviceId from the route parameters
     this.service$ = this.route.paramMap.pipe(
       switchMap(params => {
         const id = params.get('serviceId');
         if (id) {
           this.serviceId = id;
-          // 2. Fetch the full service data
           return this.serviceDataService.getServiceById(parseInt(id));
         }
-        return of(null); // Return null if ID is missing
+        return of(null);
       }),
       tap(service => {
         if (service) {
-          // 3. Extract the providerId once service data is available
-          this.providerId = service.userId; // Assuming provider ID is stored as userId in your Service model
+          this.providerId = service.userId;
           this.fetchReviewStats(service.id!);
           if (service.portfolio && service.portfolio.length > 0) {
             this.activeImageUrl = service.portfolio[0].url;
@@ -81,43 +98,86 @@ export class ServiceDetailsComponent implements OnInit {
       })
     );
   }
-  
-  // ParentComponent.ts
-handleBookingSubmission(bookingDetails: Job) {
-  // This is where the actual backend service call happens
-  this.jobService.createJob(bookingDetails).subscribe({
-    next: (response:{job:Job, chatroomId:number}) => {
-      console.log('Booking submitted successfully!', response);
-      // Show success message, redirect chatroom
-      this.routeNavigator.navigate(['/chatroom', response.chatroomId]);
-    },
-    error: (err) => {
-      console.error('Booking failed:', err);
-      alert(err.error.message || 'Booking failed. Please try again.');
+
+  // --- Booking Flow & Decision Bridge ---
+
+  handleBookingSubmission(bookingDetails: Job) {
+    if (!this.user || !this.user.id) {
+      // 1. Preserve Intent: Save details so they aren't lost
+      sessionStorage.setItem('pending_booking', JSON.stringify(bookingDetails));
+      // 2. Open Decision Bridge (The Modal/Choice section in HTML)
+      this.showAuthOptions.set(true); 
+      return;
     }
-  });
-}
+
+    this.executeBooking(bookingDetails);
+  }
+
+  // Path 1: Google Login (Fastest Conversion)
+  loginWithGoogle() {
+    // Tell auth service to return here after successful Google OAuth
+    this.authService.loginWithGoogle(this.routeNavigator.url);
+  }
+
+  // Path 2: Traditional Registration
+  redirectToRegister() {
+    this.routeNavigator.navigate(['/register'], { 
+      queryParams: { returnUrl: this.routeNavigator.url } 
+    });
+  }
+
+  // Path 3: Guest Email Request (Lowest Friction)
+  submitAsGuest(email: string) {
+    if (!email || !email.includes('@')) {
+      alert('Please enter a valid email to send job inquiry.');
+      return;
+    }
+
+    const pendingData = sessionStorage.getItem('pending_booking');
+    if (!pendingData) return;
+
+    const guestPayload = { ...JSON.parse(pendingData), guestEmail: email };
+    this.isSubmitting.set(true);
+
+    // this.jobService.createGuestJob(guestPayload).subscribe({
+    //   next: () => {
+    //     this.isSubmitting.set(false);
+    //     this.showAuthOptions.set(false);
+    //     sessionStorage.removeItem('pending_booking');
+    //     alert('Request sent! The provider will contact you via the email provided.');
+    //   },
+    //   error: () => {
+    //     this.isSubmitting.set(false);
+    //     alert('Guest submission failed. Please try again.');
+    //   }
+    // });
+  }
+
+  private executeBooking(bookingDetails: Job) {
+    this.isSubmitting.set(true);
+    this.jobService.createJob(bookingDetails).subscribe({
+      next: (response) => {
+        this.isSubmitting.set(false);
+        this.routeNavigator.navigate(['/chatroom', response.chatroomId]);
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        alert(err.error.message || 'Booking failed. Please try again.');
+      }
+    });
+  }
+
+  // --- UI Helpers ---
 
   private fetchReviewStats(serviceId: string): void {
-    const reviews$ = this.reviewService.getAllReviewsByServiceId(serviceId).pipe(
-      shareReplay(1) // Avoid re-fetching reviews if multiple subscriptions happen
-    );
-
+    const reviews$ = this.reviewService.getAllReviewsByServiceId(serviceId).pipe(shareReplay(1));
     this.reviewCount$ = reviews$.pipe(map(reviews => reviews.length));
-    
     this.averageRating$ = reviews$.pipe(
-      map(reviews => {
-        if (reviews.length === 0) return 0;
-        const total = reviews.reduce((sum, review) => sum + (review.rating || 0), 0);
-        return total / reviews.length;
-      })
+      map(reviews => reviews.length === 0 ? 0 : reviews.reduce((s, r) => s + (r.rating || 0), 0) / reviews.length)
     );
   }
 
-  goBackToSearch(): void {
-    // Uses the browser's history API to go back one step
-    this.location.back();
-  }
+  goBackToSearch(): void { this.location.back(); }
 
   setActiveImage(url: string, index: number): void {
     this.activeImageUrl = url;
@@ -132,5 +192,58 @@ handleBookingSubmission(bookingDetails: Job) {
   prevSlide(portfolio: any[]): void {
     this.currentIndex = (this.currentIndex - 1 + portfolio.length) % portfolio.length;
     this.activeImageUrl = portfolio[this.currentIndex].url!;
+  }
+
+  private initializeGoogleButton() {
+    const container = document.getElementById('google-btn-container');
+    if (!container || !google) return;
+
+    google.accounts.id.initialize({
+      client_id: `${environment.googleAuthClientId}`,
+      callback: (response: any) => this.handleGoogleResponse(response),
+      auto_select: false,
+      cancel_on_tap_outside: true
+    });
+
+    google.accounts.id.renderButton(container, {
+      theme: 'outline',
+      size: 'large',
+      width: '100%', // Makes it responsive to your modal width
+      text: 'continue_with'
+    });
+  }
+
+  private handleGoogleResponse(response: any) {
+    const idToken = response.credential;
+    this.isSubmitting.set(true);
+
+    this.authService.loginWithGoogle(idToken).subscribe({
+      next: (userResponse: any) => {
+        // Store user data and close modal
+        localStorage.setItem(AUTH_TOKEN_KEY, userResponse.token);
+        const authenticatedUser = {
+          ...userResponse.user,
+          role: userResponse.user.role || 'seeker' 
+        };
+        this.userService.setUserData(authenticatedUser);
+        this.user = authenticatedUser;
+        this.showAuthOptions.set(false);
+        this.isSubmitting.set(false);
+
+        // 5. AUTO-RESUME: Check if there's a pending booking and execute it
+        const pending = sessionStorage.getItem('pending_booking');
+        if (pending) {
+          const bookingDetails:Job = JSON.parse(pending);
+          bookingDetails.customerId = this.user!.id;
+          this.executeBooking(bookingDetails);
+          sessionStorage.removeItem('pending_booking');
+        }
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        console.error('Google Login Error:', err);
+        alert('Google Login failed. Please try again.');
+      }
+    });
   }
 }

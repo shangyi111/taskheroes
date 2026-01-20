@@ -1,6 +1,8 @@
 const { Server } = require('socket.io');
-let io;
+const chatroomHandlers = require('../message-server/realtime/chatroom-handler'); 
+const messageHandlers = require('../message-server/realtime/message-handler');   
 const userSocketMap = new Map();
+const eventBus = require('../utils/eventBus');
 
 function init(server) {
   io = new Server(server, {
@@ -13,11 +15,14 @@ function init(server) {
   io.on('connection', (socket) => {
     console.log(`Client connected: ${socket.id}`);
 
-    const userId = socket.handshake.query.userId;
+    const userId = socket.handshake.auth?.userId || socket.handshake.query?.userId;
 
     if (userId) {
       handleUserConnection(userId, socket);
     }
+
+    chatroomHandlers(io, socket); 
+    messageHandlers(io, socket);
 
     socket.on("message", function message(data) {
         console.log("received: %s", data);
@@ -30,6 +35,14 @@ function init(server) {
     socket.on('disconnect', () => {
       console.log(`Client disconnected: ${socket.id}`);
     });
+  });
+
+  eventBus.on('NEW_MESSAGE_SAVED', (messageToSend) => {
+    const roomId = String(messageToSend.chatroomId); //
+    console.log(`Event Bus: Broadcasting to room ${roomId}`);
+    
+    // Use the local io instance to emit to the specific room
+    io.to(roomId).emit('newMessage', messageToSend);
   });
 
   console.log('WebSocket server initialized');

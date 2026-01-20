@@ -8,7 +8,7 @@ const signup = async (email, username, password) => {
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({ email, password: hashedPassword, username });
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = generateToken(user);
     return { user, token };
   } catch (error) {
     const errorMsg = error.errors?.[0]?.message;
@@ -29,11 +29,19 @@ const login = async (email, password) => {
       throw new Error('Invalid credentials');
     }
 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = generateToken(user);
     return { user, token };
   } catch (error) {
     throw new Error(error.message || 'Failed to login');
   }
 };
 
-module.exports = { signup, login };
+const generateToken = (user) => {
+  return jwt.sign(
+    { id: user.id, role: user.role }, // Payload
+    process.env.JWT_SECRET, 
+    { expiresIn: '24h' } // Increased to 24h for better UX
+  );
+};
+
+module.exports = { signup, login, generateToken };

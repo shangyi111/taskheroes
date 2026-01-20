@@ -135,7 +135,7 @@ export class JobOrdersComponent {
     this.chatroomService.getChatroomByJobId(jobId).subscribe({
       next:(response:Chatroom[])=>{
         const chatRoom = response[0];
-        this.router.navigate(['user',userId,'job',jobId,'chatroom',chatRoom.id])
+        this.router.navigate(['chatroom',chatRoom.id])
       }
     })
   }

@@ -57,4 +57,9 @@ export class AuthService {
   setUser(user:User):void{
     localStorage.setItem(this.USER_KEY,JSON.stringify(user));
   }
+
+  loginWithGoogle(idToken: string) {
+    // Send the token to your Node.js backend
+    return this.http.post(`${this.API_URL}/auth/google`, { idToken });
+  }
 }

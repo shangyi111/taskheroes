@@ -35,10 +35,15 @@ export class SearchComponent {
   readonly currentFilters$ = this.filtersSubject.asObservable();
   readonly services$: Observable<ServiceWithRating[]> = combineLatest([this.userData$, this.currentFilters$]).pipe(
     switchMap(([user, filters]) => {
-      if (!user) {
-        return observableOf([]);
+      // Prepare search params
+      const searchParams = { ...filters };
+      
+      // Only exclude ID if a user actually exists
+      if (user?.id) {
+        searchParams.excludeUserId = user.id;
       }
-      return this.searchService.searchServices({ ...filters, excludeUserId: user.id });
+
+      return this.searchService.searchServices(searchParams);
     }),
     switchMap(services => {
       if (!services || services.length === 0) {

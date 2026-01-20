@@ -50,8 +50,6 @@ export class ChatroomComponent implements OnInit, OnDestroy {
   chatroom: WritableSignal<ExtendedChatroom | null> = signal(null); 
   job: WritableSignal<Job | null> = signal(null);
   messages: WritableSignal<Message[]> = signal([]);
-  // chatPartnerProfile is no longer needed
-
   newMessageContent: WritableSignal<string> = signal('');
 
   isLoading: WritableSignal<boolean> = signal(true);
@@ -80,7 +78,7 @@ export class ChatroomComponent implements OnInit, OnDestroy {
 
   jobDetails = computed(() => {
       const jobData = this.job();
-      
+    
       if (jobData) {
         return {
             jobDate: jobData.jobDate ? new Date(jobData.jobDate) : null,
@@ -131,6 +129,7 @@ export class ChatroomComponent implements OnInit, OnDestroy {
         this.userDataService.userData$,
         this.route.paramMap
       ]).pipe(
+        tap(([user, params]) => console.log("Userdata is", user)),
         filter(([user, params]) => !!user?.id && !!user?.role && !!params.get('chatroomId')),
         
         tap(([user, params]) => {
@@ -237,7 +236,6 @@ export class ChatroomComponent implements OnInit, OnDestroy {
     }
 
     this.chatroomMessageSubscription = this.chatroomService.onNewMessage().pipe(
-      tap(message => console.log('Received ANY message from socket:', message)),
       filter(message => message.chatroomId === chatroomId),
       tap(message => {
         console.log('Received new real-time message:', message);
@@ -245,7 +243,9 @@ export class ChatroomComponent implements OnInit, OnDestroy {
         if (userId) {
             this.chatroomService.markAsRead(chatroomId, userId).subscribe();
         }
+        
         this.messages.update(msgs => {
+          if (message.senderId === userId) return msgs;
           if (!msgs.some(m => m.id === message.id)) {
             return [...msgs, message];
           }

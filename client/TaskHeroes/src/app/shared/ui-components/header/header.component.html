@@ -7,13 +7,17 @@
     <div class="menu">
       @if (isLoggedIn()) {
         @if (userData$ | async; as user) {
-          <a routerLink="/search" routerLinkActive="active-link">Search</a>
           <a [routerLink]="getMessagesLink(user)" routerLinkActive="active-link">Messages</a>
 
           @if (user.role === 'provider') {
-            <a [routerLink]="['/provider', user.id]" routerLinkActive="active-link">Business</a>
-            <a [routerLink]="['/provider', user.id, 'jobs']" routerLinkActive="active-link">Jobs</a>
+            <a [routerLink]="['/provider', user.id]" 
+            routerLinkActive="active-link"
+            [routerLinkActiveOptions]="{ exact: true }">Business</a>
+            <a [routerLink]="['/provider', user.id, 'jobs']" 
+            routerLinkActive="active-link"
+            [routerLinkActiveOptions]="{ exact: true }">Jobs</a>
           } @else {
+            <a routerLink="/search" routerLinkActive="active-link">Search</a>
             <a [routerLink]="['/seeker', user.id, 'orders']" routerLinkActive="active-link">Orders</a>
           }
 
@@ -58,8 +62,8 @@
         }
       } @else {
         <div class="auth-group">
-          <a routerLink="/login">Login</a>
-          <a routerLink="/register" class="btn-primary">Join TaskHeroes</a>
+          <a routerLink="/login" routerLinkActive="active-link">Login</a>
+          <a routerLink="/register" class="btn-primary" routerLinkActive="active-link">Register</a>
         </div>
       }
     </div>

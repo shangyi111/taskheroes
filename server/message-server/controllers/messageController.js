@@ -1,5 +1,5 @@
 const { Message, User, Chatroom } = require('../../models'); 
-const { getIO } = require('../../websocket/socketServer');
+const eventBus = require('../../utils/eventBus');
 const crypto = require('crypto');
 
 const algorithm = 'aes-256-cbc';
@@ -56,8 +56,7 @@ exports.saveMessage = async (req,res) => {
       senderUsername: senderUsername, // Use 'senderUsername' to match frontend interface
       text: decryptedText, // Use 'text' to match frontend interface, contains decrypted content
     };
-
-    getIO().to(messageData.chatroomId).emit('newMessage', messageToSend);
+    eventBus.emit('NEW_MESSAGE_SAVED', messageToSend);
     await Chatroom.update(
       { lastActivityAt: new Date() },
       { where: { id: messageData.chatroomId } }
