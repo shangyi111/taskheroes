@@ -5,17 +5,30 @@ import { SearchComponent } from 'src/app/seeker/search/search.component';
 import { RegistrationComponent } from 'src/app/auth/register/register.component';
 import {DashboardComponent} from 'src/app/shared/ui-components/dashboard/dashboard.component';
 import {JobOrdersComponent} from './provider/joborders/job_orders.component';
-import { ChatroomComponent } from './shared/ui-components/messenger/chatroom/chatroom.component';
+import { ChatroomComponent } from './shared/ui-components/messenger/components/chatroom/chatroom.component';
 import { BusinessPageComponent } from 'src/app/provider/business_page/business_page.component';
-import { ChatroomsComponent } from './shared/ui-components/messenger/chatrooms/chatrooms.component';
+import { ChatroomsComponent } from './shared/ui-components/messenger/components/chatrooms/chatrooms.component';
 import { OrdersComponent } from './seeker/orders/orders.component';
 import { ManageServiceComponent } from './provider/manage_service/manage_service.component';
 import { ServiceDetailsComponent } from './seeker/service-details/service-details.component';
+import { MessengerLayoutComponent } from './shared/ui-components/messenger/messenger-layout/messenger-layout.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegistrationComponent },
   { path: 'search', component: SearchComponent },
+  {
+    path: 'messenger',
+    component: MessengerLayoutComponent,
+    canActivate: [AuthGuard],
+    children: [
+      { 
+        path: ':chatroomId', 
+        component: ChatroomComponent,
+        runGuardsAndResolvers: 'paramsChange'
+      }
+    ]
+  },
    // Role: PROVIDER Context
   {
     path: 'provider/:userId',
@@ -23,7 +36,7 @@ export const routes: Routes = [
     children: [
       { path: '', component: BusinessPageComponent },
       { path: 'jobs', component: JobOrdersComponent },
-      { path: 'chatrooms', component: ChatroomsComponent },
+      { path: 'chatrooms', redirectTo: '/messenger', pathMatch: 'full' },
       { path: 'manage/:serviceId', component: ManageServiceComponent }
     ]
   },
@@ -33,17 +46,12 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       { path: 'orders', component: OrdersComponent },
-      { path: 'chatrooms', component: ChatroomsComponent },
+      { path: 'chatrooms', redirectTo: '/messenger', pathMatch: 'full' },
     ]
   },
   {
     path: 'service/:serviceId',
     component: ServiceDetailsComponent,
-  },
-  { 
-    path: 'chatroom/:chatroomId', 
-    component: ChatroomComponent, 
-    canActivate: [AuthGuard] 
   },
   {
     path: 'user/:userId/provider/manage/:serviceId',

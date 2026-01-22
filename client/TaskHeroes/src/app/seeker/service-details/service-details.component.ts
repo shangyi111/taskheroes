@@ -158,7 +158,7 @@ export class ServiceDetailsComponent implements OnInit {
     this.jobService.createJob(bookingDetails).subscribe({
       next: (response) => {
         this.isSubmitting.set(false);
-        this.routeNavigator.navigate(['/chatroom', response.chatroomId]);
+        this.routeNavigator.navigate(['/messenger', response.chatroomId]);
       },
       error: (err) => {
         this.isSubmitting.set(false);

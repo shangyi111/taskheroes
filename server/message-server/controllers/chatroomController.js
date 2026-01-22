@@ -1,6 +1,7 @@
 
 const { Chatroom, ChatroomUser, Job, User, Service } = require ('../../models');
 const { getIO } =require ('../../websocket/socketServer');
+const { getPagination, getPagingData } = require('../../utils/pagination');
 
 
 const getChatroomIncludes = () => {
@@ -109,19 +110,26 @@ exports.createChatroom = async (req, res) => {
 exports.getChatroomsForProvider = async (req, res) => {
   try {
     const providerId = req.params.providerId;
+    const { page, size } = req.query;
     if (!providerId) {
       return res.status(400).json({ message: 'Provider ID is required' });
     }
 
-    const chatrooms = await Chatroom.findAll({
+    const { limit, offset } = getPagination(page, size);
+
+    const chatrooms = await Chatroom.findAndCountAll({
       where: { providerId: providerId },
       include: getChatroomIncludes(),
       order: [['lastActivityAt', 'DESC']],
+      limit,
+      offset,
+      distinct: true
     });
 
     if (chatrooms && chatrooms.length > 0) {
       const mappedChatrooms = chatrooms.map(room => mapChatroomData(room, providerId));
-      res.json(mappedChatrooms);
+      const response = getPagingData({ count, rows: mappedChatrooms }, page, limit);
+      res.json(response);
     } else {
       res.status(404).json({ message: 'No chatrooms found for this provider' });
     }
@@ -134,14 +142,21 @@ exports.getChatroomsForProvider = async (req, res) => {
 exports.getChatroomsForCustomer = async (req, res) => {
   try {
     const customerId = req.params.seekerId;
+    const { page, size } = req.query;
     if (!customerId) {
       return res.status(400).json({ message: 'Customer ID is required' });
     }
-
-    const chatrooms = await Chatroom.findAll({
+    const { limit, offset } = getPagination(page, size);
+    const count = await Chatroom.count({
       where: { customerId: customerId },
+      distinct: true // Accurate count for primary records
+    });
+    const chatrooms = await Chatroom.findAll({
+      where: { customerId },
       include: getChatroomIncludes(),
       order: [['lastActivityAt', 'DESC']],
+      limit,
+      offset
     });
 
     if (chatrooms && chatrooms.length > 0) {
@@ -152,7 +167,8 @@ exports.getChatroomsForCustomer = async (req, res) => {
         mapped.hasUnread = room.lastActivityAt > (room.lastReadByCustomer || 0);
         return mapped;
       });
-      res.json(mappedChatrooms);
+      const response = getPagingData({ count, rows: mappedChatrooms }, page, limit);
+      res.json(response);
     } else {
       res.status(404).json({ message: 'No chatrooms found for this customer' });
     }

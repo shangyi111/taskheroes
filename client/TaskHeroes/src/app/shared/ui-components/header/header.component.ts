@@ -33,7 +33,7 @@ export class HeaderComponent {
 
   getMessagesLink(user: User): any[] {
     // Dynamic routing based on the active role
-    return [user.role === 'provider' ? '/provider' : '/seeker', user.id, 'chatrooms'];
+    return ['/messenger'];
   }
 
   toggleRole(currentUser: User): void {

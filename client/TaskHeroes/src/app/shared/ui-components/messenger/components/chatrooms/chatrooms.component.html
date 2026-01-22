@@ -1,0 +1,50 @@
+<div class="chatrooms-sidebar">
+  <header class="sidebar-header">
+    <div class="header-content">
+      <h1 class="title">Messages</h1>
+      <span class="badge">{{ chatrooms().length }}</span>
+    </div>
+  </header>
+
+  <div class="list-viewport">
+    @if (chatrooms().length > 0) {
+      @for (chatroom of chatrooms(); track chatroom.id) {
+        <div 
+          class="chat-item" 
+          [class.active]="activeChatId()?.toString() === chatroom.id.toString()"
+          (click)="goToChatroom(chatroom)">
+          
+          <div class="avatar">
+            {{ chatroom.name.charAt(0).toUpperCase() }}
+          </div>
+
+          <div class="content">
+            <div class="top-row">
+              <span class="name">{{ chatroom.name }}</span>
+              <span class="job-id">#{{ chatroom.jobId }}</span>
+            </div>
+            <p class="preview">Click to view history</p>
+          </div>
+        </div>
+      }
+      @if (hasMore()) {
+        <div 
+          appScrollSensor 
+          (sensorInView)="onBottomReached()" 
+          class="scroll-anchor">
+          
+          @if (isLoading()) {
+            <div class="loading-indicator">
+              <mat-spinner diameter="24"></mat-spinner>
+              <span>Loading more...</span>
+            </div>
+          }
+        </div>
+      }
+    } @else {
+      <div class="empty-state">
+        <p>No conversations yet</p>
+      </div>
+    }
+  </div>
+</div>

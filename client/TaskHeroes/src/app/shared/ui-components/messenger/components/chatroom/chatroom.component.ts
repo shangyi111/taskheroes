@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, inject, signal, WritableSignal, ViewChild, ElementRef, computed } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, NavigationEnd} from '@angular/router';
 import { Subscription, of, Observable, throwError, combineLatest } from 'rxjs';
-import { switchMap, filter, tap, catchError, map } from 'rxjs/operators';
+import { switchMap, filter, tap, catchError, map, take } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MessageComponent } from '../message/message.component';
@@ -121,62 +121,57 @@ export class ChatroomComponent implements OnInit, OnDestroy {
   });
 
 
-  ngOnInit(): void {
-    console.log('ChatroomComponent initialized.');
+ ngOnInit(): void {
+  console.log('ChatroomComponent initialized.');
 
-    this.subscriptions.add(
-      combineLatest([
-        this.userDataService.userData$,
-        this.route.paramMap
-      ]).pipe(
-        tap(([user, params]) => console.log("Userdata is", user)),
-        filter(([user, params]) => !!user?.id && !!user?.role && !!params.get('chatroomId')),
-        
-        tap(([user, params]) => {
-          this.currentUser.set(user!);
-          this.chatroomId.set(params.get('chatroomId'));
-        }),
-        
-        switchMap(([user, params]) => {
-          const chatroomId = params.get('chatroomId')!;
-          const userId = user!.id!;
-
-          this.isLoading.set(true);
-          this.error.set(null);
-          
-          return this.loadChatroomAndMessages(chatroomId, userId).pipe(
-            // Step B: TINY STEP - Mark as read in the background
-            tap(() => {
-              this.chatroomService.markAsRead(chatroomId, userId).subscribe({
-                next: () => console.log('Chat marked as read'),
-                error: (err) => console.error('Failed to mark as read', err)
-              });
-            })
-          );
-        }),
-        
-        catchError(err => {
-          console.error('Error in chatroom initialization pipe:', err);
-          this.error.set('Failed to load chatroom. Please try again.');
-          this.isLoading.set(false);
-          return of(null);
-        })
-      ).subscribe({
-        next: (data) => {
-          console.log('Chatroom data loaded. Setting up real-time messaging.');
-          const currentChatroomId = this.chatroomId();
-          if (currentChatroomId) {
-            this.setupRealtimeMessaging(currentChatroomId);
-          }
-          setTimeout(() => this.scrollToBottom(), 0);
-        },
-        error: (err) => {
-          console.error('Subscription error in ChatroomComponent:', err);
+  this.subscriptions.add(
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      tap(()=>{console.log(">>> Checking for chatroomId in route params...", this.route.snapshot);}),
+      map(() => this.route.snapshot.params['chatroomId']),
+      filter(Boolean),
+      tap(id => {
+        console.log('>>> DETECTED NEW CHATROOM ID:', id);
+        this.prepareForNewChat(id);
+      }),
+      switchMap(id =>
+        this.userDataService.userData$.pipe(
+          filter(Boolean),
+          take(1),
+          switchMap(user => this.loadChatroomAndMessages(id, user.id!).pipe(
+              catchError(err => {
+                console.error('Error in loadChatroomAndMessages pipe:', err);
+                this.error.set('Failed to load chatroom details.');
+                this.isLoading.set(false);
+                // Return of(null) to satisfy the type but prevent main stream from breaking
+                return of(null);
+              })
+            ))
+          )
+        )
+    ).subscribe({
+      next: () => {
+        const currentChatroomId = this.chatroomId();
+        if (currentChatroomId) {
+          this.setupRealtimeMessaging(currentChatroomId);
         }
-      })
-    );
+        setTimeout(() => this.scrollToBottom(), 0);
+      }
+    })
+  );
+}
+  /**
+   * Reset signals so the UI doesn't show old data while loading
+  */
+  private prepareForNewChat(id: string): void {
+    this.isLoading.set(true);
+    this.error.set(null);
+    this.messages.set([]); // Clear the message list immediately
+    this.chatroom.set(null); // Clear the header
+    this.chatroomId.set(id);
+    
+    this.cleanupSocket(); // Leave the previous room's socket
   }
-
   private loadChatroomAndMessages(chatroomId: string, userId: string): Observable<ExtendedChatroom> {
     console.log(`Fetching chatroom ${chatroomId} for user ${userId} via ChatroomService.`);
 
@@ -221,7 +216,7 @@ export class ChatroomComponent implements OnInit, OnDestroy {
         console.error('Error fetching chatroom or messages:', err);
         this.error.set('Failed to retrieve chatroom details or messages.');
         this.isLoading.set(false);
-        return throwError(() => new Error('Chatroom data load failed'));
+        return throwError(()=>err);
       })
     );
   }
@@ -354,6 +349,17 @@ export class ChatroomComponent implements OnInit, OnDestroy {
     if (currentChatroomId) {
       this.chatroomService.leaveChatroomSocket(currentChatroomId);
       console.log(`Left chatroom socket channel: ${currentChatroomId}`);
+    }
+  }
+
+  private cleanupSocket(): void {
+    const oldId = this.chatroomId();
+    if (oldId) {
+      this.chatroomService.leaveChatroomSocket(oldId);
+      if (this.chatroomMessageSubscription) {
+        this.chatroomMessageSubscription.unsubscribe();
+      }
+      console.log(`Cleaned up socket for room: ${oldId}`);
     }
   }
 }

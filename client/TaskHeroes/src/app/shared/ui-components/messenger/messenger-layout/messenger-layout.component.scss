@@ -1,0 +1,64 @@
+.messenger-layout {
+  display: flex;
+  width: 100%;
+  height: calc(100vh - 64px); // Adjust 64px to your header height
+  background-color: #fff;
+  overflow: hidden;
+
+  .messenger-sidebar {
+    width: 350px; // Standard desktop width
+    height: 100%;
+    border-right: 1px solid #e5e7eb;
+    flex-shrink: 0;
+    background-color: #fff;
+    overflow-y: auto;
+    transition: transform 0.2s ease-in-out;
+  }
+
+  .messenger-main {
+    flex: 1;
+    height: 100%;
+    background-color: #f9fafb;
+    position: relative;
+    overflow: hidden;
+  }
+
+  // Adaptive logic for mobile screens
+  @media (max-width: 768px) {
+    .messenger-sidebar {
+      width: 100%;
+      
+      &.is-collapsed {
+        display: none; // Hides list when chat is open
+      }
+    }
+
+    .messenger-main {
+      display: none; // Hides empty chat area by default
+      
+      &.is-visible {
+        display: flex;
+        width: 100%;
+        position: absolute;
+        inset: 0;
+        z-index: 10;
+      }
+    }
+
+    .mobile-back-button {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
+      background: #fff;
+      border-radius: 9999px;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      border: none;
+      cursor: pointer;
+    }
+  }
+}

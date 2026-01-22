@@ -6,6 +6,7 @@ import { Message } from '../shared/models/message';
 import { catchError, throwError } from 'rxjs';
 import { SocketIoService } from './socket-io.service';
 import { filter, take } from 'rxjs/operators';
+import { PaginatedResponse } from 'src/app/shared/models/pagination';
 
 @Injectable({
   providedIn: 'root',
@@ -26,14 +27,14 @@ export class ChatroomService {
     });
   }
 
-  getChatroomsByProviderId(providerId: string): Observable<Chatroom[]> {
+  getChatroomsByProviderId(providerId: string, page: number, size: number): Observable<PaginatedResponse<Chatroom>> {
     const headers = this.getAuthHeaders();
-    return this.http.get<Chatroom[]>(`${this.CHATROOMS_API_URL}/chatrooms/provider/${providerId}`, { headers });
+    return this.http.get<PaginatedResponse<Chatroom>>(`${this.CHATROOMS_API_URL}/chatrooms/provider/${providerId}?page=${page}&size=${size}`, { headers });
   }
 
-  getChatroomsBySeekerId(seekerId: string): Observable<Chatroom[]> {
+  getChatroomsBySeekerId(seekerId: string, page: number, size: number): Observable<PaginatedResponse<Chatroom>> {
     const headers = this.getAuthHeaders();
-    return this.http.get<Chatroom[]>(`${this.CHATROOMS_API_URL}/chatrooms/seeker/${seekerId}`, { headers });
+    return this.http.get<PaginatedResponse<Chatroom>>(`${this.CHATROOMS_API_URL}/chatrooms/seeker/${seekerId}?page=${page}&size=${size}`, { headers });
   }
 
   getChatroomByJobId(jobId:string):Observable<Chatroom[]>{

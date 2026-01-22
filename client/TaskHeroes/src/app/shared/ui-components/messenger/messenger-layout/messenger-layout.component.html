@@ -1,0 +1,28 @@
+<div class="messenger-layout">
+  
+  <aside 
+    class="messenger-sidebar" 
+    [class.is-collapsed]="isChatSelected()">
+    
+    <div class="sidebar-content">
+      <app-chatrooms></app-chatrooms>
+    </div>
+  </aside>
+
+  <main 
+    class="messenger-main" 
+    [class.is-visible]="isChatSelected()">
+    
+    <router-outlet></router-outlet>
+
+    @if (isChatSelected()) {
+      <button 
+        type="button"
+        class="mobile-back-button"
+        (click)="goBack()"
+        aria-label="Back to messages">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+    }
+  </main>
+</div>
