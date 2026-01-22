@@ -1,7 +1,15 @@
 /* You can add global styles to this file, and also import other style files */
 
-html, body { height: 100%; }
-body { margin: 0; font-family:  "Helvetica Neue", Arial, sans-serif;}
+html, body {
+  height: 100dvh;
+  margin: 0;
+}
+body { 
+  margin: 0; 
+  font-family:  "Helvetica Neue", Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+}
 
 :root {
     // Colors
@@ -39,6 +47,8 @@ body { margin: 0; font-family:  "Helvetica Neue", Arial, sans-serif;}
     --role-card-max-width: 350px;
     --role-card-height: 200px;
     --role-cards-max-width: 800px;
+    --global-footer-height:45px;
+    --global-footer-padding:10px;
   
     // Transitions
     --transition-default: transform 0.3s ease, box-shadow 0.3s ease;

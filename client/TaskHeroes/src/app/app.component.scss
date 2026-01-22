@@ -1,0 +1,22 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  // Use dvh (dynamic viewport height) to handle mobile browser bars correctly
+  height: 100dvh; 
+  width: 100%;
+}
+
+app-header, app-footer {
+  flex: 0 0 auto; // These stay their natural size
+}
+
+// This targets the router-outlet's sibling content
+// (Note: router-outlet itself doesn't render as a tag, it renders siblings)
+main, .content-wrapper {
+  flex: 1 1 auto; // Fills the remaining space between header and footer
+  display: flex;
+  flex-direction: column;
+  min-height:0;
+  height:100%;
+  padding-bottom: calc(var(--global-footer-height) + var(--global-footer-padding));
+}

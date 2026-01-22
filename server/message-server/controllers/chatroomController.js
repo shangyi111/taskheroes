@@ -107,77 +107,63 @@ exports.createChatroom = async (req, res) => {
   }
 };
 
-exports.getChatroomsForProvider = async (req, res) => {
-  try {
-    const providerId = req.params.providerId;
-    const { page, size } = req.query;
-    if (!providerId) {
-      return res.status(400).json({ message: 'Provider ID is required' });
-    }
-
-    const { limit, offset } = getPagination(page, size);
-
-    const chatrooms = await Chatroom.findAndCountAll({
-      where: { providerId: providerId },
-      include: getChatroomIncludes(),
-      order: [['lastActivityAt', 'DESC']],
-      limit,
-      offset,
-      distinct: true
-    });
-
-    if (chatrooms && chatrooms.length > 0) {
-      const mappedChatrooms = chatrooms.map(room => mapChatroomData(room, providerId));
-      const response = getPagingData({ count, rows: mappedChatrooms }, page, limit);
-      res.json(response);
-    } else {
-      res.status(404).json({ message: 'No chatrooms found for this provider' });
-    }
-  } catch (err) {
-    console.error('Error retrieving chatrooms for provider:', err);
-    res.status(500).json({ message: 'Internal Server Error', error: err.message });
-  }
+// For Seekers/Customers
+exports.getChatroomsForCustomer = (req, res) => {
+  return getChatroomsByRole(req, res, 'customerId', 'customer');
 };
 
-exports.getChatroomsForCustomer = async (req, res) => {
+// For Providers
+exports.getChatroomsForProvider = (req, res) => {
+  return getChatroomsByRole(req, res, 'providerId', 'provider');
+};
+
+const getChatroomsByRole = async (req, res, roleIdField, roleName) => {
   try {
-    const customerId = req.params.seekerId;
+    const userId = req.params.seekerId || req.params.providerId;
     const { page, size } = req.query;
-    if (!customerId) {
-      return res.status(400).json({ message: 'Customer ID is required' });
+
+    if (!userId) {
+      return res.status(400).json({ message: `${roleName} ID is required` });
     }
+
     const { limit, offset } = getPagination(page, size);
+    const whereClause = { [roleIdField]: userId };
+
     const count = await Chatroom.count({
-      where: { customerId: customerId },
-      distinct: true // Accurate count for primary records
+      where: whereClause,
+      distinct: true 
     });
+
     const chatrooms = await Chatroom.findAll({
-      where: { customerId },
+      where: whereClause,
       include: getChatroomIncludes(),
       order: [['lastActivityAt', 'DESC']],
       limit,
       offset
     });
 
-    if (chatrooms && chatrooms.length > 0) {
-      const mappedChatrooms = chatrooms.map(room => {
-
-        const mapped = mapChatroomData(room, customerId);
-        // Logic: If activity is newer than the last time I read it, it's unread
-        mapped.hasUnread = room.lastActivityAt > (room.lastReadByCustomer || 0);
-        return mapped;
-      });
-      const response = getPagingData({ count, rows: mappedChatrooms }, page, limit);
-      res.json(response);
-    } else {
-      res.status(404).json({ message: 'No chatrooms found for this customer' });
+    if (!chatrooms || chatrooms.length === 0) {
+      return res.status(404).json({ message: `No chatrooms found for this ${roleName}` });
     }
+
+    const mappedChatrooms = chatrooms.map(room => {
+      const mapped = mapChatroomData(room, userId);
+      
+      // Dynamically check unread status based on role
+      const lastReadField = roleIdField === 'customerId' ? 'lastReadByCustomer' : 'lastReadByProvider';
+      mapped.hasUnread = room.lastActivityAt > (room[lastReadField] || 0);
+      
+      return mapped;
+    });
+
+    const response = getPagingData({ count, rows: mappedChatrooms }, page, limit);
+    return res.json(response);
+
   } catch (err) {
-    console.error('Error retrieving chatrooms for customer:', err);
+    console.error(`Error retrieving chatrooms for ${roleName}:`, err);
     res.status(500).json({ message: 'Internal Server Error', error: err.message });
   }
 };
-
 exports.getChatroomByJobId = async (req, res) => {
   try {
     const jobId = req.params.jobId;

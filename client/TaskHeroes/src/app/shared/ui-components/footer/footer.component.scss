@@ -4,7 +4,8 @@ footer {
     text-align: center;
     padding: 10px 0;
     font-size: 0.9em;
-    position: sticky;
+    position: fixed;
+    height: var(--global-footer-height);
     bottom: 0;
     width: 100%;
   }

@@ -127,11 +127,9 @@ export class ChatroomComponent implements OnInit, OnDestroy {
   this.subscriptions.add(
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
-      tap(()=>{console.log(">>> Checking for chatroomId in route params...", this.route.snapshot);}),
       map(() => this.route.snapshot.params['chatroomId']),
       filter(Boolean),
       tap(id => {
-        console.log('>>> DETECTED NEW CHATROOM ID:', id);
         this.prepareForNewChat(id);
       }),
       switchMap(id =>

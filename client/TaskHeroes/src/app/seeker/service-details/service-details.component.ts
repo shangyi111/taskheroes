@@ -138,19 +138,6 @@ export class ServiceDetailsComponent implements OnInit {
 
     const guestPayload = { ...JSON.parse(pendingData), guestEmail: email };
     this.isSubmitting.set(true);
-
-    // this.jobService.createGuestJob(guestPayload).subscribe({
-    //   next: () => {
-    //     this.isSubmitting.set(false);
-    //     this.showAuthOptions.set(false);
-    //     sessionStorage.removeItem('pending_booking');
-    //     alert('Request sent! The provider will contact you via the email provided.');
-    //   },
-    //   error: () => {
-    //     this.isSubmitting.set(false);
-    //     alert('Guest submission failed. Please try again.');
-    //   }
-    // });
   }
 
   private executeBooking(bookingDetails: Job) {
@@ -177,7 +164,13 @@ export class ServiceDetailsComponent implements OnInit {
     );
   }
 
-  goBackToSearch(): void { this.location.back(); }
+  goBackToSearch(): void { 
+    if (window.history.length > 1) {
+      this.location.back();
+    } else {
+        this.routeNavigator.navigate(['/search']); // Absolute fallback
+    }
+  }
 
   setActiveImage(url: string, index: number): void {
     this.activeImageUrl = url;
