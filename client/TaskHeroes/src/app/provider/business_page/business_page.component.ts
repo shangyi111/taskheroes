@@ -49,7 +49,6 @@ export class BusinessPageComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.authSubscription?.unsubscribe();
     this.socketSubscriptions.forEach(sub => sub.unsubscribe());
-    this.socketIoService.disconnect();
   }
 
   /**

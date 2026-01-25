@@ -5,8 +5,11 @@ import { Chatroom } from '../../app/shared/models/chatroom';
 import { Message } from '../shared/models/message';
 import { catchError, throwError } from 'rxjs';
 import { SocketIoService } from './socket-io.service';
-import { filter, take } from 'rxjs/operators';
-import { PaginatedResponse } from 'src/app/shared/models/pagination';
+import { filter, take, tap} from 'rxjs/operators';
+import { PaginatedMessages, PaginatedResponse } from 'src/app/shared/models/pagination';
+import { BehaviorSubject } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { combineLatest } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -16,8 +19,41 @@ export class ChatroomService {
   private readonly CHATROOMS_API_URL = `${this.API_BASE_URL}/chatroom`;
   private readonly MESSAGES_API_URL = `${this.API_BASE_URL}/message/chatroom`; 
   private readonly AUTH_TOKEN_KEY = 'authToken'; 
+  private activeRoomId = new BehaviorSubject<string | null>(null);
+
+  // This is the "Single Source of Truth" for the socket room state
+  private roomSubscription: Subscription | undefined; 
 
   constructor(private http: HttpClient,private socketIoService: SocketIoService) {}
+
+  watchActiveRoom(roomId: string): void {
+    // Update the current active room
+    this.activeRoomId.next(roomId);
+
+    // If we already have a sync loop running, clean it up first
+    if (this.roomSubscription) {
+      this.roomSubscription.unsubscribe();
+    }
+
+    // Combine connection status and active room ID
+    this.roomSubscription = combineLatest([
+      this.socketIoService.isConnected$.pipe(filter(connected => connected === true)),
+      this.activeRoomId.pipe(filter(id => !!id))
+    ]).pipe(
+      tap(([_, id]) => {
+        // This runs EVERY time the socket connects OR the room changes
+        this.socketIoService.emit('joinChatroom', { chatroomId: id });
+        console.log(`ChatroomService: Auto-joined room ${id}`);
+      })
+    ).subscribe();
+  }
+
+  stopWatchingRoom(): void {
+    this.activeRoomId.next(null);
+    if (this.roomSubscription) {
+      this.roomSubscription.unsubscribe();
+    }
+  }
 
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem(this.AUTH_TOKEN_KEY);
@@ -55,15 +91,23 @@ export class ChatroomService {
   /**
    * Fetches all messages for a specific chatroom.
    * @param chatroomId The ID of the chatroom whose messages are to be retrieved.
+   * @param size Number of messages to fetch.
+   * @param lastId The ID of the oldest message currently displayed (the cursor).
    * @returns An Observable of an array of Message objects.
-   */
-  getMessagesForChatroom(chatroomId: string): Observable<Message[]> {
+  */
+  getMessagesForChatroom(chatroomId: string,size: number = 20, lastId: string | null = null): Observable<PaginatedMessages> {
     const headers = this.getAuthHeaders();
-    // Assuming backend endpoint is /api/message/chatrooms/{chatroomId}
-    return this.http.get<Message[]>(`${this.MESSAGES_API_URL}/${chatroomId}`, { headers })
-      .pipe(
-        catchError(this.handleError)
-      );
+    let params: any = { size: size.toString() };
+    if (lastId) {
+      params.lastId = lastId;
+    }
+
+    return this.http.get<PaginatedMessages>(`${this.MESSAGES_API_URL}/${chatroomId}`, { 
+      headers, 
+      params 
+    }).pipe(
+      catchError(this.handleError)
+    );
   }
 
   /**

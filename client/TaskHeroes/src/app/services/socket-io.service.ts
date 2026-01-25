@@ -25,9 +25,15 @@ export class SocketIoService implements OnDestroy {
     // Connect socket when user data is available
     this.subscriptions.push(
       this.userDataService.userData$.subscribe((user) => {
+        console.log("inside user for socketIo service",user);
         if (user?.id) {
           this.socket.auth = { userId: user.id }; 
           this.connect(user.id);
+        }else {
+          // 🟢 THIS IS THE PLACE: 
+          // If the user data is cleared (logout/expired), disconnect.
+          console.log("SocketIoService: No active user session. Disconnecting.");
+          this.disconnect();
         }
       })
     );
@@ -106,10 +112,12 @@ export class SocketIoService implements OnDestroy {
   }
 
   emit(eventName: string, data?: any): void {
-    if (this.socket && this.isConnectedSubject.value) {
-      this.socket.emit(eventName, data);
-    } else {
-      console.warn(`Socket not connected, cannot emit event: ${eventName}`);
+    // Socket.io natively buffers emits until the connection is ready.
+    this.socket.emit(eventName, data);
+    
+    // Optional: keep the log for debugging but don't block the emit
+    if (!this.isConnectedSubject.value) {
+      console.log(`Socket not yet connected. Event "${eventName}" is buffered and will send on connect.`);
     }
   }
 

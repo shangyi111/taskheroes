@@ -16,13 +16,21 @@
         </header>
 
         <main class="message-area" #messageContainer>
-            <div *ngIf="isLoading()">
-                <p class="loading-message">Loading messages...</p>
-            </div>
-            <div *ngIf="error()" class="error-message">
+            <th-loading 
+                *ngIf="chatStatus() === 'loading'"
+                type="skeleton" 
+                height="100%">
+            </th-loading>
+            <div *ngIf="chatStatus() === 'error'" class="error-message">
                 <p>{{ error() }}</p>
                 <button (click)="ngOnInit()">Retry</button>
             </div>
+
+            <div #scrollAnchor *ngIf="!allMessagesLoaded()" style="height: 1px; width: 100%;"></div>
+
+            @if (chatStatus() === 'fetching-history') {
+                <div class="load-more-spinner">Loading older messages...</div>
+            }
 
             <ng-container *ngFor="let message of messages(); trackBy: messageTrackBy">
                 <th-message

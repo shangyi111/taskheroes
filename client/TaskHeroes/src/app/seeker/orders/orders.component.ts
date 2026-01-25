@@ -49,7 +49,6 @@ export class OrdersComponent {
       this.jobsSubscription.unsubscribe();
     }
     this.socketSubscriptions.forEach((sub) => sub.unsubscribe());
-    this.socketIoService.disconnect();
   }
 
   loadInitialJobs(): void {

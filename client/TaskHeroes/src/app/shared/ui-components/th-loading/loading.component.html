@@ -1,0 +1,21 @@
+<div class="th-loading-container" [style.height]="height">
+  
+  @if (type === 'skeleton') {
+    <div class="skeleton-wrapper">
+      <div class="skeleton-item" *ngFor="let i of [1,2,3]">
+        <div class="skeleton-avatar shimmer"></div>
+        <div class="skeleton-content">
+          <div class="skeleton-line short shimmer"></div>
+          <div class="skeleton-line long shimmer"></div>
+        </div>
+      </div>
+    </div>
+  } 
+  
+  @else {
+    <div class="th-loading-content">
+      <div class="th-spinner"></div>
+      <p class="th-loading-text">{{ message }}</p>
+    </div>
+  }
+</div>

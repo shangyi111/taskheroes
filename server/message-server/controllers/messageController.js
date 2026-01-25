@@ -1,6 +1,8 @@
 const { Message, User, Chatroom } = require('../../models'); 
 const eventBus = require('../../utils/eventBus');
 const crypto = require('crypto');
+const { getPagination, getPagingData } = require('../../utils/pagination');
+const { Op } = require('sequelize');
 
 const algorithm = 'aes-256-cbc';
 const encryptionKeyHex = process.env.MESSAGE_ENCRYPTION_KEY;
@@ -91,29 +93,44 @@ exports.getMessagesByChatroom = async (req, res) => {
   }
 };
 
-exports.getPaginatedMessages = async (req,res) => {
+exports.getPaginatedMessages = async (req, res) => {
   try {
-    const offset = req.params.offset;
-    const limit = req.params.limit;
-    const chatroomId = req.params.chatroomId;
-    const messages = await Message.findAll({
-      where: { chatroomId },
-      offset,
+    const { chatroomId } = req.params;
+    const { lastId, size } = req.query;
+    const limit = size ? parseInt(size) : 20;
+    const whereClause = { chatroomId };
+
+    if (lastId) {
+      whereClause.id = { [Op.lt]: lastId };
+    }
+
+    // 2. Use findAndCountAll to get both the rows and the total count
+    const data = await Message.findAndCountAll({
+      where: whereClause,
       limit,
-      include: [{ model: User, as: 'sender', attributes: ['username'] }], 
-      order: [['sentAt', 'DESC']] // Order by timestamp (newest first for pagination)
+      include: [{ model: User, as: 'sender', attributes: ['username'] }],
+      order: [['createdAt', 'DESC']]
     });
-    const decryptedMessages = messages.map((message) => {
-      const decryptedText = decryptMessage(message.iv, message.messageText);
+
+    // 3. Decrypt the messages (the 'rows' from the data object)
+    const decryptedItems = data.rows.map((message) => {
+      const decryptedText = decryptMessage(message.iv, message.encryptedContent);
       return {
         ...message.dataValues,
-        messageText: decryptedText, 
-        senderUsername: message.sender ? message.sender.username : 'Unknown User', 
+        text: decryptedText, // Ensure this matches your frontend Message model
+        senderUsername: message.sender ? message.sender.username : 'Unknown User',
       };
     });
-    res.json(decryptedMessages);
+
+    res.json({
+      items: decryptedItems,
+      totalItems: data.count,
+      // Provide the ID of the oldest message in this batch for the next call
+      nextCursor: decryptedItems.length > 0 ? decryptedItems[decryptedItems.length - 1].id : null
+    });
+    
   } catch (err) {
     console.error('Error retrieving paginated messages:', err);
-    throw err;
+    res.status(500).json({ message: 'Error retrieving messages' });
   }
 };

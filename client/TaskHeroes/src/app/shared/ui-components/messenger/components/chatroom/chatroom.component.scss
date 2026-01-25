@@ -113,6 +113,12 @@ $breakpoint-md: 768px;
     gap: $spacing-sm;
     scroll-behavior: smooth;
 
+    #scrollAnchor {
+        opacity: 0;
+        pointer-events: none;
+        margin-bottom: -1px; // Ensure it doesn't push messages down
+    }
+
     .date-separator {
         text-align: center;
         margin: $spacing-md 0;
@@ -285,4 +291,76 @@ $breakpoint-md: 768px;
     direction: ltr;
     -webkit-font-feature-settings: 'liga';
     -webkit-font-smoothing: antialiased;
+}
+
+.load-more-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 15px 0;
+  font-size: 0.85rem;
+  color: var(--text-muted, #666);
+  background-color: rgba(255, 255, 255, 0.8);
+  width: 100%;
+  animation: fadeIn 0.3s ease-in;
+
+  &::before {
+    content: "";
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    border: 2px solid #ddd;
+    border-top: 2px solid var(--primary-color, #007bff);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.loading-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  
+  // Fill the message area so the footer stays pinned at the bottom
+  height: 100%; 
+  min-height: 300px; 
+  
+  color: var(--text-muted, #888);
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  
+  // A gentle pulse animation to show the app is active
+  animation: pulse 1.5s ease-in-out infinite;
+
+  &::before {
+    content: "sync"; // Uses Material Icon "sync" as a spinner
+    font-family: 'Material Icons';
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: var(--primary-color, #007bff);
+    animation: spin 2s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
 }
