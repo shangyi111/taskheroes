@@ -34,7 +34,7 @@ const getChatroomIncludes = () => {
         {
           model: Service, // Use your model name (Business or Service)
           as: 'Service',   // This must match the alias in your Job -> Service association
-          attributes: ['businessName'],
+          attributes: ['businessName','profilePicture'],
         }
       ]
     }
@@ -52,31 +52,39 @@ const mapChatroomData = (chatroom, currentUserId = null) => {
     // If the viewer is the Provider, the "Name" is the Customer's username.
     // If the viewer is the Customer, the "Name" is the Business Name from the Job's Service (if exists), otherwise the Provider's username.
     let displayName = "Chatroom";
+    let isProvider = currentUserId == data.providerId;
     if (currentUserId) {
-        displayName = (currentUserId == data.providerId) 
+        displayName = isProvider
             ? data.Customer.username 
             : data.Job?.Service?.businessName || data.Provider.username;
     }
     return {
-        // Core Chatroom Fields
-        ...data,
-        jobId: data.jobId, // Ensure jobId is present
+        // Core Identity
+        id: data.id,
+        jobId: data.jobId,
+        customerId: data.customerId,
+        providerId: data.providerId,
         name: displayName,
-        // User Context (Provider/Seeker)
+        lastActivityAt: data.lastActivityAt,
+
+        // User Context
         customerUsername: data.Customer.username,
         providerUsername: data.Provider.username,
         customerProfilePicture: data.Customer.profilePicture,
-        providerProfilePicture: data.Provider.profilePicture,
         
-        // Job Context (from Job model, if it exists)
+        // Seeker sees Service Pic; Provider sees Customer Pic
+        serviceProfilePicture: data.Job?.Service?.profilePicture?.url || data.Provider.profilePicture,
+
+        // Flattened Job Attributes (Optional)
         jobTitle: data.Job?.jobTitle || null,
         jobDate: data.Job?.jobDate || null,
         jobStatus: data.Job?.jobStatus || null,
         jobLocation: data.Job?.jobLocation || null,
         fee: data.Job?.fee || null,
-        description: data.Job?.description || null,
-        lastReadByMe: currentUserId === data.providerId ? data.lastReadByProvider : data.lastReadByCustomer
-    };
+        description: data.Job?.jobDescription || null,
+
+        // Read Status
+        lastReadByMe: isProvider ? data.lastReadByProvider : data.lastReadByCustomer};
 };
 
 exports.createChatroom = async (req, res) => {

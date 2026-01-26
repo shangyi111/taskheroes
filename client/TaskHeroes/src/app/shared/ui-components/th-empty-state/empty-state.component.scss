@@ -1,0 +1,61 @@
+/* Using your existing TaskHeroes spacing and color variables */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+  height: 100%;
+  width: 100%;
+  box-sizing:border-box;
+  background-color: transparent; // Let the parent container's bg show through
+
+  .icon-container {
+    margin-bottom: 20px;
+    
+    i {
+      font-size: 80px;
+      color: var(--card-border); // A soft grey
+      opacity: 0.6;
+    }
+  }
+
+  .empty-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 10px 0;
+  }
+
+  .empty-message {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    max-width: 320px;
+    line-height: 1.6;
+    margin: 0 auto 24px;
+  }
+
+  .empty-action-btn {
+    background-color: var(--primary-green);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+      background-color: color-mix(in srgb, var(--primary-green) 80%, black);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}

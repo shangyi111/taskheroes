@@ -4,43 +4,49 @@
             <button class="mobile-menu-toggle" (click)="backToChatList()">
                 <i class="material-icons">arrow_back</i>
             </button>
-            <div class="chat-title-group">
-                <h1 class="chat-title">{{ chatPartnerName() }}</h1>
-                <p class="chat-subtitle">
-                    {{ jobDetails().jobDate ? (jobDetails().jobDate | date:'mediumDate') : 'Date TBD' }} | {{ jobDetails().serviceName }}
-                </p>
-            </div>
+            @if (jobDetails(); as details) {
+                <div class="chat-title-group">
+                    <h1 class="chat-title">{{ chatPartnerName() }}</h1>
+                    <p class="chat-subtitle">
+                        {{ details.jobDate ? (details.jobDate | date:'mediumDate') : 'Date TBD' }} | {{ details.serviceName || 'General Inquiry' }}
+                    </p>
+                </div>
+            }
             <div class="chat-options">
-                <p class="detail-link" (click)="openDetailsModal()">details</p>
+                <p class="detail-link" (click)="openDetailsModal()">View details</p>
             </div>
         </header>
 
         <main class="message-area" #messageContainer>
-            <th-loading 
-                *ngIf="chatStatus() === 'loading'"
-                type="skeleton" 
-                height="100%">
-            </th-loading>
-            <div *ngIf="chatStatus() === 'error'" class="error-message">
-                <p>{{ error() }}</p>
-                <button (click)="ngOnInit()">Retry</button>
-            </div>
+            <th-loading *ngIf="chatStatus() === 'loading'" type="skeleton" height="100%"></th-loading>
+            @if (chatStatus() === 'error') {
+                <th-empty-state 
+                    icon="cloud_off"
+                    title="Connection Issue"
+                    [message]="error() ?? 'We couldn\'t load your chat messages. Please check your internet connection.'"
+                    actionLabel="Try Again"
+                    (actionClicked)="ngOnInit()">
+                </th-empty-state>
+            }
 
             <div #scrollAnchor *ngIf="!allMessagesLoaded()" style="height: 1px; width: 100%;"></div>
-
             @if (chatStatus() === 'fetching-history') {
                 <div class="load-more-spinner">Loading older messages...</div>
             }
-
             <ng-container *ngFor="let message of messages(); trackBy: messageTrackBy">
                 <th-message
-                [message]="message"
-                [currentUserId]="currentUser()? currentUser()!.id! : null"
-                [chatPartnerAvatarUrl]="chatPartnerAvatarUrl()" 
+                    [message]="message"
+                    [currentUserId]="currentUser()? currentUser()!.id! : null"
+                    [chatPartnerAvatarUrl]="chatPartnerAvatarUrl()" 
                 ></th-message>
             </ng-container>
-
+            <div #bottomAnchor style="height: 1px; width: 100%;"></div>
         </main>
+
+        <button *ngIf="showScrollToBottomBtn()" class="scroll-bottom-btn" (click)="scrollToBottom()">
+            Jump to Latest
+            <span *ngIf="hasUnreadAtBottom()" class="unread-dot"></span>
+        </button>
 
         <footer class="message-input-area">
             <div class="input-actions">
@@ -59,25 +65,39 @@
         </footer>
     </div>
 
-    <div class="modal-overlay" *ngIf="showDetailsModal()">
-        <div class="modal-content">
-            <button class="close-btn" (click)="closeDetailsModal()">&times;</button>
-            <h3>Job Details & Booking Info</h3>
-            <hr>
-            <p><strong>Service:</strong> {{ jobDetails().serviceName }}</p>
-            <p><strong>Date:</strong> {{ jobDetails().jobDate | date:'fullDate' }}</p>
-            <!-- <p><strong>Status:</strong> {{ jobDetails().status || chatroom()?.jobStatus || 'Awaiting Confirmation' }}</p> -->
-            <p><strong>Location:</strong> {{ jobDetails().location || chatroom()?.jobLocation || 'Not provided' }}</p>
-            
-            <p>
-                <strong>Fee Quoted:</strong> 
-                {{ jobDetails().fee ? (jobDetails().fee | currency:'USD':'symbol':'1.0-2') : 'TBD' }}
-            </p>
-            
-            <div class="modal-notes">
-                <h4>Job Description:</h4>
-                <p>{{ jobDetails().description || 'No detailed description available.' }}</p>
+    @if (showDetailsModal()) {
+        <div class="details-drawer-overlay" [class.active]="showDetailsModal()">
+            <header class="drawer-header">
+                <h3>Job Info</h3>
+                <button class="close-btn" (click)="closeDetailsModal()">
+                    <i class="material-icons">close</i>
+                </button>
+            </header>
+
+            <div class="drawer-body">
+                @if (jobDetails(); as details) {
+                    <section class="detail-group">
+                        <label>Service</label>
+                        <p>{{ details.serviceName || 'General inquiry.' }}</p>
+                    </section>
+                    <section class="detail-group">
+                        <label>Date</label>
+                        <p>{{ details.jobDate ? (details.jobDate | date:'fullDate') : 'Date TBD' }}</p>
+                    </section>
+                    <section class="detail-group">
+                        <label>Location</label>
+                        <p>{{ details.location || 'TBD'}}</p>
+                    </section>
+                    <section class="detail-group">
+                        <label>Fee Quoted</label>
+                        <p class="fee-highlight">{{ details.fee ? (details.fee | currency:'USD':'symbol':'1.0-2') : 'TBD' }}</p>
+                    </section>
+                    <div class="detail-group description">
+                        <label>Description</label>
+                        <p>{{ details.description || 'No detailed description available.' }}</p>
+                    </div>
+                }
             </div>
         </div>
-    </div>
+    }
 </div>

@@ -56,6 +56,55 @@ $breakpoint-md: 768px;
     background-color: var(--dashboard-bg);
     position: relative;
     overflow: hidden;
+    
+    
+    .scroll-bottom-btn {
+    // Positioning
+    position: absolute;
+    bottom: 100px; // Sits above the input area
+    right: 30px;
+    z-index: 100;
+
+    // Visuals
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background-color: #3498db; // Use your TaskHeroes primary blue
+    color: white;
+    border: none;
+    border-radius: 50px; // Makes it pill-shaped
+    font-weight: 600;
+    font-size: 0.9rem;
+    
+    // Effects
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+
+    &:hover {
+        background-color: #2980b9;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+
+    // The Notification Dot
+    .unread-dot {
+        width: 10px;
+        height: 10px;
+        background-color: #e74c3c; // Red for unread
+        border-radius: 50%;
+        border: 2px solid white;
+        position: absolute;
+        top: -2px;
+        right: 5px;
+        box-shadow: 0 0 5px rgba(231, 76, 60, 0.5);
+    }
+  }
 }
 
 /* Header Styles */
@@ -363,4 +412,66 @@ $breakpoint-md: 768px;
   0% { opacity: 0.5; }
   50% { opacity: 1; }
   100% { opacity: 0.5; }
+}
+
+/* Adaptive Drawer Design */
+.details-drawer-overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 380px; /* Desktop Drawer width */
+    background-color: white;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
+    animation: slideInRight 0.3s ease-out;
+
+    /* 🟢 MOBILE TAKEOVER: Fill entire screen */
+    @media (max-width: $breakpoint-md) {
+        width: 100%;
+        left: 0;
+        animation: fadeIn 0.2s ease-in;
+    }
+
+    .drawer-header {
+        padding: $spacing-md;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--card-border);
+        
+        h3 { margin: 0; font-size: 1.1rem; color: var(--text-primary); }
+        .close-btn { @include button-reset(); color: var(--text-secondary); }
+    }
+
+    .drawer-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: $spacing-lg;
+
+        .detail-group {
+            margin-bottom: $spacing-lg;
+            label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; }
+            p { margin: $spacing-xs 0 0; font-size: 1rem; color: var(--text-primary); }
+            .fee-highlight { color: var(--primary-green, #27ae60); font-weight: 700; font-size: 1.2rem; }
+        }
+    }
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+/* Ensure detail-link is prominent */
+.detail-link {
+    cursor: pointer;
+    color: var(--text-primary);
+    font-weight: 500;
+    text-decoration: none;
+    font-family:var(--global-font-family);
+    font-size: 0.8rem;
+    &:hover { color: color-mix(in srgb, var(--text-primary) 80%, black); }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal, WritableSignal, ViewChild, ElementRef, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, WritableSignal, ViewChild, ElementRef, computed, AfterViewInit } from '@angular/core';
 import { ActivatedRoute, Router, NavigationEnd} from '@angular/router';
 import { Subscription, of, Observable, throwError, combineLatest } from 'rxjs';
 import { switchMap, filter, tap, catchError, map, take } from 'rxjs/operators';
@@ -14,18 +14,7 @@ import { Job } from 'src/app/shared/models/job';
 import { Message } from 'src/app/shared/models/message';
 import { PaginatedMessages } from 'src/app/shared/models/pagination';
 import { ThLoadingComponent } from '../../../th-loading/loading.component';
-
-// Interface reflecting the data structure returned by the enriched backend controller
-interface ExtendedChatroom extends Chatroom {
-    jobTitle?: string;
-    jobDate?: string | Date;
-    jobStatus?: string;
-    customerUsername?: string;
-    providerUsername?: string;
-    // Fields expected from backend JOINs for avatar simplification
-    customerProfilePicture?: string; 
-    providerProfilePicture?: string;
-}
+import { EmptyStateComponent } from '../../../th-empty-state/empty-state.component';
 
 type ChatStatus = 'loading' | 'fetching-history' | 'idle' | 'error';
 
@@ -38,17 +27,27 @@ type ChatStatus = 'loading' | 'fetching-history' | 'idle' | 'error';
     CommonModule,
     FormsModule,
     MessageComponent,
-    ThLoadingComponent
+    ThLoadingComponent,
+    EmptyStateComponent
   ]
 })
 export class ChatroomComponent implements OnInit, OnDestroy {
-  @ViewChild('messageContainer') private messageContainer!: ElementRef;
-  @ViewChild('scrollAnchor') set scrollAnchor(content: ElementRef) {
-  if (content) {
-    this.setupIntersectionObserver(content);
+  @ViewChild('messageContainer') set messageContainer(content: ElementRef) {
+    if (content) {
+      this._messageContainer = content;
+      this.setupObservers();
     }
   }
-  private observer?: IntersectionObserver;
+  @ViewChild('scrollAnchor') set scrollAnchor(content: ElementRef) {
+  if (content && this.historyObserver) this.historyObserver.observe(content.nativeElement);
+  }
+
+  @ViewChild('bottomAnchor') set bottomAnchor(content: ElementRef) {
+    if (content && this.bottomObserver) this.bottomObserver.observe(content.nativeElement);
+  }
+  private historyObserver?: IntersectionObserver;
+  private bottomObserver?: IntersectionObserver;
+  private _messageContainer!: ElementRef;
 
   private router = inject(Router);
   private chatroomService = inject(ChatroomService);
@@ -58,8 +57,7 @@ export class ChatroomComponent implements OnInit, OnDestroy {
 
   currentUser: WritableSignal<User | null> = signal(null);
   chatroomId: WritableSignal<string | null> = signal(null);
-  chatroom: WritableSignal<ExtendedChatroom | null> = signal(null); 
-  job: WritableSignal<Job | null> = signal(null);
+  chatroom: WritableSignal<Chatroom | null> = signal(null); 
   messages: WritableSignal<Message[]> = signal([]);
   newMessageContent: WritableSignal<string> = signal('');
   currentPage = signal(0);
@@ -70,6 +68,9 @@ export class ChatroomComponent implements OnInit, OnDestroy {
   error: WritableSignal<string | null> = signal(null);
   
   showDetailsModal: WritableSignal<boolean> = signal(false);
+  showScrollToBottomBtn = signal(false);
+  hasUnreadAtBottom = signal(false);
+  markCurrentRoomAsRead = signal(false);
 
   private subscriptions: Subscription = new Subscription();
   private chatroomMessageSubscription: Subscription | undefined;
@@ -83,7 +84,7 @@ export class ChatroomComponent implements OnInit, OnDestroy {
       if (!chatroomData || !currentUserId) { return 'Loading Chat...'; }
 
       if (chatroomData.customerId === currentUserId) {
-          return chatroomData.providerUsername || 'Provider';
+          return chatroomData.name || chatroomData.providerUsername ||'Provider';
       } else if (chatroomData.providerId === currentUserId) {
           return chatroomData.customerUsername || 'Seeker';
       }
@@ -91,48 +92,31 @@ export class ChatroomComponent implements OnInit, OnDestroy {
   });
 
   jobDetails = computed(() => {
-      const jobData = this.job();
-    
-      if (jobData) {
-        return {
-            jobDate: jobData.jobDate ? new Date(jobData.jobDate) : null,
-            serviceName: jobData.jobTitle || 'Service Job',
-            location: jobData.location,
-            fee: jobData.fee,
-            description: jobData.description,
-            // status: jobData.jobStatus || 'Confirmed', 
-        };
-      }
-    
-    // Fallback logic from chatroom data
-    const chatroomData = this.chatroom();
-    return {
-        jobDate: chatroomData?.jobDate ? new Date(chatroomData.jobDate) : null,
-        serviceName: chatroomData?.jobTitle || 'General Inquiry',
-        location: 'Not available',
-        fee: 'N/A',
-        description: 'N/A',
-        // status: chatroomData?.jobStatus || 'Unknown',
-    };
+      const room = this.chatroom();
+      if (!room) return null;
+      
+      return {
+        jobDate: room.jobDate ? new Date(room.jobDate) : null,
+        serviceName: room.jobTitle || 'General Inquiry',
+        location: room.jobLocation || 'Not provided',
+        fee: room.fee || 'TBD',
+        description: room.description || 'No description'
+      };
   });
   
   // Fetches the partner's avatar URL from the enriched chatroom object
   chatPartnerAvatarUrl = computed(() => {
-    const chatroomData = this.chatroom();
-    const currentUserId = this.currentUser()?.id;
+    const data = this.chatroom();
+    const user = this.currentUser();
+    
+    if (!data || !user) return 'assets/img/default-avatar.png';
 
-    if (!chatroomData || !currentUserId) {
-        return 'assets/img/default-avatar.png';
-    }
-
-    if (chatroomData.customerId === currentUserId) {
-        // Current user is customer, partner is provider
-        return chatroomData.providerProfilePicture || 'assets/img/default-avatar.png';
-    } else {
-        // Current user is provider, partner is customer
-        return chatroomData.customerProfilePicture || 'assets/img/default-avatar.png';
-    }
-  });
+    // Seeker view: Backend already populated serviceProfilePicture with the Business pic
+    // Provider view: Backend already populated customerProfilePicture
+    return (user.id === data.customerId) 
+      ? data.serviceProfilePicture || null
+      : data.customerProfilePicture || null;
+});
 
  ngOnInit(): void {
   console.log('ChatroomComponent initialized.');
@@ -154,22 +138,25 @@ export class ChatroomComponent implements OnInit, OnDestroy {
   );
 }
 
-  private setupIntersectionObserver(anchor: ElementRef) {
-    this.observer = new IntersectionObserver(([entry]) => {
-      // Trigger if anchor is visible AND we have at least one full page already
-      if (entry.isIntersecting && 
-          this.chatStatus() === 'idle' && 
-          !this.allMessagesLoaded()) {
+  private setupObservers() {
+    // Use the private backing field we set in the setter
+    const container = this._messageContainer.nativeElement;
+
+    this.historyObserver = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && this.chatStatus() === 'idle' && !this.allMessagesLoaded()) {
         this.loadMoreMessages();
       }
-    }, {
-      root: this.messageContainer.nativeElement,
-      threshold: 0.1,
-      rootMargin: '50px 0px 0px 0px' // Start loading slightly before hitting the top
-    });
+    }, { root: container, threshold: 0.1 });
 
-    this.observer.observe(anchor.nativeElement);
-  } 
+    this.bottomObserver = new IntersectionObserver(([entry]) => {
+      this.showScrollToBottomBtn.set(!entry.isIntersecting);
+      
+      if (entry.isIntersecting) {
+        this.hasUnreadAtBottom.set(false);
+        this.markCurrentRoomAsRead();
+      }
+    }, { root: container, threshold: 0.1 });
+  }
  // 3. Extract the loading logic to a helper
   private loadInitialData(id: string): void {
     this.userDataService.userData$.pipe(
@@ -196,56 +183,15 @@ export class ChatroomComponent implements OnInit, OnDestroy {
     this.allMessagesLoaded.set(false);  
     this.cleanupSocket(); // Leave the previous room's socket
   }
-  private loadChatroomAndMessages(chatroomId: string, userId: string): Observable<ExtendedChatroom> {
+  private loadChatroomAndMessages(chatroomId: string, userId: string): Observable<Chatroom> {
     console.log(`Fetching chatroom ${chatroomId} for user ${userId} via ChatroomService.`);
-
     return this.chatroomService.getChatroomById(chatroomId).pipe(
-      tap(chatroomData => {
-        if (!chatroomData) {
-          throw new Error('Chatroom not found.');
-        }
-        if (chatroomData.customerId !== userId && chatroomData.providerId !== userId) {
-          this.error.set('You do not have access to this chatroom.');
-          this.chatStatus.set('error');
-          throw new Error('Unauthorized access to chatroom');
-        }
-        this.chatroom.set(chatroomData as ExtendedChatroom); 
-      }),
-      
-      switchMap(chatroomData => {
-        const jobId = chatroomData.jobId; 
-        if (jobId) {
-          const jobIdNumber = typeof jobId === 'string' ? Number(jobId) : jobId;
-          
-          return this.jobService.getJobById(jobIdNumber).pipe(
-            tap(jobData => this.job.set(jobData)),
-            // Catch the error here so the chatroom still loads
-            catchError(err => {
-              console.warn(`Job ${jobIdNumber} not found, continuing to load chat...`);
-              this.job.set(null); // Fallback to null
-              return of(null); // Return a successful observable to keep the pipe alive
-            }),
-            switchMap(() => of(chatroomData as ExtendedChatroom))
-          );
-        } else {
-          this.job.set(null); 
-          return of(chatroomData as ExtendedChatroom);
-        }
-      }),
-      
-      switchMap(chatroomData => 
-          this.chatroomService.getMessagesForChatroom(chatroomId).pipe(
-            tap((response: PaginatedMessages) => {
-              const initialMessages = [...response.items].reverse();
-              this.messages.set(initialMessages);
-              if (initialMessages.length < this.pageSize) {
-                  this.allMessagesLoaded.set(true);
-              }
-              this.chatStatus.set('idle');
-            }),
-            map(() => chatroomData as ExtendedChatroom) 
-          )
-      ),
+      tap(chatroom => this.validateAccess(chatroom, userId)),
+      // Fetch and Process Messages
+      switchMap(chatroom => this.chatroomService.getMessagesForChatroom(chatroomId).pipe(
+        tap(res => this.processInitialMessages(res)),
+        map(() => chatroom)
+      )),
       catchError(err => {
         console.error('Error fetching chatroom or messages:', err);
         this.error.set('Failed to retrieve chatroom details or messages.');
@@ -255,48 +201,51 @@ export class ChatroomComponent implements OnInit, OnDestroy {
     );
   }
 
-  private setupRealtimeMessaging(chatroomId: string): void {
-    console.log(`Setting up real-time messaging for chatroom ${chatroomId}.`);
-
-    this.chatroomService.watchActiveRoom(chatroomId);
-
-    if (this.chatroomMessageSubscription) {
-      this.chatroomMessageSubscription.unsubscribe();
+  private validateAccess(chatroomData: Chatroom | null, userId: string): void {
+    // 1. Check if chatroom actually exists
+    if (!chatroomData) {
+      throw new Error('Chatroom not found.');
     }
+
+    // 2. Security Check: Is the current user part of this chat?
+    const isParticipant = chatroomData.customerId === userId || chatroomData.providerId === userId;
+
+    if (!isParticipant) {
+      this.error.set('You do not have access to this chatroom.');
+      this.chatStatus.set('error');
+      throw new Error('Unauthorized access to chatroom');
+    }
+    // 3. If everything is fine, update the state
+    this.chatroom.set(chatroomData);
+  }
+
+  private processInitialMessages(response: PaginatedMessages): void {
+    // 1. Reverse the items for chronological display (Bottom-Up)
+    const initialMessages = [...response.items].reverse();
+    
+    // 2. Update the main messages signal
+    this.messages.set(initialMessages);
+    
+    // 3. Check if we've hit the end of history
+    if (initialMessages.length < this.pageSize) {
+      this.allMessagesLoaded.set(true);
+    }
+    
+    // 4. Update status so the loading spinners disappear
+    this.chatStatus.set('idle');
+  }
+
+  private setupRealtimeMessaging(chatroomId: string): void {
+    this.chatroomService.watchActiveRoom(chatroomId);
 
     this.chatroomMessageSubscription = this.chatroomService.onNewMessage().pipe(
       filter(message => message.chatroomId === chatroomId),
-      tap(message => {
-        const element = this.messageContainer.nativeElement;
-        // Check if user is near bottom (within 100px)
-        const isNearBottom = element.scrollHeight - element.scrollTop - element.clientHeight < 100;
-        
-        console.log('Received new real-time message:', message);
-        const userId = this.currentUser()?.id;
-        if (userId) {
-            this.chatroomService.markAsRead(chatroomId, userId).subscribe();
-        }
-        
-        this.messages.update(msgs => {
-          if (message.senderId === userId) return msgs;
-          if (!msgs.some(m => m.id === message.id)) {
-            return [...msgs, message];
-          }
-          return msgs;
-        });
-        if (isNearBottom || message.senderId === this.currentUser()?.id) {
-            setTimeout(() => this.scrollToBottom(), 0);
-        }
-      }),
-      catchError(err => {
-        console.error('Error receiving real-time message:', err);
-        return of(null);
-      })
+      tap(message => this.handleIncomingMessage(message)),
+      catchError(() => of(null))
     ).subscribe();
 
     this.subscriptions.add(this.chatroomMessageSubscription);
   }
-
   sendMessage(): void {
     if (!this.currentUser()) {
       this.error.set('User not logged in. Please sign in to send messages.');
@@ -372,24 +321,13 @@ export class ChatroomComponent implements OnInit, OnDestroy {
     return message.id;
   }
 
-  onScroll(event: any): void {
-    if (this.chatStatus() !== 'idle') {
-      return;
-    }
-
-    const threshold = 50; // Trigger when within 50px of the top
-    if (event.target.scrollTop <= threshold && !this.allMessagesLoaded()) {
-      this.loadMoreMessages();
-    }
-  }
-
   loadMoreMessages(): void {
     const id = this.chatroomId();
     const currentMessages = this.messages();
     if (!id || this.chatStatus() !== 'idle' || currentMessages.length === 0 || this.allMessagesLoaded()) return;
 
     // SCROLL CORRECTION: Capture height before update
-    const container = this.messageContainer.nativeElement;
+    const container = this._messageContainer.nativeElement;
     const previousHeight = container.scrollHeight;
 
     this.chatStatus.set('fetching-history');
@@ -417,9 +355,9 @@ export class ChatroomComponent implements OnInit, OnDestroy {
   }
 
   scrollToBottom(): void {
-    if (this.messageContainer && this.messageContainer.nativeElement) {
+    if (this._messageContainer && this._messageContainer.nativeElement) {
       try {
-        this.messageContainer.nativeElement.scrollTop = this.messageContainer.nativeElement.scrollHeight;
+        this._messageContainer.nativeElement.scrollTop = this._messageContainer.nativeElement.scrollHeight;
       } catch (err) {
         console.error('Failed to scroll to bottom:', err);
       }
@@ -430,16 +368,49 @@ export class ChatroomComponent implements OnInit, OnDestroy {
     console.log('ChatroomComponent destroyed.');
     this.subscriptions.unsubscribe();
     this.chatroomService.stopWatchingRoom();
+    this.historyObserver?.disconnect();
+    this.bottomObserver?.disconnect();
   }
 
   private cleanupSocket(): void {
     const oldId = this.chatroomId();
     if (oldId) {
       this.chatroomService.stopWatchingRoom();
+      this.historyObserver?.disconnect(); 
+      this.bottomObserver?.disconnect();
       if (this.chatroomMessageSubscription) {
         this.chatroomMessageSubscription.unsubscribe();
       }
       console.log(`Stopped watching socket room: ${oldId}`);
+    }
+  }
+
+  private handleIncomingMessage(message: Message): void {
+  if (!this._messageContainer) return; // Safety gate
+
+    const element = this._messageContainer.nativeElement;
+    const isNearBottom = element.scrollHeight - element.scrollTop - element.clientHeight < 100;
+    const isMine = message.senderId === this.currentUser()?.id;
+
+    // 1. Update UI: Notify user if they are looking at history
+    if (!isMine && !isNearBottom) {
+      this.hasUnreadAtBottom.set(true);
+    }
+
+    // 2. Mark as Read: If user is at the bottom, tell the server immediately
+    if (!isMine && isNearBottom) {
+      this.markCurrentRoomAsRead();
+    }
+
+    // 3. Update State: Add to list if not already there (prevents duplicates)
+    this.messages.update(msgs => {
+      if (isMine) return msgs; // Optimistic UI handled this
+      return msgs.some(m => m.id === message.id) ? msgs : [...msgs, message];
+    });
+
+    // 4. Auto-Scroll: Only jump to bottom if user is already there or it's their own message
+    if (isNearBottom || isMine) {
+      setTimeout(() => this.scrollToBottom(), 0);
     }
   }
 }

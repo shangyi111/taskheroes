@@ -8,13 +8,14 @@ import { UserDataService } from 'src/app/services/user_data.service';
 import { CommonModule } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ScrollSensorDirective } from 'src/app/shared/directives/scroll-sensor.directive';
+import { EmptyStateComponent } from '../../../th-empty-state/empty-state.component';
 
 @Component({
   selector: 'app-chatrooms',
   templateUrl: './chatrooms.component.html',
   styleUrls: ['./chatrooms.component.scss'],
   standalone: true,
-  imports: [CommonModule, MatProgressSpinnerModule, ScrollSensorDirective],
+  imports: [CommonModule, MatProgressSpinnerModule, ScrollSensorDirective, EmptyStateComponent],
 })
 export class ChatroomsComponent implements OnInit, OnDestroy {
   private router = inject(Router);
