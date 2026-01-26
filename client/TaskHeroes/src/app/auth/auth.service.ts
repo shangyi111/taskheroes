@@ -58,8 +58,19 @@ export class AuthService {
     localStorage.setItem(this.USER_KEY,JSON.stringify(user));
   }
 
-  loginWithGoogle(idToken: string) {
-    // Send the token to your Node.js backend
-    return this.http.post(`${this.API_URL}/auth/google`, { idToken });
+  // loginWithGoogle(idToken: string) {
+  //   // Send the token to your Node.js backend
+  //   return this.http.post(`${this.API_URL}/auth/google`, { idToken });
+  // }
+  loginWithGoogle(idToken: string): Observable<User> {
+    return this.http.post<LoginResponse>(`${this.API_URL}/auth/google`, { idToken }).pipe(
+      tap((response: LoginResponse) => {
+        // 🟢 Centralized Side Effects
+        this.setToken(response.token);
+        this.setUser(response.user);
+        this.userDataService.setUserData(response.user);
+      }),
+      map(response => response.user)
+    );
   }
 }

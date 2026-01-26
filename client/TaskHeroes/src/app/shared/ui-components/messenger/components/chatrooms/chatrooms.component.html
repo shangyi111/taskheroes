@@ -36,17 +36,13 @@
           class="scroll-anchor">
           
           @if (isLoading()) {
-            <div class="loading-indicator">
-              <mat-spinner diameter="24"></mat-spinner>
-              <span>Loading more...</span>
-            </div>
+            <th-loading type="skeleton" height="100%"></th-loading>
           }
         </div>
       }
     } @else {
       <th-empty-state 
-        icon="chat_bubble_outline"
-        title="No chatrooms yet">
+        message="No chatrooms yet.">
       </th-empty-state>
     }
   </div>

@@ -10,13 +10,13 @@ import { CommonModule } from '@angular/common';
 })
 export class EmptyStateComponent {
   // The Material Icon name (e.g., 'chat_bubble_outline', 'search', 'cloud_off')
-  @Input() icon: string = 'inbox';
+  @Input() icon?: string;
   
   // The main bold heading
-  @Input() title: string = 'Nothing here yet';
+  @Input() title?: string;
   
   // The smaller supporting text
-  @Input() message: string = '';
+  @Input() message?: string = '';
   
   // Optional button text; if provided, the button will show
   @Input() actionLabel?: string;

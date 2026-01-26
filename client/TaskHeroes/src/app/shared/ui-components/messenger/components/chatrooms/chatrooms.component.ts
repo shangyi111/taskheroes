@@ -9,13 +9,16 @@ import { CommonModule } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ScrollSensorDirective } from 'src/app/shared/directives/scroll-sensor.directive';
 import { EmptyStateComponent } from '../../../th-empty-state/empty-state.component';
+import { ThLoadingComponent } from '../../../th-loading/loading.component';
 
 @Component({
   selector: 'app-chatrooms',
   templateUrl: './chatrooms.component.html',
   styleUrls: ['./chatrooms.component.scss'],
   standalone: true,
-  imports: [CommonModule, MatProgressSpinnerModule, ScrollSensorDirective, EmptyStateComponent],
+  imports: [CommonModule, MatProgressSpinnerModule, ScrollSensorDirective, EmptyStateComponent,
+    ThLoadingComponent
+  ],
 })
 export class ChatroomsComponent implements OnInit, OnDestroy {
   private router = inject(Router);

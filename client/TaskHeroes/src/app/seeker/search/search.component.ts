@@ -12,6 +12,7 @@ import { switchMap, catchError } from 'rxjs/operators';
 import { MatChipsModule } from '@angular/material/chips';
 import { SearchService } from 'src/app/services/search.service';
 import { ReviewService } from 'src/app/services/review.service';
+import { EmptyStateComponent } from 'src/app/shared/ui-components/th-empty-state/empty-state.component';
 
 interface ServiceWithRating extends Service {
   averageRating: number | null;
@@ -22,7 +23,9 @@ interface ServiceWithRating extends Service {
   standalone: true,
   templateUrl: './search.component.html',
   styleUrls: ['./search.component.scss'],
-  imports: [MatCardModule, MatButtonModule, FilterComponent, CommonModule, MatIconModule, MatChipsModule],
+  imports: [MatCardModule, MatButtonModule, FilterComponent, CommonModule, MatIconModule, MatChipsModule,
+    EmptyStateComponent
+  ],
 })
 export class SearchComponent {
   private searchService = inject(SearchService);

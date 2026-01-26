@@ -1,20 +1,27 @@
 <h2>Register</h2>
-<form (submit)="onSubmit()">
-  <div>
+<form (submit)="onSubmit()" class="register-form">
+  <div class="input-group">
     <label for="email" class="sr-only">Email:</label>
     <input type="email" id="email" name="email" [(ngModel)]="email" placeholder="Email" required>
   </div>
-  <div>
+  <div class="input-group">
     <label for="newUsername" class="sr-only">Username:</label>
     <input type="text" id="newUsername" name="newUsername" [(ngModel)]="newUsername" placeholder="Username" required>
   </div>
-  <div>
+  <div class="input-group">
     <label for="newPassword" class="sr-only">Password:</label>
     <input type="password" id="newPassword" name="newPassword" [(ngModel)]="newPassword" placeholder="Password" required>
   </div>
-  <button type="submit">Register</button>
+  <button type="submit" class="submit-button">Register</button>
   @if (errorMessage) {
     <p style="color: red;">{{ errorMessage }}</p>
   }
 </form>
+
+<div class="divider">
+    <span>OR</span>
+  </div>
+
+<div id="google-reg-btn" class="google-btn-wrapper"></div>
+
 <p>Already have an account? <a routerLink="/login">Log in</a></p>

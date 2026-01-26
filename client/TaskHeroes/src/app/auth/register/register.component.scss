@@ -1,6 +1,7 @@
 :host {
   display: block;
-  max-width: 400px;
+  max-width: 50%;
+  width:50%;
   margin: 50px auto;
   padding: 20px;
   border:none;
@@ -18,27 +19,29 @@ h2 {
     text-align: center;
 }
 
-form div {
-  margin-bottom: 15px;
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  text-align: center;
 }
 
-label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-  color: var(--text-primary);
-  font-family:var(--global-font-family);
+.input-group input {
+  width: 94%;
+  padding: 15px 10px;
+  /* Use a consistent border color */
+  border: 1px solid var(--card-border); 
+  border-radius: 4px;
+  transition: var(--transition-default); /* Use your general transition */
+  font-size: var(--text-font-size); /* Use a standard text size for input */
 }
 
-input[type="text"],
-input[type="password"],
-input[type="email"] {
-  width: calc(100% - 12px);
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 3px;
-  box-sizing: border-box;
-  font-family: var(--global-font-family);
+.input-group input:focus {
+  /* Use your primary accent color for focus state */
+  border-color: var(--primary-blue); 
+  outline: none;
+  /* Subtle glow using the primary accent */
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1); 
 }
 
 button[type="submit"] {
@@ -52,8 +55,25 @@ button[type="submit"] {
   width:97%;
 }
 
-button[type="submit"]:hover {
-  background-color: lightseagreen;
+/* --- Submit Button --- */
+.submit-button {
+  width:105%;
+  padding: 15px;
+  /* Using a dark color for the button for high contrast */
+  background-color: var(--text-primary); 
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: var(--text-font-size);
+  font-weight: 500;
+  margin-top: 10px;
+  transition: background-color 0.2s;
+}
+
+.submit-button:hover {
+  /* Darker shade of the button color, or perhaps black */
+  background-color: lightseagreen; 
 }
 
 p {
@@ -83,3 +103,27 @@ a:hover {
   clip: rect(0, 0, 0, 0);
   border: 0;
 } 
+
+.divider {
+    margin: 32px 0;
+    position: relative;
+    border-top: 1px solid var(--card-border, #eee);
+    
+    span {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white; 
+      padding: 0 12px;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+}
+
+.google-btn-wrapper {
+  min-height: 40px;
+  display: flex;
+  justify-content: center;
+}

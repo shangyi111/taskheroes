@@ -42,8 +42,8 @@
   }
 
   @if (!services?.length) {
-    <div class="empty-state">
-      <p>No services found matching your criteria.</p>
-    </div>
+    <th-empty-state 
+        message="No services found matching your criteria.">
+    </th-empty-state>
   }
 </div>
