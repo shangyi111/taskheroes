@@ -127,3 +127,19 @@ a:hover {
   display: flex;
   justify-content: center;
 }
+
+.signup-link {
+  margin-top: 30px;
+  font-size: var(--description-font-size);
+}
+
+.signup-link a {
+  /* Use your primary accent color for links */
+  color: var(--primary-blue);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.signup-link a:hover {
+  text-decoration: underline;
+}

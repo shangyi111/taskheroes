@@ -23,13 +23,26 @@
                 </div>
               }
             </div>
+
+            <div class="content-block contact-section">
+              <div class="contact-row">
+                <mat-icon>place</mat-icon>
+                <span>{{ service.businessAddress ?? "California, United States" }}</span>
+              </div>
+              <div class="contact-row">
+                <mat-icon>call</mat-icon>
+                <span>{{ service.phoneNumber ?? "Request for details"}}</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="content-block">
-          <h3>About the Service</h3>
-          <p class="description">{{ service.description }}</p>
-        </div>
+        <mat-card class="about-service-card">
+          <div class="content-block">
+            <h3>About the Service</h3>
+            <p class="description">{{ service.description }}</p>
+          </div>
+        </mat-card>
 
         @if (service.portfolio && service.portfolio.length > 0) {
         <div class="content-block">
@@ -68,17 +81,6 @@
               <span class="label">Base Hourly Rate</span>
               <span class="amount">{{ service.hourlyRate | currency }}</span>
             </div>
-          </div>
-        </div>
-
-        <div class="content-block contact-section">
-          <div class="contact-row">
-            <mat-icon>place</mat-icon>
-            <span>{{ service.businessAddress }}</span>
-          </div>
-          <div class="contact-row">
-            <mat-icon>call</mat-icon>
-            <span>{{ service.phoneNumber }}</span>
           </div>
         </div>
       </div>

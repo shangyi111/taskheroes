@@ -75,7 +75,6 @@ button.mat-mdc-button.back-to-search-link {
     display: flex;
     align-items: center;
     gap: 20px;
-    margin-bottom: 32px;
 
     .business-avatar {
       width: 80px;
@@ -101,6 +100,16 @@ button.mat-mdc-button.back-to-search-link {
   }
 }
 
+ .about-service-card{
+    margin-bottom: 40px;
+    border: 1px solid none;
+    border-radius: 12px;
+    padding: 40px;
+    background: var(--dashboard-bg);
+    box-shadow: var(--card-shadow);
+    width: 91%;
+}
+
 .content-block {
   margin-bottom: 32px;
 
@@ -118,6 +127,10 @@ button.mat-mdc-button.back-to-search-link {
     color: var(--text-secondary);
     font-size: 1.05rem;
     white-space: break-spaces;
+  }
+
+  &.contact-section{
+    margin-top:10px;
   }
 }
 
@@ -188,7 +201,7 @@ button.mat-mdc-button.back-to-search-link {
 }
 
 .category-tag {
-  background:var(--dashboard-bg);
+  background:#F2F2F2;
   padding: 4px 10px;
   border-radius: 6px;
   font-size: 0.75rem;
@@ -206,9 +219,9 @@ button.mat-mdc-button.back-to-search-link {
 
   .main-image-container {
     position: relative;
-    width: 100%;
+    width: 91%;
     aspect-ratio: 16 / 9;
-    background: #f2f4f7;
+    background:var(--dashboard-bg);
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid #eaecf0;
