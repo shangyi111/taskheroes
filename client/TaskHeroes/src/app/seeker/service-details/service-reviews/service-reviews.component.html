@@ -35,7 +35,9 @@
       </div>
     </div>
     } @empty {
-    <p class="no-reviews">No reviews yet. Be the first to leave one!</p>
+      <th-empty-state class="review-empty-state"
+        message="No reviews yet. Be the first to leave one!">
+      </th-empty-state>
     }
   </div>
 </mat-card>

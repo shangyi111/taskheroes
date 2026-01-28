@@ -13,4 +13,5 @@ export interface Job{
     serviceId?:string,
     jobTitle?:string,
     customerPhone?:string,
+    status?:string,
 }

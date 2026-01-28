@@ -136,6 +136,10 @@ $breakpoint-md: 768px;
         flex-grow: 1;
     }
 
+    .chat-subtitle::first-letter {
+        text-transform: uppercase;
+    }
+
     .chat-options {
         display: flex;
         gap: $spacing-md;
@@ -454,7 +458,15 @@ $breakpoint-md: 768px;
         .detail-group {
             margin-bottom: $spacing-lg;
             label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; }
-            p { margin: $spacing-xs 0 0; font-size: 1rem; color: var(--text-primary); }
+            p { 
+                margin: $spacing-xs 0 0; 
+                font-size: 1rem; 
+                color: var(--text-primary); 
+
+                &::first-letter{
+                    text-transform: uppercase;
+                }
+            }
             .fee-highlight { color: var(--primary-green, #27ae60); font-weight: 700; font-size: 1.2rem; }
         }
     }

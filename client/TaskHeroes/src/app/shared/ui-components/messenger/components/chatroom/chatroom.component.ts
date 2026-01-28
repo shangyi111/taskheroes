@@ -100,8 +100,9 @@ export class ChatroomComponent implements OnInit, OnDestroy {
         serviceName: room.jobTitle || 'General Inquiry',
         location: room.jobLocation || 'Not provided',
         fee: room.fee || 'TBD',
-        description: room.description || 'No description'
-      };
+        description: room.description || 'No description',
+        jobStatus: room.jobStatus ? room.jobStatus 
+          : (room.jobDate && new Date(room.jobDate) < new Date() ? 'Past' : 'Pending')}
   });
   
   // Fetches the partner's avatar URL from the enriched chatroom object

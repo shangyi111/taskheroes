@@ -8,7 +8,7 @@
                 <div class="chat-title-group">
                     <h1 class="chat-title">{{ chatPartnerName() }}</h1>
                     <p class="chat-subtitle">
-                        {{ details.jobDate ? (details.jobDate | date:'mediumDate') : 'Date TBD' }} | {{ details.serviceName || 'General Inquiry' }}
+                        {{details.jobStatus}} Requested Job Date: {{ details.jobDate ? (details.jobDate | date:'mediumDate') : 'Date TBD' }} | {{ details.serviceName || 'General Inquiry' }}
                     </p>
                 </div>
             }
@@ -81,8 +81,8 @@
                         <p>{{ details.serviceName || 'General inquiry.' }}</p>
                     </section>
                     <section class="detail-group">
-                        <label>Date</label>
-                        <p>{{ details.jobDate ? (details.jobDate | date:'fullDate') : 'Date TBD' }}</p>
+                        <label>{{details.jobStatus || ''}} Requested Job Date</label>
+                        <p>{{details.jobStatus || ''}} Requested Job Date :{{ details.jobDate ? (details.jobDate | date:'fullDate') : 'Date TBD' }}</p>
                     </section>
                     <section class="detail-group">
                         <label>Location</label>

@@ -9,6 +9,7 @@ import { UserDataService } from 'src/app/services/user_data.service';
 import { Review } from 'src/app/shared/models/review';
 import { map, shareReplay } from 'rxjs/operators';
 import { MatCardModule } from '@angular/material/card';
+import { EmptyStateComponent } from 'src/app/shared/ui-components/th-empty-state/empty-state.component';
 
 export type EnrichedReview = Review & { reviewerUsername?: string };
 @Component({
@@ -16,7 +17,7 @@ export type EnrichedReview = Review & { reviewerUsername?: string };
   standalone: true,  
   templateUrl: './service-reviews.component.html',
   styleUrls: ['./service-reviews.component.scss'],
-  imports: [CommonModule, MatIconModule, MatCardModule], 
+  imports: [CommonModule, MatIconModule, MatCardModule, EmptyStateComponent], 
 })
 export class ServiceReviewsComponent implements OnInit {
   
