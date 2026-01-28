@@ -1,0 +1,89 @@
+@use 'abstracts' as *;
+/* Header Styles */
+.chat-header {
+    background-color: white; /* No direct var for white, using literal */
+    padding: var(--dashboard-padding); /* Using :root variable */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
+
+    .mobile-menu-toggle {
+        @include button-reset();
+        font-size: var(--title-font-size); /* Using a more appropriate font size from :root */
+        color: var(--text-primary);
+        margin-right: $spacing-md;
+        cursor: pointer;
+        @media (max-width: $breakpoint-md) {
+            display: block;
+        }
+    }
+
+    .chat-title {
+        font-size: var(--title-font-size);
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+        flex-grow: 1;
+    }
+
+    .chat-subtitle::first-letter {
+        text-transform: uppercase;
+    }
+
+    .chat-options {
+        display: flex;
+        gap: $spacing-md;
+        .material-icons {
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: var(--text-font-size); /* Adjusting icon size to fit context */
+            transition: color 0.2s ease;
+            &:hover {
+                color: var(--primary-blue);
+            }
+        }
+    }
+}
+
+
+.status-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+
+  .status-btn {
+    padding: 4px 12px;
+    border-radius: 16px;
+    border: none;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    background: #007bff;
+    color: white;
+    
+    &.cancel { background: #dc3545; }
+    &.accept { background: #28a745; }
+    &.verify { background: #6f42c1; }
+  }
+
+  .status-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    background: #f0f0f0;
+    border-radius: 4px;
+    color: #666;
+  }
+}
+
+/* Ensure detail-link is prominent */
+.detail-link {
+    cursor: pointer;
+    color: var(--text-primary);
+    font-weight: 500;
+    text-decoration: none;
+    font-family:var(--global-font-family);
+    font-size: 0.8rem;
+    &:hover { color: color-mix(in srgb, var(--text-primary) 80%, black); }
+}

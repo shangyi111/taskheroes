@@ -2,6 +2,7 @@ const { DataTypes } = require('sequelize');
 const User = require('./user');
 const Service = require('./service');
 const sequelize = require('../config/db');
+const JobStatus = require('../constants/jobStatus');
 
 const Job = sequelize.define('Job', {
   performerId: {
@@ -29,9 +30,9 @@ const Job = sequelize.define('Job', {
     },
   },
   jobStatus: {
-    type: DataTypes.ENUM('pending', 'inProgress', 'completed', 'cancelled'),
-    allowNull: true,
-    defaultValue: 'pending',
+    type: DataTypes.ENUM(Object.values(JobStatus)),
+    defaultValue: JobStatus.PENDING, // Use the constant here
+    allowNull: false
   },
   jobDescription: {
     type: DataTypes.TEXT,
@@ -41,8 +42,19 @@ const Job = sequelize.define('Job', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  // HYBRID APPROACH: Store the full combined Date + Time here for Cron logic
   jobDate: {
-    type: DataTypes.DATE,
+    type: DataTypes.DATE, 
+    allowNull: true,
+  },
+  // HYBRID APPROACH: Store the human-readable start time for UI display
+  startTime: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  // REQUIRED FOR AUTOMATION: Duration in minutes to calculate "End Time"
+  duration: {
+    type: DataTypes.INTEGER,
     allowNull: true,
   },
   fee: {
@@ -57,7 +69,7 @@ const Job = sequelize.define('Job', {
     type:DataTypes.INTEGER,
     allowNull:true,
   },
-  location: {//jobLocation
+  location: {
     type: DataTypes.STRING,
     allowNull: true,
   },

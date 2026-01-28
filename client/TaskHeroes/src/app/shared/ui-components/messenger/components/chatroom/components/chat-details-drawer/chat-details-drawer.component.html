@@ -1,0 +1,37 @@
+@if (isOpen()) {
+    <div class="details-drawer-overlay" [class.active]="isOpen()">
+        <header class="drawer-header">
+            <h3>Job Info</h3>
+            <button class="close-btn" (click)="close.emit()">
+                <i class="material-icons">close</i>
+            </button>
+        </header>
+
+        <div class="drawer-body">
+            @if (jobDetails(); as details) {
+                <section class="detail-group">
+                    <label>Service</label>
+                    <p>{{ details.serviceName || 'General inquiry.' }}</p>
+                </section>
+                <section class="detail-group">
+                    <label>{{details.jobStatus || ''}} Requested Job Date</label>
+                    <p>{{ details.jobDate ? (details.jobDate | date:'fullDate') : 'Date TBD' }}</p>
+                </section>
+                <section class="detail-group">
+                    <label>Location</label>
+                    <p>{{ details.location || 'TBD'}}</p>
+                </section>
+                <section class="detail-group">
+                    <label>Fee Quoted</label>
+                    <p class="fee-highlight">
+                        {{ details.fee ? (details.fee | currency:'USD':'symbol':'1.0-2') : 'TBD' }}
+                    </p>
+                </section>
+                <div class="detail-group description">
+                    <label>Description</label>
+                    <p>{{ details.description || 'No detailed description available.' }}</p>
+                </div>
+            }
+        </div>
+    </div>
+}

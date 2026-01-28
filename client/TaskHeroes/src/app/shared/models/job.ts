@@ -1,17 +1,28 @@
-export interface Job{
-    id?:string,//job Id
-    performerId?:string, //person who performs job
-    jobDate?:Date,
-    customerId?:string,//user id
-    category?:string,
-    location?:string,
-    zipCode?:number,
-    description?:string,
-    fee?:string,
-    hourlyRate?:number,
-    paymentMethod?:string,
-    serviceId?:string,
-    jobTitle?:string,
-    customerPhone?:string,
-    status?:string,
+import { JobStatus } from './job-status.enum'; // Assuming you created this enum file
+
+export interface Job {
+    id?: string;               // Job ID
+    performerId?: string;      // User ID of the Provider
+    customerId?: string;       // User ID of the Seeker
+    serviceId?: string;        // ID of the original Service offering
+    
+    jobTitle?: string;
+    category?: string;
+    description?: string;
+    location?: string;
+    zipCode?: number;
+    customerPhone?: string;
+
+    // Financials
+    fee?: string;              // Total calculated fee (string to match .toFixed(2))
+    hourlyRate?: number;       // Rate at the time of booking
+    paymentMethod?: string;
+
+    // Time & Scheduling
+    jobDate?: Date;            // The Full Timestamp (Hybrid: Date + Time)
+    startTime?: string;        // Human-readable start (e.g., "14:00")
+    duration?: number;         // Duration in MINUTES (crucial for automation)
+
+    // State Machine
+    jobStatus?: JobStatus;     // Strictly typed to our 9-step Enum
 }

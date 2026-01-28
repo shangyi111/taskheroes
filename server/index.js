@@ -39,6 +39,7 @@ app.use('/api/portfolio', portfolioRoutes);
 app.get('/api/protected', authenticateToken, (req, res) => {
   res.json({ message: 'Authenticated access granted', user: req.user });
 });
+require('./cron/jobAutomations');
 
 // Create the HTTP server instance
 const server = http.createServer(app);

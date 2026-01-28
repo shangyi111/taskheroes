@@ -1,0 +1,61 @@
+@use 'abstracts' as *;
+
+/* Adaptive Drawer Design */
+.details-drawer-overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 380px; /* Desktop Drawer width */
+    background-color: white;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
+    animation: slideInRight 0.3s ease-out;
+
+    /* 🟢 MOBILE TAKEOVER: Fill entire screen */
+    @media (max-width: $breakpoint-md) {
+        width: 100%;
+        left: 0;
+        animation: fadeIn 0.2s ease-in;
+    }
+
+    .drawer-header {
+        padding: $spacing-md;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--card-border);
+        
+        h3 { margin: 0; font-size: 1.1rem; color: var(--text-primary); }
+        .close-btn { @include button-reset(); color: var(--text-secondary); }
+    }
+
+    .drawer-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: $spacing-lg;
+
+        .detail-group {
+            margin-bottom: $spacing-lg;
+            label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; }
+            p { 
+                margin: $spacing-xs 0 0; 
+                font-size: 1rem; 
+                color: var(--text-primary); 
+
+                &::first-letter{
+                    text-transform: uppercase;
+                }
+            }
+            .fee-highlight { color: var(--primary-green, #27ae60); font-weight: 700; font-size: 1.2rem; }
+        }
+    }
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+

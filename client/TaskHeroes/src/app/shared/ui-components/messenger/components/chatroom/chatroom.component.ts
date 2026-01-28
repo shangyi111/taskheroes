@@ -1,10 +1,9 @@
-import { Component, OnInit, OnDestroy, inject, signal, WritableSignal, ViewChild, ElementRef, computed, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, WritableSignal, ViewChild,computed } from '@angular/core';
 import { ActivatedRoute, Router, NavigationEnd} from '@angular/router';
 import { Subscription, of, Observable, throwError, combineLatest } from 'rxjs';
 import { switchMap, filter, tap, catchError, map, take } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MessageComponent } from '../message/message.component';
 import { ChatroomService } from 'src/app/services/chatroom.service';
 import { UserDataService } from 'src/app/services/user_data.service';
 import { JobService } from 'src/app/services/job.service';
@@ -13,8 +12,10 @@ import { User } from 'src/app/shared/models/user';
 import { Job } from 'src/app/shared/models/job';
 import { Message } from 'src/app/shared/models/message';
 import { PaginatedMessages } from 'src/app/shared/models/pagination';
-import { ThLoadingComponent } from '../../../th-loading/loading.component';
-import { EmptyStateComponent } from '../../../th-empty-state/empty-state.component';
+import { ChatHeaderComponent } from './components/chat-header/chat-header.component';
+import { ChatDetailsDrawerComponent } from './components/chat-details-drawer/chat-details-drawer.component';
+import { JobStatus } from 'src/app/shared/models/job-status.enum';
+import { ChatMessageListComponent } from './components/chat-message-list/chat-message-list.component';
 
 type ChatStatus = 'loading' | 'fetching-history' | 'idle' | 'error';
 
@@ -26,28 +27,13 @@ type ChatStatus = 'loading' | 'fetching-history' | 'idle' | 'error';
   imports: [
     CommonModule,
     FormsModule,
-    MessageComponent,
-    ThLoadingComponent,
-    EmptyStateComponent
+    ChatHeaderComponent,
+    ChatDetailsDrawerComponent,
+    ChatMessageListComponent
   ]
 })
 export class ChatroomComponent implements OnInit, OnDestroy {
-  @ViewChild('messageContainer') set messageContainer(content: ElementRef) {
-    if (content) {
-      this._messageContainer = content;
-      this.setupObservers();
-    }
-  }
-  @ViewChild('scrollAnchor') set scrollAnchor(content: ElementRef) {
-  if (content && this.historyObserver) this.historyObserver.observe(content.nativeElement);
-  }
-
-  @ViewChild('bottomAnchor') set bottomAnchor(content: ElementRef) {
-    if (content && this.bottomObserver) this.bottomObserver.observe(content.nativeElement);
-  }
-  private historyObserver?: IntersectionObserver;
-  private bottomObserver?: IntersectionObserver;
-  private _messageContainer!: ElementRef;
+  @ViewChild(ChatMessageListComponent) messageList!: ChatMessageListComponent;
 
   private router = inject(Router);
   private chatroomService = inject(ChatroomService);
@@ -99,7 +85,7 @@ export class ChatroomComponent implements OnInit, OnDestroy {
         jobDate: room.jobDate ? new Date(room.jobDate) : null,
         serviceName: room.jobTitle || 'General Inquiry',
         location: room.jobLocation || 'Not provided',
-        fee: room.fee || 'TBD',
+        fee: room.fee,
         description: room.description || 'No description',
         jobStatus: room.jobStatus ? room.jobStatus 
           : (room.jobDate && new Date(room.jobDate) < new Date() ? 'Past' : 'Pending')}
@@ -117,6 +103,31 @@ export class ChatroomComponent implements OnInit, OnDestroy {
     return (user.id === data.customerId) 
       ? data.serviceProfilePicture || null
       : data.customerProfilePicture || null;
+});
+
+// Helper to determine if the user can perform an action based on their role
+canUpdateStatus = computed(() => {
+  const room = this.chatroom();
+  const user = this.currentUser();
+  if (!room || !user) return false;
+
+  const isProvider = user.id === room.providerId;
+  const isCustomer = user.id === room.customerId;
+  const status = room.jobStatus as JobStatus;
+
+  return {
+    isProvider,
+    isCustomer,
+    // Provider specific triggers
+    showAccept: isProvider && status === JobStatus.Pending,
+    showConfirmDeposit: isProvider && (status === JobStatus.Accepted || status === JobStatus.DepositSent),
+    showBook: isProvider && status === JobStatus.DepositReceived,
+    // Seeker specific triggers
+    showDepositSent: isCustomer && status === JobStatus.Accepted,
+    showVerify: isCustomer && status === JobStatus.Completed,
+    // Cancellation (Both roles usually can cancel if not started)
+    showCancel: isCustomer && ![JobStatus.InProgress, JobStatus.Completed, JobStatus.Verified, JobStatus.Cancelled].includes(status)
+  };
 });
 
  ngOnInit(): void {
@@ -139,25 +150,6 @@ export class ChatroomComponent implements OnInit, OnDestroy {
   );
 }
 
-  private setupObservers() {
-    // Use the private backing field we set in the setter
-    const container = this._messageContainer.nativeElement;
-
-    this.historyObserver = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting && this.chatStatus() === 'idle' && !this.allMessagesLoaded()) {
-        this.loadMoreMessages();
-      }
-    }, { root: container, threshold: 0.1 });
-
-    this.bottomObserver = new IntersectionObserver(([entry]) => {
-      this.showScrollToBottomBtn.set(!entry.isIntersecting);
-      
-      if (entry.isIntersecting) {
-        this.hasUnreadAtBottom.set(false);
-        this.markCurrentRoomAsRead();
-      }
-    }, { root: container, threshold: 0.1 });
-  }
  // 3. Extract the loading logic to a helper
   private loadInitialData(id: string): void {
     this.userDataService.userData$.pipe(
@@ -327,10 +319,6 @@ export class ChatroomComponent implements OnInit, OnDestroy {
     const currentMessages = this.messages();
     if (!id || this.chatStatus() !== 'idle' || currentMessages.length === 0 || this.allMessagesLoaded()) return;
 
-    // SCROLL CORRECTION: Capture height before update
-    const container = this._messageContainer.nativeElement;
-    const previousHeight = container.scrollHeight;
-
     this.chatStatus.set('fetching-history');
     const lastId = currentMessages[0].id;
 
@@ -341,27 +329,15 @@ export class ChatroomComponent implements OnInit, OnDestroy {
 
         if (olderMsgs.length > 0) {
           this.messages.update(current => [...[...olderMsgs].reverse(), ...current]);
-          
-          // SCROLL CORRECTION: Restore position
-          setTimeout(() => {
-            container.scrollTop = container.scrollHeight - previousHeight;
-            this.chatStatus.set('idle');
-          }, 0);
-        } else {
-          this.chatStatus.set('idle');
-        }
+        } 
+        this.chatStatus.set('idle');
       },
       error: () => this.chatStatus.set('idle')
     });
   }
-
   scrollToBottom(): void {
-    if (this._messageContainer && this._messageContainer.nativeElement) {
-      try {
-        this._messageContainer.nativeElement.scrollTop = this._messageContainer.nativeElement.scrollHeight;
-      } catch (err) {
-        console.error('Failed to scroll to bottom:', err);
-      }
+    if (this.messageList) {
+      this.messageList.scrollToBottom();
     }
   }
 
@@ -369,16 +345,12 @@ export class ChatroomComponent implements OnInit, OnDestroy {
     console.log('ChatroomComponent destroyed.');
     this.subscriptions.unsubscribe();
     this.chatroomService.stopWatchingRoom();
-    this.historyObserver?.disconnect();
-    this.bottomObserver?.disconnect();
   }
 
   private cleanupSocket(): void {
     const oldId = this.chatroomId();
     if (oldId) {
       this.chatroomService.stopWatchingRoom();
-      this.historyObserver?.disconnect(); 
-      this.bottomObserver?.disconnect();
       if (this.chatroomMessageSubscription) {
         this.chatroomMessageSubscription.unsubscribe();
       }
@@ -387,11 +359,8 @@ export class ChatroomComponent implements OnInit, OnDestroy {
   }
 
   private handleIncomingMessage(message: Message): void {
-  if (!this._messageContainer) return; // Safety gate
-
-    const element = this._messageContainer.nativeElement;
-    const isNearBottom = element.scrollHeight - element.scrollTop - element.clientHeight < 100;
     const isMine = message.senderId === this.currentUser()?.id;
+    const isNearBottom = this.messageList?.isUserAtBottom() || false;
 
     // 1. Update UI: Notify user if they are looking at history
     if (!isMine && !isNearBottom) {
@@ -414,4 +383,22 @@ export class ChatroomComponent implements OnInit, OnDestroy {
       setTimeout(() => this.scrollToBottom(), 0);
     }
   }
+
+  updateStatus(newStatus: string): void {
+  const room = this.chatroom();
+  if (!room || !room.jobId) return;
+
+  // Set loading state if you have one for the button
+  this.jobService.updateJobStatus(room.jobId, newStatus).subscribe({
+    next: (updatedJob) => {
+      // Update the chatroom signal with the new job status
+      this.chatroom.update(current => current ? { ...current, jobStatus: updatedJob.jobStatus } : null);
+      console.log(`Job status updated to: ${updatedJob.jobStatus}`);
+    },
+    error: (err) => {
+      console.error('Failed to update status:', err);
+      this.error.set(err.error?.message || 'Action failed. Please try again.');
+    }
+  });
+}
 }

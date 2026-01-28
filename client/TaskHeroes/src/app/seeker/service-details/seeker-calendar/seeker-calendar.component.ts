@@ -9,6 +9,7 @@ import { CalendarAvailability, ProviderCalendar } from 'src/app/shared/models/ca
 import { Job } from 'src/app/shared/models/job';
 import { User } from 'src/app/shared/models/user';
 import { Service } from 'src/app/shared/models/service';
+import { JobStatus } from 'src/app/shared/models/job-status.enum';
 
 // Define constants outside the class for clarity
 const TIME_FEE_THRESHOLD_MINUTES = 30; // 30 minutes one-way threshold
@@ -314,17 +315,25 @@ generateCalendar(): void {
       return;
     }
 
-    const requestData :Job = {
+    const combinedTimestamp = new Date(`${this.selectedDateData.date}T${this.selectedStartTime}:00`);
+    const requestData: Job = { // 'any' used here to allow the new fields; update your Job interface later
       serviceId: this.service.id,
       performerId: this.service.userId,
-      jobDate: this.selectedDateData.date,
+      customerId: this.user?.id,
+      
+      // The "Hybrid" Fields
+      jobDate: combinedTimestamp,             // Full timestamp for the automated status transitions
+      startTime: this.selectedStartTime,      // Kept as a string for easy UI display
+      duration: this.selectedDurationHours * 60, // Automation needs minutes, not hours
+      
+      // Metadata
       location: this.seekerJobLocation,
       fee: this.calculatedJobFee.toFixed(2),
       hourlyRate: Number(this.selectedDateData.availability.customPrice),
-      category:this.service.category,
-      jobTitle:this.service.businessName,
-      customerId:this.user?.id,
-      description:this.seekerJobDescription.trim(),
+      category: this.service.category,
+      jobTitle: this.service.businessName,
+      description: this.seekerJobDescription.trim(),
+      jobStatus: JobStatus.Pending // Always start the state machine here
     };
     
     this.bookRequest.emit(requestData);

@@ -1,0 +1,34 @@
+<main class="message-area" #messageContainer>
+    <th-loading *ngIf="chatStatus() === 'loading'" type="skeleton" height="100%"></th-loading>
+    
+    @if (chatStatus() === 'error') {
+        <th-empty-state 
+            icon="cloud_off"
+            title="Connection Issue"
+            [message]="error() ?? 'Failed to load messages.'"
+            actionLabel="Try Again"
+            (actionClicked)="retry.emit()">
+        </th-empty-state>
+    }
+
+    <div #scrollAnchor *ngIf="!allMessagesLoaded()" style="height: 1px; width: 100%;"></div>
+    
+    @if (chatStatus() === 'fetching-history') {
+        <div class="load-more-spinner">Loading older messages...</div>
+    }
+
+    <ng-container *ngFor="let message of _messages()">
+        <th-message
+            [message]="message"
+            [currentUserId]="currentUserId()"
+            [chatPartnerAvatarUrl]="chatPartnerAvatarUrl()" 
+        ></th-message>
+    </ng-container>
+
+    <div #bottomAnchor style="height: 1px; width: 100%;"></div>
+</main>
+
+<button *ngIf="showScrollToBottomBtn()" class="scroll-bottom-btn" (click)="scrollToBottom()">
+    Jump to Latest
+    <span *ngIf="hasUnreadAtBottom()" class="unread-dot"></span>
+</button>

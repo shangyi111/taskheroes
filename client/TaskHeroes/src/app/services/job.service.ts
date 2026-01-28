@@ -4,13 +4,13 @@ import { Observable } from 'rxjs';
 import { AUTH_TOKEN_KEY } from 'src/app/shared/constants';
 import {Job} from "src/app/shared/models/job";
 import {map} from 'rxjs/operators';
+import { JobStatus } from "src/app/shared/models/job-status.enum";
 
 @Injectable({
   providedIn: 'root',
 })
 
 export class JobService {
-  private readonly API_URL_PROVIDER = 'http://localhost:3000/api/job';
   private readonly API_URL_JOB = 'http://localhost:3000/api/job';
   private readonly API_URL_SEEKER = 'http://localhost:3000/api/order';
   private readonly AUTH_TOKEN_KEY = AUTH_TOKEN_KEY;
@@ -18,7 +18,7 @@ export class JobService {
   constructor(private http: HttpClient) {}
 
   getAllJobs(): Observable<Job[]> {
-    return this.http.get<Job[]>(this.API_URL_PROVIDER);
+    return this.http.get<Job[]>(this.API_URL_JOB);
   }
 
   getJobById(id: number): Observable<Job> {
@@ -26,7 +26,7 @@ export class JobService {
   }
 
   getAllJobsByPerformerId(performerId:string):Observable<Job[]>{
-    return this.http.get<Job[]>(`${this.API_URL_PROVIDER}/provider/${performerId}`);
+    return this.http.get<Job[]>(`${this.API_URL_JOB}/provider/${performerId}`);
   }
 
   getAllOrdersByCustomerId(customerId:string):Observable<Job[]>{
@@ -51,12 +51,31 @@ export class JobService {
     return this.http.put<any>(`${this.API_URL_JOB}/${id}`, jobData, { headers });
   }
 
+  /**
+   * Specialized method for the State Machine handshake
+   * Hits the /api/job/:id/status endpoint
+   */
+  updateJobStatus(id: string, newStatus: string | JobStatus): Observable<Job> {
+    const token = localStorage.getItem(this.AUTH_TOKEN_KEY);
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    });
+
+    // We send 'newStatus' in the body as expected by the backend controller
+    return this.http.put<Job>(
+      `${this.API_URL_JOB}/${id}/status`, 
+      { newStatus }, 
+      { headers }
+    );
+  }
+
   deleteJob(id: string): Observable<Job> {
     const token = localStorage.getItem(this.AUTH_TOKEN_KEY);
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`,
     });
-    return this.http.delete<any>(`${this.API_URL_PROVIDER}/${id}`, { headers });
+    return this.http.delete<any>(`${this.API_URL_JOB}/${id}`, { headers });
   }
 
   deleteOrder(id: string): Observable<Job> {

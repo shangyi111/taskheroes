@@ -18,6 +18,9 @@ router.post('/', authMiddleware, jobsController.createJob);
 // Update a job (protected)
 router.put('/:id', authMiddleware, jobsController.updateJob);
 
+//Updatea a job's status(protected)
+router.put('/:id/status', authMiddleware, jobsController.updateJobStatus);
+
 // Delete a job (protected)
 router.delete('/provider/:id', authMiddleware, jobsController.deleteOrderByPerformerId);
 

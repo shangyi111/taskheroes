@@ -1,0 +1,44 @@
+// SCSS variables for granular spacing and border radii,
+// as they are not defined as generic CSS variables in :root.
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+
+$border-radius-sm: 4px;
+$border-radius-md: 8px;
+$border-radius-lg: 12px;
+$border-radius-pill: 9999px; // For fully rounded elements like badges, avatars
+
+// Breakpoints (keeping this as an SCSS variable as it's not in :root)
+$breakpoint-md: 768px;
+
+// Mixins (reusable blocks of CSS)
+@mixin flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@mixin button-reset {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    outline: inherit;
+}
+
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+
+$border-radius-sm: 4px;
+$border-radius-md: 8px;
+$border-radius-lg: 12px;
+$border-radius-pill: 9999px; 
+
+$breakpoint-md: 768px;

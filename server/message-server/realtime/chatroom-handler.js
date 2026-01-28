@@ -4,7 +4,6 @@ const { findSocketByUserId } = require('../../websocket/socketServer');
 module.exports = (io, socket) => {
   socket.on('joinChatroom', (chatroomId) => {
     console.log('--- JOIN ATTEMPT RECEIVED ---');
-    console.log("socket info:", socket.userId);
     // Safety check: extract ID if an object was passed
     socket.join(chatroomId.chatroomId);
     console.log(`Socket user ${socket.userId} joined chatroom ${chatroomId.chatroomId}`);

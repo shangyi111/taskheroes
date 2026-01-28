@@ -1,0 +1,145 @@
+@use 'abstracts' as *;
+
+/* Message Area Styles */
+.message-area {
+    flex:1;
+    min-height:0;
+    padding: var(--dashboard-padding); /* Using :root variable */
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+    scroll-behavior: smooth;
+    height:100%;
+
+    #scrollAnchor {
+        opacity: 0;
+        pointer-events: none;
+        margin-bottom: -1px; // Ensure it doesn't push messages down
+    }
+
+    .date-separator {
+        text-align: center;
+        margin: $spacing-md 0;
+        span {
+            background-color: var(--dashboard-bg);
+            color: var(--text-secondary);
+            font-size: var(--description-font-size); /* Using :root variable */
+            padding: $spacing-xs $spacing-sm;
+            border-radius: $border-radius-pill;
+        }
+    }
+
+    .message-bubble {
+        max-width: 70%;
+        padding: $spacing-sm $spacing-md;
+        border-radius: $border-radius-lg;
+        font-size: var(--description-font-size);
+        line-height: 1.4;
+        position: relative;
+        word-wrap: break-word;
+
+        &.received {
+            background-color: white; /* No direct var for white, using literal */
+            border-bottom-left-radius: $border-radius-sm;
+            align-self: flex-start;
+            box-shadow: var(--card-shadow);
+        }
+
+        &.sent {
+            background-color: var(--primary-blue);
+            color: white; /* No direct var for white, using literal for text on dark background */
+            border-bottom-right-radius: $border-radius-sm;
+            align-self: flex-end;
+        }
+
+        .message-sender {
+            font-size: var(--description-font-size); /* Using :root variable */
+            font-weight: 600;
+            color: var(--primary-blue);
+            margin-bottom: 2px;
+            display: block;
+        }
+
+        .message-timestamp {
+            font-size: 0.7rem; /* Keeping as literal for fine control */
+            color: var(--text-secondary);
+            margin-top: $spacing-xs;
+            display: block;
+            text-align: right;
+            opacity: 0.8;
+        }
+
+        .material-icons.icon-read {
+            font-size: 0.6em; /* Keeping as literal for fine control relative to font size */
+            margin-left: 5px;
+            color: var(--primary-green);
+            vertical-align: middle;
+        }
+    }
+
+    .typing-indicator {
+        font-size: var(--description-font-size);
+        color: var(--text-secondary);
+        align-self: flex-start;
+        margin-top: $spacing-sm;
+    }
+
+    .scroll-to-bottom-button {
+        @include button-reset();
+        @include flex-center();
+        position: absolute;
+        bottom: $spacing-md;
+        right: $spacing-md;
+        background-color: var(--primary-blue);
+        color: white; /* No direct var for white, using literal */
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        box-shadow: var(--card-shadow);
+        font-size: var(--title-font-size); /* Using :root variable for icon size */
+        opacity: 0;
+        visibility: hidden;
+        transition: var(--transition-default);
+        z-index: 10;
+        &.show {
+            opacity: 1;
+            visibility: visible;
+        }
+    }
+}
+
+.scroll-bottom-btn {
+    // Positioning
+    position: absolute;
+    bottom: 100px; // Sits above the input area
+    right: 30px;
+    z-index: 100;
+
+    // Visuals
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background-color: #3498db; // Use your TaskHeroes primary blue
+    color: white;
+    border: none;
+    border-radius: 50px; // Makes it pill-shaped
+    font-weight: 600;
+    font-size: 0.9rem;
+    
+    // Effects
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+
+    &:hover {
+        background-color: #2980b9;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+}

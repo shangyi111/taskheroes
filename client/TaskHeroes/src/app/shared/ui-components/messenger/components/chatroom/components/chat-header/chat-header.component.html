@@ -1,0 +1,41 @@
+ <header class="chat-header">
+    <button class="mobile-menu-toggle" (click)="backClicked.emit()">
+        <i class="material-icons">arrow_back</i>
+    </button>
+    @if (jobDetails(); as details) {
+        <div class="chat-title-group">
+            <h1 class="chat-title">{{ chatPartnerName() }}</h1>
+            @if (canUpdateStatus(); as actions) {
+                <div class="status-actions">
+                
+                @if (actions.showAccept) {
+                    <button class="status-btn accept" (click)="updateStatus('accepted')">Accept Job</button>
+                }
+                @if (actions.showConfirmDeposit) {
+                    <button class="status-btn deposit" (click)="updateStatus('booked')">Confirm Deposit</button>
+                }
+                @if (actions.showDepositSent) {
+                    <button class="status-btn sent" (click)="updateStatus('depositSent')">I Sent Deposit</button>
+                }
+                @if (actions.showVerify) {
+                    <button class="status-btn verify" (click)="updateStatus('verified')">Verify & Close</button>
+                }
+
+                @if (actions.showCancel) {
+                    <button class="status-btn cancel" (click)="updateStatus('cancelled')">Cancel</button>
+                }
+
+                <span class="status-badge" [attr.data-status]="chatroom()?.jobStatus">
+                    {{ chatroom()?.jobStatus | uppercase }}
+                </span>
+                </div>
+            }
+            <p class="chat-subtitle">
+                {{details.jobStatus}} Requested Job Date: {{ details.jobDate ? (details.jobDate | date:'mediumDate') : 'Date TBD' }} | {{ details.serviceName || 'General Inquiry' }}
+            </p>
+        </div>
+    }
+    <div class="chat-options">
+        <p class="detail-link" (click)="detailsOpened.emit()">View details</p>
+    </div>
+</header>
