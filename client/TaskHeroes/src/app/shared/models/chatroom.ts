@@ -1,3 +1,10 @@
+export interface ReviewEligibility {
+  allowed: boolean;
+  isExpired: boolean;
+  hasReviewed: boolean;
+  daysRemaining: number | null;
+}
+
 export interface Chatroom {
   id: string;
   name: string; // Backend provides "displayName" (Partner name or Business name)
@@ -20,4 +27,7 @@ export interface Chatroom {
   fee?: string;
   description?: string;
   hasUnread?: boolean;
+
+  reviewEligibility?: ReviewEligibility;
+  existingReview?: string;
 }

@@ -1,0 +1,88 @@
+<div class="modal-overlay" (click)="close.emit()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <header>
+      <h2>Leave a Review</h2>
+      <p class="expiry-warning" @if(daysRemaining()) >
+        Review window closes in {{ daysRemaining() }} days
+      </p>
+    </header>
+
+    <div class="review-body">
+      <section class="rating-section">
+        <label>Overall Experience</label>
+        <div class="stars">
+          @for (star of [1,2,3,4,5]; track star) {
+            <i class="material-icons" [class.active]="rating() >= star" (click)="setRating(star)">
+              {{ rating() >= star ? 'star' : 'star_border' }}
+            </i>
+          }
+        </div>
+      </section>
+
+      <section class="rating-section">
+        <label>Communication</label>
+        <div class="stars small">
+          @for (star of [1,2,3,4,5]; track star) {
+            <i class="material-icons" [class.active]="communication() >= star" (click)="setComm(star)">
+              {{ communication() >= star ? 'star' : 'star_border' }}
+            </i>
+          }
+        </div>
+      </section>
+
+     @if (isSeeker()) {
+      <section class="rating-section">
+        <label>Professionalism</label>
+        <div class="stars small">
+          @for (star of [1,2,3,4,5]; track star) {
+            <i class="material-icons" [class.active]="professionalism() >= star" (click)="setProf(star)">
+              {{ professionalism() >= star ? 'star' : 'star_border' }}
+            </i>
+          }
+        </div>
+      </section>
+     }
+
+     @if (isSeeker()) {
+        <div class="explicit-choice-group">
+            <label>Was the TaskHero on time?</label>
+            <div class="choice-buttons">
+            <button type="button" [class.selected]="wasOnTime() === true" (click)="wasOnTime.set(true)">Yes</button>
+            <button type="button" [class.selected]="wasOnTime() === false" (click)="wasOnTime.set(false)">No</button>
+            </div>
+        </div>
+    } @else {
+        <div class="explicit-choice-group">
+            <label>Paid in full?</label>
+            <div class="choice-buttons">
+            <button type="button" [class.selected]="isFullAmountPaid() === true" (click)="isFullAmountPaid.set(true)">Yes</button>
+            <button type="button" [class.selected]="isFullAmountPaid() === false" (click)="isFullAmountPaid.set(false)">No</button>
+            </div>
+        </div>
+
+        <div class="explicit-choice-group">
+            <label>Paid within 24 hours?</label>
+            <div class="choice-buttons">
+            <button type="button" [class.selected]="isPaidWithin24h() === true" (click)="isPaidWithin24h.set(true)">Yes</button>
+            <button type="button" [class.selected]="isPaidWithin24h() === false" (click)="isPaidWithin24h.set(false)">No</button>
+            </div>
+        </div>
+
+        <div class="explicit-choice-group">
+            <label>Would recommend this client?</label>
+            <div class="choice-buttons">
+            <button type="button" [class.selected]="wouldRecommend() === true" (click)="wouldRecommend.set(true)">Yes</button>
+            <button type="button" [class.selected]="wouldRecommend() === false" (click)="wouldRecommend.set(false)">No</button>
+            </div>
+        </div>
+    }
+
+      <textarea [(ngModel)]="comment" placeholder="Share your review comments..."></textarea>
+    </div>
+
+    <footer>
+      <button class="btn-cancel" (click)="close.emit()">Cancel</button>
+      <button class="btn-submit" [disabled]="!isFormValid()" (click)="onSubmit()">Submit Review</button>
+    </footer>
+  </div>
+</div>

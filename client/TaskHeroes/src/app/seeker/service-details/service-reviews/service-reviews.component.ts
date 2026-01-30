@@ -37,7 +37,7 @@ export class ServiceReviewsComponent implements OnInit {
       
       this.reviews$ = reviewsData$.pipe(
         // Ensure only reviews with text content are shown in the list
-        map(reviews => reviews.filter(r => r.review && r.review.length > 0)),
+        map(reviews => reviews.filter(r => r.comment && r.comment.length > 0)),
         switchMap(reviews => {
         if (reviews.length === 0) return of([]);
 

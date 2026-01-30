@@ -6,20 +6,20 @@ const authMiddleware = require('../../auth/authMiddleware');
 
 // Routes for chatrooms list for certain provider
 router.route('/chatrooms/provider/:providerId')
-  .get(chatroomController.getChatroomsForProvider)
+  .get(authMiddleware,chatroomController.getChatroomsForProvider)
 
 // Routes for chatrooms list for certain customer
 router.route('/chatrooms/seeker/:seekerId')
-  .get(chatroomController.getChatroomsForCustomer)
+  .get(authMiddleware,chatroomController.getChatroomsForCustomer)
 
 router.route('/:chatroomId')
-  .get(chatroomController.getChatroomById)
+  .get(authMiddleware,chatroomController.getChatroomById)
 
 router.route('/job/:jobId')
-  .get(chatroomController.getChatroomByJobId)
+  .get(authMiddleware,chatroomController.getChatroomByJobId)
 
 router.route('')
-  .post(chatroomController.createChatroom);
+  .post(authMiddleware,chatroomController.createChatroom);
 
 // Mark chatroom as read (The new optimized feature)
 // Using PATCH because we are partially updating the chatroom record

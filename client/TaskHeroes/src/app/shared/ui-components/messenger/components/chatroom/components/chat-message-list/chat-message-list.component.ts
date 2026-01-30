@@ -13,10 +13,11 @@ import { EmptyStateComponent } from 'src/app/shared/ui-components/th-empty-state
 })
 export class ChatMessageListComponent implements OnDestroy {
     _messages = signal<Message[]>([]);
-  // Inputs
-  @Input() set messages(newMessages: Message[]) {
-    const container = this.messageContainer?.nativeElement;
-    
+    // Inputs
+    @Input() set messages(newMessages: Message[]) {
+        if (!newMessages) return;
+        const container = this.messageContainer?.nativeElement;
+        
     // If we are loading HISTORY (adding to the top)
     if (this.chatStatus() === 'fetching-history' && container) {
         const prevHeight = container.scrollHeight;

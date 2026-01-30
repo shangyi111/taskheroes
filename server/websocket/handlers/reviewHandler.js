@@ -1,14 +1,15 @@
-const { emitToUser } = require('../socketService');
-
 function sendReviewCreated(review) {
-  emitToUser(review.userId, 'review_created', review);
+  const { emitToUser } = require('../socketService');
+  emitToUser(review.reviewerId, 'review_created', review);
 }
 
 function sendReviewUpdated(review) {
-  emitToUser(review.userId, 'review_updated', review);
+  const { emitToUser } = require('../socketService');
+  emitToUser(review.reviewerId, 'review_updated', review);
 }
 
 function sendReviewDeleted(reviewId, userId) {
+  const { emitToUser } = require('../socketService');
   emitToUser(userId, 'review_deleted', { reviewId });
 }
 

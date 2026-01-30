@@ -1,7 +1,8 @@
 
-const { Chatroom, ChatroomUser, Job, User, Service } = require ('../../models');
+const { Chatroom, ChatroomUser, Job, User, Service, Review } = require ('../../models');
 const { getIO } =require ('../../websocket/socketServer');
 const { getPagination, getPagingData } = require('../../utils/pagination');
+const { checkReviewEligibility } = require('../../controllers/reviewsController');
 
 
 const getChatroomIncludes = () => {
@@ -21,14 +22,6 @@ const getChatroomIncludes = () => {
     {
       model: Job,
       as: 'Job', // Must match your association alias
-      attributes: [
-        ['jobTitle', 'jobTitle'],
-        ['jobDate', 'jobDate'], 
-        ['fee', 'fee'],
-        ['location', 'jobLocation'],
-        ['jobDescription', 'jobDescription'],
-        ['jobStatus', 'jobStatus'],
-      ],
       required: false, // Job is optional (can be null for general chats)
       include: [
         {
@@ -219,23 +212,48 @@ exports.removeUserFromChatroom = async (req, res) => {
   }
 };
 
+//including user, job, reviewEligibility, and existingReviewToEdit
 exports.getChatroomById = async (req, res) => {
   try {
-    const chatroomId = req.params.chatroomId;
-    if (!chatroomId) {
-      return res.status(400).json({ message: 'Chatroom ID is required' });
-    }
+    const { chatroomId } = req.params;
+    const userId = req.user.id; // Correctly populated by authMiddleware
+
+    // 1. Fetch chatroom with the full set of includes defined in your helper
     const chatroom = await Chatroom.findByPk(chatroomId, {
-      include: getChatroomIncludes(),
+      include: getChatroomIncludes()
     });
-    if (chatroom) {
-      res.json(mapChatroomData(chatroom));
-    } else {
-      res.status(404).json({ message: 'Chatroom not found' });
+
+    if (!chatroom) {
+      return res.status(404).json({ message: 'Chatroom not found' });
     }
+
+    // 2. Access the included Job using the EXACT alias 'Job' defined in your association
+    // Using chatroom.Job instead of chatroom.job to match: 
+    // Chatroom.belongsTo(Job, { foreignKey: 'jobId', as: 'Job' });
+    const jobData = chatroom.Job; 
+
+    // 3. Attach eligibility data using your externalized helper
+    // We pass the nested job object and the authenticated user ID
+    const eligibility = await checkReviewEligibility(jobData, userId);
+    
+    // 4. Map the data to your Frontend's ExtendedChatroom format
+    const mappedData = mapChatroomData(chatroom, userId);
+
+    // 5. Send back the mapped data merged with eligibility info
+    res.json({
+      ...mappedData,
+      reviewEligibility: eligibility,
+      existingReview: eligibility.hasReviewed ? //existingReview reviewed by current user
+          await Review.findOne({ where: { jobId: chatroom.jobId, reviewerId: req.user.id } }) : 
+          null
+    });
+    
   } catch (err) {
     console.error('Error retrieving chatroom by ID:', err);
-    res.status(500).json({ message: 'Internal Server Error', error: err.message });
+    res.status(500).json({ 
+      message: 'Internal Server Error', 
+      error: err.message 
+    });
   }
 };
 

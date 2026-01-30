@@ -1,5 +1,5 @@
 const cron = require('node-cron');
-const { Job, User } = require('../models');
+const { Job, User, Review} = require('../models');
 const JobStatus = require('../constants/jobStatus');
 const { Op } = require('sequelize');
 const { sendJobUpdated} = require('../websocket/handlers/jobHandler');
@@ -59,5 +59,37 @@ cron.schedule('* * * * *', async () => {
     }
   } catch (err) {
     console.error('Cron Error:', err);
+  }
+});
+
+// Run every night at midnight
+cron.schedule('0 0 * * *', async () => {
+  const tenDaysAgo = new Date();
+  tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+
+  try {
+    // 1. Find all Jobs that were completed/verified more than 10 days ago
+    // and haven't had their reviews "locked/published" yet.
+    const expiredJobs = await Job.findAll({
+      where: {
+        jobStatus: { [Op.in]: ['completed', 'verified'] },
+        jobDate: { [Op.lte]: tenDaysAgo }
+      },
+      attributes: ['id']
+    });
+
+    if (expiredJobs.length > 0) {
+      const jobIds = expiredJobs.map(j => j.id);
+
+      // 2. Flip isPublished for any existing reviews for these jobs
+      await Review.update(
+        { isPublished: true }, 
+        { where: { jobId: { [Op.in]: jobIds }, isPublished: false } }
+      );
+      
+      console.log(`Successfully closed the review window for ${jobIds.length} jobs.`);
+    }
+  } catch (error) {
+    console.error('Error in Review Reveal Cron:', error);
   }
 });

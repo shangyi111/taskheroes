@@ -4,10 +4,10 @@
             [chatroom]="chatroom()"
             [currentUser]="currentUser()"
             [jobDetails]="jobDetails()"
-            [canUpdateStatus]="canUpdateStatus()"
             [chatPartnerName]="chatPartnerName()"
             (statusUpdated)="updateStatus($event)"
             (backClicked)="backToChatList()"
+            (reviewOpened)="showReviewModal.set(true)"
             (detailsOpened)="openDetailsModal()">
         </app-chat-header>
 
@@ -21,6 +21,16 @@
             (loadMore)="loadMoreMessages()"
             (retry)="ngOnInit()">
         </app-chat-message-list>
+        @if (showReviewModal()) {
+            <review-modal
+                [job]="chatroom()"
+                [currentUser]="currentUser()"
+                [daysRemaining]="chatroom()?.reviewEligibility?.daysRemaining!"
+                [existingReview]="chatroom()?.existingReview"
+                (close)="showReviewModal.set(false)"
+                (submit)="handleReviewSubmit($event)">
+            </review-modal>
+        }
         <footer class="message-input-area">
             <div class="input-actions">
                 <i class="material-icons">attach_file</i>

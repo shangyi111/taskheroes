@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { ChatroomService } from 'src/app/services/chatroom.service';
 import { UserDataService } from 'src/app/services/user_data.service';
 import { JobService } from 'src/app/services/job.service';
+import { ReviewService } from 'src/app/services/review.service';
 import { Chatroom } from 'src/app/shared/models/chatroom';
 import { User } from 'src/app/shared/models/user';
 import { Job } from 'src/app/shared/models/job';
@@ -14,8 +15,8 @@ import { Message } from 'src/app/shared/models/message';
 import { PaginatedMessages } from 'src/app/shared/models/pagination';
 import { ChatHeaderComponent } from './components/chat-header/chat-header.component';
 import { ChatDetailsDrawerComponent } from './components/chat-details-drawer/chat-details-drawer.component';
-import { JobStatus } from 'src/app/shared/models/job-status.enum';
 import { ChatMessageListComponent } from './components/chat-message-list/chat-message-list.component';
+import { ReviewModalComponent } from './components/review-modal/review-modal.component';
 
 type ChatStatus = 'loading' | 'fetching-history' | 'idle' | 'error';
 
@@ -29,7 +30,8 @@ type ChatStatus = 'loading' | 'fetching-history' | 'idle' | 'error';
     FormsModule,
     ChatHeaderComponent,
     ChatDetailsDrawerComponent,
-    ChatMessageListComponent
+    ChatMessageListComponent,
+    ReviewModalComponent
   ]
 })
 export class ChatroomComponent implements OnInit, OnDestroy {
@@ -39,6 +41,7 @@ export class ChatroomComponent implements OnInit, OnDestroy {
   private chatroomService = inject(ChatroomService);
   private userDataService = inject(UserDataService);
   private jobService = inject(JobService);
+  private reviewService = inject(ReviewService);
   private route = inject(ActivatedRoute);
 
   currentUser: WritableSignal<User | null> = signal(null);
@@ -54,6 +57,7 @@ export class ChatroomComponent implements OnInit, OnDestroy {
   error: WritableSignal<string | null> = signal(null);
   
   showDetailsModal: WritableSignal<boolean> = signal(false);
+  showReviewModal = signal(false);
   showScrollToBottomBtn = signal(false);
   hasUnreadAtBottom = signal(false);
   markCurrentRoomAsRead = signal(false);
@@ -103,31 +107,6 @@ export class ChatroomComponent implements OnInit, OnDestroy {
     return (user.id === data.customerId) 
       ? data.serviceProfilePicture || null
       : data.customerProfilePicture || null;
-});
-
-// Helper to determine if the user can perform an action based on their role
-canUpdateStatus = computed(() => {
-  const room = this.chatroom();
-  const user = this.currentUser();
-  if (!room || !user) return false;
-
-  const isProvider = user.id === room.providerId;
-  const isCustomer = user.id === room.customerId;
-  const status = room.jobStatus as JobStatus;
-
-  return {
-    isProvider,
-    isCustomer,
-    // Provider specific triggers
-    showAccept: isProvider && status === JobStatus.Pending,
-    showConfirmDeposit: isProvider && (status === JobStatus.Accepted || status === JobStatus.DepositSent),
-    showBook: isProvider && status === JobStatus.DepositReceived,
-    // Seeker specific triggers
-    showDepositSent: isCustomer && status === JobStatus.Accepted,
-    showVerify: isCustomer && status === JobStatus.Completed,
-    // Cancellation (Both roles usually can cancel if not started)
-    showCancel: isCustomer && ![JobStatus.InProgress, JobStatus.Completed, JobStatus.Verified, JobStatus.Cancelled].includes(status)
-  };
 });
 
  ngOnInit(): void {
@@ -385,20 +364,32 @@ canUpdateStatus = computed(() => {
   }
 
   updateStatus(newStatus: string): void {
-  const room = this.chatroom();
-  if (!room || !room.jobId) return;
+    const room = this.chatroom();
+    if (!room || !room.jobId) return;
 
-  // Set loading state if you have one for the button
-  this.jobService.updateJobStatus(room.jobId, newStatus).subscribe({
-    next: (updatedJob) => {
-      // Update the chatroom signal with the new job status
-      this.chatroom.update(current => current ? { ...current, jobStatus: updatedJob.jobStatus } : null);
-      console.log(`Job status updated to: ${updatedJob.jobStatus}`);
-    },
-    error: (err) => {
-      console.error('Failed to update status:', err);
-      this.error.set(err.error?.message || 'Action failed. Please try again.');
-    }
-  });
-}
+    // Set loading state if you have one for the button
+    this.jobService.updateJobStatus(room.jobId, newStatus).subscribe({
+      next: (updatedJob) => {
+        // Update the chatroom signal with the new job status
+        this.chatroom.update(current => current ? { ...current, jobStatus: updatedJob.jobStatus } : null);
+        console.log(`Job status updated to: ${updatedJob.jobStatus}`);
+      },
+      error: (err) => {
+        console.error('Failed to update status:', err);
+        this.error.set(err.error?.message || 'Action failed. Please try again.');
+      }
+    });
+  }
+
+  handleReviewSubmit(payload: any) {
+    this.reviewService.createReview(payload).subscribe({
+      next: (response) => {
+        // 2. Hide the modal
+        this.showReviewModal.set(false);
+      },
+      error: (err) => {
+        console.error('Submission failed', err);
+      }
+    });
+  }
 }

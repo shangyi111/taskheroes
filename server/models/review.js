@@ -5,6 +5,10 @@ const Service = require('./service');
 const sequelize = require('../config/db');
 
 const Review = sequelize.define('Review', {
+  isPublished: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  },
   revieweeId: {
     type: DataTypes.INTEGER, // Assuming revieweeId refers to a service or user ID
     allowNull: true, // Reviewee might not be known initially
@@ -37,6 +41,7 @@ const Review = sequelize.define('Review', {
       key: 'id',
     },
   },
+  //overall feedback
   rating: {
     type: DataTypes.INTEGER,
     allowNull: true,
@@ -45,14 +50,23 @@ const Review = sequelize.define('Review', {
       max: 5,
     },
   },
-  review: {
-    type: DataTypes.TEXT,
-    allowNull: true,
-  },
+  comment: { type: DataTypes.TEXT },
+  communication: { type: DataTypes.INTEGER, validate: { min: 1, max: 5 } },
+  // --- SEEKER Criteria (About Provider) ---
+  professionalism: { type: DataTypes.INTEGER, validate: { min: 1, max: 5 } },
+  wasOnTime: { type: DataTypes.BOOLEAN, defaultValue: true },
+
+  // --- PROVIDER Criteria (About Seeker) ---
+  isFullAmountPaid: { type: DataTypes.BOOLEAN, defaultValue: true },
+  isPaidWithin24h: { type: DataTypes.BOOLEAN, defaultValue: false },
+  wouldRecommend: { type: DataTypes.BOOLEAN, defaultValue: true },
+  //Role metadata
+  reviewerRole: { type: DataTypes.ENUM('seeker', 'provider'), allowNull: false },
   addedDate:{
     type:DataTypes.DATE,
     allowNull:true,
-  }
+  },
+  
 });
 
 module.exports = Review;
