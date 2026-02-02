@@ -22,10 +22,10 @@
 
           <div class="content">
             <div class="top-row">
-              <span class="name">{{ chatroom.name }}</span>
+              <span class="name">{{ getChatPartnerName(chatroom,this.user()?.id) }}</span>
               <span class="job-id">#{{ chatroom.jobId }}</span>
             </div>
-            <p class="preview">Click to view history</p>
+            <p class="preview">{{chatroom.jobStatus | titlecase}} · {{chatroom.jobDate | date:'MMM d, yyyy'}} · {{chatroom.jobTitle}}</p>
           </div>
         </div>
       }

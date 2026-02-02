@@ -1,4 +1,4 @@
-import { Component, input, output, computed } from '@angular/core';
+import { Component, input, output, computed, signal, effect} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Chatroom } from 'src/app/shared/models/chatroom';
 import { User } from 'src/app/shared/models/user';
@@ -13,17 +13,21 @@ import { ReviewEligibility } from 'src/app/shared/models/chatroom';
   styleUrls: ['./chat-header.component.scss']
 })
 export class ChatHeaderComponent {
+  readonly DEFAULT_AVATAR = 'assets/img/default-avatar.png';
   // Inputs (Signals)
   chatroom = input.required<Chatroom | null>();
   currentUser = input.required<User | null>();
   jobDetails = input.required<any>();
   chatPartnerName = input.required<string>();
+  chatPartnerAvatarUrl = input.required<string | null>();
 
   // Outputs (Emitters)
   statusUpdated = output<string>();
   backClicked = output<void>();
   detailsOpened = output<void>();
   reviewOpened = output<void>();
+
+  imgError = signal(false);
 
   reviewEligibility = computed(() => {
     const room = this.chatroom();
@@ -79,6 +83,13 @@ export class ChatHeaderComponent {
     };
   });
 
+  constructor() {
+    effect(() => {
+      this.chatroom(); // track change
+      this.imgError.set(false); // reset error state for new partner
+    }, { allowSignalWrites: true });
+  }
+
   updateStatus(status: string) {
     this.statusUpdated.emit(status);
   }
@@ -86,4 +97,13 @@ export class ChatHeaderComponent {
   openReview() {
     this.reviewOpened.emit();
   }
+
+  handleImgError(event: any) {
+    // If the error happened on the default avatar itself, stop trying!
+    if (event.target.src.includes(this.DEFAULT_AVATAR)) {
+        event.target.style.display = 'none'; // Or hide it
+        return;
+    }
+    this.imgError.set(true);
+ }
 }

@@ -2,49 +2,47 @@
     <button class="mobile-menu-toggle" (click)="backClicked.emit()">
         <i class="material-icons">arrow_back</i>
     </button>
-    @if (jobDetails(); as details) {
-        <div class="chat-title-group">
-            <h1 class="chat-title">{{ chatPartnerName() }}</h1>
-            <div class="chat-subtitle">
-                <span class="status-badge" [attr.data-status]="chatroom()?.jobStatus">
-                    {{ chatroom()?.jobStatus }}
-                </span>
-                <p> 
-                    Date: {{ details.jobDate ? (details.jobDate | date:'mediumDate') : 'Date TBD' }} | {{ details.serviceName || 'General Inquiry' }} 
-                </p> 
+    <div class = "chat-header-mid-section">
+        @if (jobDetails(); as details) {
+            <div class="chat-title-group">
+                <div class="chat-partner-avatar">
+                    <img [src]="imgError() ? DEFAULT_AVATAR : (chatPartnerAvatarUrl() || DEFAULT_AVATAR)" 
+                    (error)="handleImgError($event)"
+                    class="avatar-img">
+                    
+                </div>
+                <h1 class="chat-title">
+                    {{ chatPartnerName() }}   
+                </h1>
             </div>
             @if (headerState(); as actions) {
-                 @let daysRemaining = actions.daysRemaining!;
-                <div class="status-actions">
-                
-                @if (actions.showAccept) {
-                    <button class="status-btn accept" (click)="updateStatus('accepted')">Accept Job</button>
-                }
-                @if (actions.showConfirmDeposit) {
-                    <button class="status-btn deposit" (click)="updateStatus('booked')">Confirm Deposit</button>
-                }
-                @if (actions.showDepositSent) {
-                    <button class="status-btn sent" (click)="updateStatus('depositSent')">I Sent Deposit</button>
-                }
+                        <div class="status-actions">
+                        
+                            @if (actions.showAccept) {
+                                <button class="status-btn accept" (click)="updateStatus('accepted')">Accept Job</button>
+                            }
+                            @if (actions.showConfirmDeposit) {
+                                <button class="status-btn deposit" (click)="updateStatus('booked')">Confirm Deposit</button>
+                            }
+                            @if (actions.showDepositSent) {
+                                <button class="status-btn sent" (click)="updateStatus('depositSent')">I Sent Deposit</button>
+                            }
 
-                @if (actions.showReviewAction) {
-                    <div class="review-action-wrapper">
-                        <button class="status-btn review" (click)="reviewOpened.emit()">
-                            {{ actions.reviewActionLabel }}
-                        </button>
-                         @if (daysRemaining !== null && daysRemaining > 0 && !actions.isReviewExpired) {
-                            <span class="expiry-label">{{ actions.daysRemaining }} days left</span>
-                        }
-                    </div>
-                }
+                            @if (actions.showReviewAction) {
+                                <div class="review-action-wrapper">
+                                    <button class="status-btn review" (click)="reviewOpened.emit()">
+                                        {{ actions.reviewActionLabel }}
+                                    </button>
+                                </div>
+                            }
 
-                @if (actions.showCancel) {
-                    <button class="status-btn cancel" (click)="updateStatus('cancelled')">Cancel</button>
-                }
-                </div>
-            }
-        </div>
-    }
+                            @if (actions.showCancel) {
+                                <button class="status-btn cancel" (click)="updateStatus('cancelled')">Cancel</button>
+                            }
+                        </div>
+                    }
+        }
+    </div>
     <div class="chat-options">
         <p class="detail-link" (click)="detailsOpened.emit()">View details</p>
     </div>

@@ -39,6 +39,8 @@ export class ChatroomsComponent implements OnInit, OnDestroy {
 
   private subscriptions: Subscription[] = [];
 
+  
+
   ngOnInit(): void {
     this.captureInitialRouteId();
     this.trackActiveChatFromUrl();
@@ -159,4 +161,16 @@ export class ChatroomsComponent implements OnInit, OnDestroy {
       console.warn('Cannot navigate to chatroom: User ID or role not available.');
     }
   }
+
+  getChatPartnerName(chatroomData:Chatroom, currentUserId?:String) {
+        
+        if (!chatroomData || !currentUserId) { return 'Loading Chat...'; }
+  
+        if (chatroomData.customerId === currentUserId) {
+            return chatroomData.providerUsername ||'Provider';
+        } else if (chatroomData.providerId === currentUserId) {
+            return chatroomData.customerUsername || 'Seeker';
+        }
+        return 'Unknown Chat';
+  };
 }

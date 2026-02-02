@@ -74,7 +74,7 @@ export class ChatroomComponent implements OnInit, OnDestroy {
       if (!chatroomData || !currentUserId) { return 'Loading Chat...'; }
 
       if (chatroomData.customerId === currentUserId) {
-          return chatroomData.name || chatroomData.providerUsername ||'Provider';
+          return chatroomData.providerUsername ||'Provider';
       } else if (chatroomData.providerId === currentUserId) {
           return chatroomData.customerUsername || 'Seeker';
       }

@@ -21,7 +21,7 @@ export interface Chatroom {
 
   // Flattened Job Attributes
   jobTitle?: string;
-  jobDate?: Date | string;
+  jobDate?: Date;
   jobStatus?: string;
   jobLocation?: string;
   fee?: string;
