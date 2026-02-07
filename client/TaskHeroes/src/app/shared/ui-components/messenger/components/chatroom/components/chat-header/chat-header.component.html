@@ -18,8 +18,11 @@
             @if (headerState(); as actions) {
                         <div class="status-actions">
                         
-                            @if (actions.showAccept) {
-                                <button class="status-btn accept" (click)="updateStatus('accepted')">Accept Job</button>
+                            @if (actions.showAccept || actions.showDecline) {
+                                <div class="btn-group">
+                                    <button class="status-btn decline" (click)="updateStatus('cancelled')">Decline</button>
+                                    <button class="status-btn accept" (click)="updateStatus('accepted')">Accept Job</button>
+                                </div>
                             }
                             @if (actions.showConfirmDeposit) {
                                 <button class="status-btn deposit" (click)="updateStatus('booked')">Confirm Deposit</button>

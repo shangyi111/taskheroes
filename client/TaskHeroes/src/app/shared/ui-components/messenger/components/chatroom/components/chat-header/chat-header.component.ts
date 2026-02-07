@@ -40,7 +40,9 @@ export class ChatHeaderComponent {
   headerState = computed(() => {
     const room = this.chatroom();
     const user = this.currentUser();
+    const job = this.jobDetails();
     const eligibility = room?.reviewEligibility as ReviewEligibility;
+    
 
     if (!room || !user || !eligibility) {
       return { showReviewAction: false, showStatusActions: false };
@@ -55,6 +57,8 @@ export class ChatHeaderComponent {
     const isProvider = user.id === room.providerId;
     const isCustomer = user.id === room.customerId;
     const status = room.jobStatus as JobStatus;
+    const isMyTurn = job.lastActionBy !== user.id;
+    const showSeekerConfirm = isCustomer && status === JobStatus.Pending && isMyTurn;
 
 
     return {
@@ -62,14 +66,19 @@ export class ChatHeaderComponent {
       isCustomer,
       // Provider triggers
       showAccept: isProvider && status === JobStatus.Pending,
+      showDecline: isProvider && status === JobStatus.Pending,
       showConfirmDeposit: isProvider && (status === JobStatus.Accepted || status === JobStatus.DepositSent),
       showBook: isProvider && status === JobStatus.DepositReceived,
-      // Seeker triggers
+      // Seeker triggers: The "Confirm & Book" button
+      showConfirmBook: showSeekerConfirm,
       showDepositSent: isCustomer && status === JobStatus.Accepted,
+
+      // Waiting State: Show a "Waiting..." label if it's Pending but not my turn
+      isWaiting: status === JobStatus.Pending && !isMyTurn,
     //   showVerify: isCustomer && status === JobStatus.Completed,
       // Cancellation
       showCancel: isCustomer && ![
-        JobStatus.InProgress, 
+        JobStatus.Pending, 
         JobStatus.Completed, 
         JobStatus.Verified, 
         JobStatus.Cancelled

@@ -1,5 +1,11 @@
 import { JobStatus } from './job-status.enum'; // Assuming you created this enum file
 
+export interface PriceItem {
+  type: 'base' | 'travel' | 'custom' | 'discount';
+  label: string;
+  amount: number;
+}
+
 export interface Job {
     id?: string;               // Job ID
     performerId?: string;      // User ID of the Provider
@@ -8,13 +14,13 @@ export interface Job {
     
     jobTitle?: string;
     category?: string;
-    description?: string;
+    jobDescription?: string;
     location?: string;
     zipCode?: number;
     customerPhone?: string;
 
     // Financials
-    fee?: string;              // Total calculated fee (string to match .toFixed(2))
+    priceBreakdown: PriceItem[];
     hourlyRate?: number;       // Rate at the time of booking
     paymentMethod?: string;
 
@@ -25,4 +31,5 @@ export interface Job {
 
     // State Machine
     jobStatus?: JobStatus;     // Strictly typed to our 9-step Enum
+    lastActionBy?: number;
 }

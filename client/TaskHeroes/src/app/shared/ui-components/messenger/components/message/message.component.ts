@@ -19,15 +19,19 @@ export class MessageComponent implements OnInit {
   @Input() currentUserId: string | null = null;
   @Input() chatPartnerAvatarUrl: string | null = null; 
 
+  isSystemMessage = computed(() => this.message.text?.startsWith('[System]'));
+
   isSentMessage = computed(() => this.currentUserId === this.message.senderId);
 
   senderAvatarUrl = computed(() => {
-    // If the message is RECEIVED, use the URL provided by the parent.
-    if (!this.isSentMessage()) {
-        return this.chatPartnerAvatarUrl || 'assets/img/default-avatar.png';
-    }
-    // If sent, no avatar is needed in the message stream
-    return null; 
+    if (this.isSentMessage() || this.isSystemMessage()) return null;
+    return this.chatPartnerAvatarUrl || 'assets/img/default-avatar.png';
+  });
+
+  displayText = computed(() => {
+    return this.isSystemMessage() 
+      ? this.message.text.replace('[System] ', '') 
+      : this.message.text;
   });
 
   ngOnInit(): void {

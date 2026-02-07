@@ -42,25 +42,48 @@ exports.getAllJobs = async (req, res) => {
 // Get a specific job by ID
 exports.getJobsByPerformerId = async (req, res) => {
   try {
-    const job = await Job.findAll({where:
-                                    {performerId:req.params.id}
-                                  });
-    if (job) {
-      res.json(job);
-    } else {
-      res.status(404).json({ message: 'Job not found' });
+    // Parse the filter from query params (e.g., ?filter={"startDate":"2026-02-01"})
+    const filter = req.query.filter ? JSON.parse(req.query.filter) : {};
+    const whereClause = { performerId: req.params.id };
+
+    // Apply Date Filters if they exist
+    if (filter.startDate || filter.endDate) {
+      whereClause.jobDate = {};
+      if (filter.startDate) whereClause.jobDate[Op.gte] = new Date(filter.startDate);
+      if (filter.endDate) whereClause.jobDate[Op.lte] = new Date(filter.endDate);
     }
+
+    // Apply Status Filter if it exists
+    if (filter.status) {
+      whereClause.jobStatus = filter.status;
+    }
+
+    const jobs = await Job.findAll({
+      where: whereClause,
+      include: [{ model: User, as: 'customer', attributes: ['id', 'username', 'profilePicture'] }],
+      order: [['jobDate', filter.order || 'ASC']]
+    });
+
+    res.json(jobs);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Filter parsing error or " + error.message });
   }
-}
+};
 
 // Get a specific job by customer ID
 exports.getJobsByCustomerId = async (req, res) => {
   try {
-    const job = await Job.findAll({where:
-                                    {customerId:req.params.id}
-                                  });
+    const job = await Job.findAll({
+      where: {customerId:req.params.id},
+      include: [
+        {
+          model: User,
+          as: 'performer',
+          attributes: ['id', 'username', 'profilePicture']
+        }
+      ],
+      order: [['jobDate', 'ASC']]
+    });
     if (job) {
       res.json(job);
     } else {
@@ -101,7 +124,7 @@ exports.createJob = async (req, res) => {
     }
 
     // 2. Create the Job (defaultValue 'pending' handles the status)
-    const newJob = await Job.create({ ...req.body });
+    const newJob = await Job.create({ ...req.body, lastActionBy: req.body.customerId });
 
     // Fetch the Provider's email to notify them
     const provider = await User.findByPk(req.body.performerId);
@@ -144,7 +167,24 @@ exports.createJob = async (req, res) => {
 exports.updateJob = async (req, res) => {
   try {
     const jobId = req.params.id;
-    const [updatedRowCount] = await Job.update(req.body, {
+    const userId = req.user.id;
+
+    const job = await Job.findByPk(jobId);
+    if (!job) return res.status(404).json({ message: 'Job not found' });
+
+    const isProvider = job.performerId === userId;
+    const isSeeker = job.customerId === userId;
+
+    if (!isProvider && !isSeeker) {
+      return res.status(403).json({ message: 'Unauthorized access' });
+    }
+
+    if (req.body.priceBreakdown && !isProvider) {
+      return res.status(403).json({ message: 'Only providers can adjust the fee' });
+    }
+
+    const updateData = { ...req.body, lastActionBy: userId };
+    const [updatedRowCount] = await Job.update(updateData, {
       where: { id: jobId, performerId: req.user.id }, // Ensure user owns the job
       returning: true, // To get the updated record
     });
@@ -157,22 +197,23 @@ exports.updateJob = async (req, res) => {
       sendJobUpdated(updatedJob);
 
       // If the status was updated, send the email
-      if (jobStatus && updatedJob.Customer) {
-        await NotificationService.sendStatusUpdate(
-          updatedJob.Customer.email,
-          updatedJob.jobTitle,
-          jobStatus,
-          jobId
-        );
+      try {
+          const recipientEmail = isProvider ? updatedJob.customer?.email : null; // Add provider email fetch if needed
+          if (recipientEmail) {
+            await NotificationService.sendStatusUpdate(recipientEmail, updatedJob.jobTitle, updatedJob.jobStatus, jobId);
+          }
+        } catch (e) { console.error('Notification error', e); }
+      } else {
+        return res.status(404).json({ message: 'Job not found or unauthorized' });
       }
-    } else {
-      res.status(404).json({ message: 'Job not found or unauthorized' });
-    }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    if (!res.headersSent) {
+      return res.status(500).json({ message: error.message });
+    }
+    console.error('Final Catch Error:', error.message);
   }
 };
-exports.updateJobStatus = async (req, res) => {
+  exports.updateJobStatus = async (req, res) => {
   try {
     const { newStatus } = req.body;
     const userId = req.user.id;
@@ -211,10 +252,11 @@ exports.updateJobStatus = async (req, res) => {
       return res.status(400).json({ message: "Invalid status or system-protected transition." });
     }
 
-    if (!rule.from.includes(job.jobStatus) || job[rule.actor] !== userId) {
-      return res.status(403).json({ message: rule.errorMessage });
+    if (!rule.from.includes(job.jobStatus) || !rule.actor.some(field => job[field] === userId) || job.lastActionBy === userId) {
+      return res.status(403).json({ 
+        message: job.lastActionBy === userId ? "Waiting for other party to respond." : rule.errorMessage 
+      });
     }
-
     // 3. Success - Update database and trigger notifications
     return await finalizeStatusUpdate(job, newStatus, userId, res);
 
@@ -227,7 +269,8 @@ exports.updateJobStatus = async (req, res) => {
 const finalizeStatusUpdate = async (job, newStatus, userId, res) => {
   // 1. Update and Save
   job.jobStatus = newStatus;
-  await job.save({ fields: ['jobStatus'] });
+  job.lastActionBy = userId; // TRACK ACTOR
+  await job.save({ fields: ['jobStatus','lastActionBy'] });
   // 2. Real-time Update (Socket)
   sendJobUpdated(job);
 

@@ -43,8 +43,34 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!this.getToken();
+    const token = this.getToken();
+    if (!token) return false;
+
+    const currentUserId = this.userDataService.getUserData()?.id;
+
+    // If we have a token but NO ID in memory (The "NG-SERVE Refresh" state)
+    if (token && !currentUserId) {
+      try {
+        // 1. Sync extraction of ID to prevent immediate crashes
+        const decoded = JSON.parse(atob(token.split('.')[1]));
+        const userId = decoded.id; 
+
+        // 2. Immediate partial hydration so Guards pass
+        this.userDataService.setUserData({ id: userId } as User);
+
+        // 3. Background full hydration
+        this.userDataService.fetchAndSyncProfile(userId).subscribe();
+        
+      } catch (e) {
+        console.error('Token decoding failed', e);
+        this.logout();
+        return false;
+      }
+    }
+
+    return true;
   }
+
 
   getToken(): string | null {
     return localStorage.getItem(this.AUTH_TOKEN_KEY);
@@ -58,10 +84,6 @@ export class AuthService {
     localStorage.setItem(this.USER_KEY,JSON.stringify(user));
   }
 
-  // loginWithGoogle(idToken: string) {
-  //   // Send the token to your Node.js backend
-  //   return this.http.post(`${this.API_URL}/auth/google`, { idToken });
-  // }
   loginWithGoogle(idToken: string): Observable<User> {
     return this.http.post<LoginResponse>(`${this.API_URL}/auth/google`, { idToken }).pipe(
       tap((response: LoginResponse) => {

@@ -1,4 +1,4 @@
-import { Component, inject} from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy} from '@angular/core';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -20,22 +20,28 @@ import { ReactiveFormsModule} from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { FormComponent } from 'src/app/shared/ui-components/th-form/form.component';
+import { EmptyStateComponent } from 'src/app/shared/ui-components/th-empty-state/empty-state.component';
+import { JobStatus } from 'src/app/shared/models/job-status.enum';
 
 @Component({
   selector: 'seeker-order',
   standalone: true,
   templateUrl: './orders.component.html', 
   styleUrls: ['./orders.component.scss'],
-  imports: [MatCardModule,MatIconModule,MatFormFieldModule, MatInputModule,MatButtonModule,FormsModule,CommonModule,MatChipsModule, MatExpansionModule], // Import the required modules, including Router
+  imports: [MatCardModule,MatIconModule,MatFormFieldModule, 
+            MatInputModule,MatButtonModule,FormsModule,
+            CommonModule,MatChipsModule, MatExpansionModule,
+            EmptyStateComponent
+          ], // Import the required modules, including Router
 })
-export class OrdersComponent {
+export class OrdersComponent implements OnInit, OnDestroy{
   private chatroomService = inject(ChatroomService);
   private socketIoService = inject(SocketIoService);
   private router = inject(Router);
   private jobService = inject(JobService);
   private readonly userData$ = inject(UserDataService).userData$;
-  jobs:Job[] = [];
+  jobs = signal<Job[]>([]);
+  performerMap = signal<Map<number, string>>(new Map());
   private jobsSubscription: Subscription | null = null;
   private socketSubscriptions: Subscription[] = [];
   ngOnInit(): void {
@@ -52,16 +58,32 @@ export class OrdersComponent {
   }
 
   loadInitialJobs(): void {
+    const upcomingFilter = { 
+      startDate: new Date().toISOString(), 
+      order: 'ASC' 
+    };
     this.jobsSubscription = this.userData$.pipe(
       switchMap((user: User | null) => {
         if (!user) return observableOf(null);
-        return this.jobService.getAllOrdersByCustomerId(user.id!);
+        return this.jobService.getAllOrdersByCustomerId(user.id!,upcomingFilter);
       })
     ).subscribe({
-      next: (loadedJobs: Job[] | null) => {
+      next: (loadedJobs: any[] | null) => {
         if (loadedJobs) {
-          this.jobs = loadedJobs;
-          // If using OnPush, trigger change detection here
+          // Sort by date
+          const sorted = loadedJobs.sort((a: any, b: any) => 
+            new Date(a.jobDate).getTime() - new Date(b.jobDate).getTime()
+          );
+          this.jobs.set(sorted);
+
+          // Populate Performer Map
+          const newMap = new Map<number, string>();
+          loadedJobs.forEach((job) => {
+            if (job.performerId && job.performer) {
+              newMap.set(job.performerId, job.performer.username);
+            }
+          });
+          this.performerMap.set(newMap);
         }
       },
       error: (error) => {
@@ -88,7 +110,7 @@ export class OrdersComponent {
   listenForJobUpdates(): void {  
     this.socketSubscriptions.push(
       this.socketIoService.onUserEvent<Job>('job_created').subscribe((newJob) => {
-        this.jobs = [...this.jobs, newJob];
+        this.jobs.update(current => current.map(job => job.id === newJob.id ? newJob : job));
         console.log('Job Created (Real-time):', newJob);
         // If using OnPush, trigger change detection here
       })
@@ -96,9 +118,7 @@ export class OrdersComponent {
 
     this.socketSubscriptions.push(
       this.socketIoService.onUserEvent<Job>('job_updated').subscribe((updatedJob) => {
-        this.jobs = this.jobs.map((job) =>
-          job.id === updatedJob.id ? updatedJob : job
-        );
+        this.jobs.update(current => current.map(job => job.id === updatedJob.id ? updatedJob : job));
         console.log('Job Updated (Real-time):', updatedJob);
         // If using OnPush, trigger change detection here
       })
@@ -106,7 +126,9 @@ export class OrdersComponent {
 
     this.socketSubscriptions.push(
       this.socketIoService.onUserEvent<{ jobId: number }>('job_deleted').subscribe((data) => {
-        this.jobs = this.jobs.filter((job:Job) => String(job.id) != data.jobId.toString());
+         this.jobs.update(prev => 
+          prev.filter(job => job.id?.toString() !== data.jobId.toString())
+        );
         console.log('Job Deleted (Real-time):', data.jobId);
         // If using OnPush, trigger change detection here
       })
@@ -156,5 +178,18 @@ export class OrdersComponent {
         }
       });
   }
+
+  calculateTotal(priceBreakdown: any[]): number {
+    if (!priceBreakdown || !Array.isArray(priceBreakdown)) return 0;
+    return priceBreakdown.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+  }
   
+
+  getPerformerName(id: number): string {
+    return this.performerMap().get(id) || 'Provider';
+  }
+
+  getStatusClass(status: JobStatus): string {
+    return `status-dot ${status.toLowerCase().replace(/\s+/g, '')}`;
+  }
 }

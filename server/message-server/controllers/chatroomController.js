@@ -72,9 +72,10 @@ const mapChatroomData = (chatroom, currentUserId = null) => {
         jobTitle: data.Job?.jobTitle || null,
         jobDate: data.Job?.jobDate || null,
         jobStatus: data.Job?.jobStatus || null,
-        jobLocation: data.Job?.jobLocation || null,
-        fee: data.Job?.fee || null,
+        jobLocation: data.Job?.location || null,
         description: data.Job?.jobDescription || null,
+        jobDuration: data.Job?.duration || null,
+        jobHourlyRate:data.Job?.hourlyRate||null,
 
         // Read Status
         lastReadByMe: isProvider ? data.lastReadByProvider : data.lastReadByCustomer};

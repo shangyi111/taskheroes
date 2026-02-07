@@ -43,6 +43,11 @@
   gap: 8px;
   margin-top: 4px;
 
+  .btn-group {
+    display:flex;
+    gap:5px;
+  }
+
   .status-btn {
     padding: 4px 12px;
     border-radius: 16px;
@@ -50,12 +55,30 @@
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
-    background: #007bff;
-    color: white;
+    background: none;
     
-    &.cancel { background: #dc3545; }
-    &.accept { background: #28a745; }
-    &.verify { background: #6f42c1; }
+    &.cancel,
+    &.decline { 
+        color:#dc3545;
+        border: 1px solid #dc3545; 
+        &:hover { opacity: 0.4; 
+                  background-color:rgba(#dc3545, 0.1); }
+    }
+    &.accept,
+    &.sent,
+    &.deposit { 
+        border: 1px solid #28a745; 
+        color:#28a745; 
+         &:hover { opacity: 0.4; 
+                  background-color:rgba(#28a745, 0.1); }
+    }
+    &.verify { 
+        border: 1px solid #6f42c1; 
+        color: #6f42c1; 
+          &:hover { opacity: 0.4; 
+                  background-color:rgba(#6f42c1, 0.1); }
+
+    }
   }
 }
 

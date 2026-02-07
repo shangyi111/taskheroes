@@ -1,26 +1,58 @@
-<div class="job-list-container">
-    @for (job of jobs; track job.id) {
-      <mat-card class="job-card">
-        <mat-card-header>
-          <mat-card-title>{{ job.jobTitle }}</mat-card-title>
-          <mat-card-subtitle>Category: {{ job.category }} - Location: {{ job.location }}</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <p>{{ job.description }}</p>
-          <p><strong>Job Date:</strong> {{ job.jobDate | date }}</p>
-          <p><strong>Fee:</strong> {{ job.fee }}</p>
-          <p><strong>HourlyRate:</strong> {{ job.hourlyRate }}</p>
-          <p><strong>Payment Method:</strong> {{ job.paymentMethod }}</p>
-          <p><strong>Customer Phone:</strong> {{ job.customerPhone }}</p>
-          <p *ngIf="job.serviceId"><strong>Service ID:</strong> {{ job.serviceId }}</p>
-        </mat-card-content>
-        <mat-card-actions>
-          <button mat-button color="accent" (click)="contactCustomer(job.id!,job.performerId!)">Contact Customer</button>
-          <button mat-button color="warn" (click)="deleteJob(job.id!)">Delete Job</button>
-          </mat-card-actions>
+<div class="business-page-wrapper">
+  <div class="management-header">
+    <div class="header-text">
+      <h2>Upcoming Jobs</h2>
+    </div>
+  </div>
+
+  <div class="service-results">
+    @for (job of jobs(); track job.id) {
+      <mat-card class="service-card" (click)="contactCustomer(job.id!)">
+        
+        <div class="date-side">
+          <div class="date-badge">
+            <span class="month">{{ job.jobDate | date:'MMM' }}</span>
+            <span class="day">{{ job.jobDate | date:'dd' }}</span>
+          </div>
+          <div class="time-label">{{ job.startTime || 'TBD' }}</div>
+        </div>
+
+        <div class="business-info">
+          
+          <div class="info-header">
+            <div class="status-indicator">
+              <span [class]="getStatusClass(job.jobStatus!)"></span>
+              <span class="status-text">{{ job.jobStatus | uppercase }}</span>
+            </div>
+            <h3 class="business-name">{{ job.jobTitle }}</h3>
+          </div>
+
+          <div class="client-info">
+            <mat-icon>person</mat-icon> 
+            <span>Customer: <strong>{{ getCustomerName(+job.customerId!)}}</strong></span>
+            <span class="divider">|</span>
+            <span class="modern-display-tag">{{ job.category }}</span>
+          </div>
+          
+          <div class="meta-details">
+              <span>{{ calculateTotal(job.priceBreakdown) | currency }}</span>
+              <span class="divider">|</span>
+              <span >
+               {{ job.location }}
+              </span>
+          </div>
+        </div>
+
+        <div class="action-side">
+          <button class="view-btn" click="contactCustomer(job.id)">View Chat</button>
+        </div>
       </mat-card>
     }
-    @empty {
-      <p>No jobs available at the moment.</p>
+
+    @if (jobs().length === 0) {
+       <th-empty-state 
+          message="No jobs yet.">
+       </th-empty-state>
     }
   </div>
+</div>

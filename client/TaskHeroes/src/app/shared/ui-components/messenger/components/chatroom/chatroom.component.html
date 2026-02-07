@@ -3,7 +3,7 @@
         <app-chat-header 
             [chatroom]="chatroom()"
             [currentUser]="currentUser()"
-            [jobDetails]="jobDetails()"
+            [jobDetails]="job()"
             [chatPartnerName]="chatPartnerName()"
             [chatPartnerAvatarUrl]="chatPartnerAvatarUrl()"
             (statusUpdated)="updateStatus($event)"
@@ -14,7 +14,7 @@
 
         <app-chat-message-list
             [messages]="messages()"
-            [chatStatus]="chatStatus()"
+            [chatStatus]="chatStatus()" 
             [allMessagesLoaded]="allMessagesLoaded()"
             [currentUserId]="currentUser()?.id || null"
             [chatPartnerAvatarUrl]="chatPartnerAvatarUrl()"
@@ -50,7 +50,11 @@
     </div>
     <app-chat-details-drawer 
         [isOpen]="showDetailsModal()"
-        [jobDetails]="jobDetails()"
+        [jobDetails]="job()"
+        [serviceDetails]="service()"
+        [currentUser]="currentUser()"
+        (jobUpdated)="handleJobUpdate($event)"
+        (statusChange)="updateStatus($event)"
         (close)="closeDetailsModal()">
     </app-chat-details-drawer>
 </div>

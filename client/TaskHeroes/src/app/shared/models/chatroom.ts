@@ -24,7 +24,8 @@ export interface Chatroom {
   jobDate?: Date;
   jobStatus?: string;
   jobLocation?: string;
-  fee?: string;
+  jobDuration?:number;
+  jobHourlyRate?:number;
   description?: string;
   hasUnread?: boolean;
 

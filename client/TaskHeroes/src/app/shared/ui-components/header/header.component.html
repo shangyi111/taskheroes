@@ -12,7 +12,7 @@
           @if (user.role === 'provider') {
             <a [routerLink]="['/provider', user.id]" 
             routerLinkActive="active-link"
-            [routerLinkActiveOptions]="{ exact: true }">Business</a>
+            [routerLinkActiveOptions]="{ exact: true }">Listings</a>
             <a [routerLink]="['/provider', user.id, 'jobs']" 
             routerLinkActive="active-link"
             [routerLinkActiveOptions]="{ exact: true }">Jobs</a>

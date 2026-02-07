@@ -10,6 +10,7 @@ import { PaginatedMessages, PaginatedResponse } from 'src/app/shared/models/pagi
 import { BehaviorSubject } from 'rxjs';
 import { Subscription } from 'rxjs';
 import { combineLatest } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -38,7 +39,7 @@ export class ChatroomService {
     // Combine connection status and active room ID
     this.roomSubscription = combineLatest([
       this.socketIoService.isConnected$.pipe(filter(connected => connected === true)),
-      this.activeRoomId.pipe(filter(id => !!id))
+      this.activeRoomId.pipe(filter(id => !!id), distinctUntilChanged())
     ]).pipe(
       tap(([_, id]) => {
         // This runs EVERY time the socket connects OR the room changes

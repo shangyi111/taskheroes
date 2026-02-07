@@ -6,7 +6,7 @@ import { environment } from 'src/environments/environment';
 import { MatIconModule } from '@angular/material/icon';
 import { CalendarDataService } from 'src/app/services/calendar-data.service';
 import { CalendarAvailability, ProviderCalendar } from 'src/app/shared/models/calendar';
-import { Job } from 'src/app/shared/models/job';
+import { Job, PriceItem } from 'src/app/shared/models/job';
 import { User } from 'src/app/shared/models/user';
 import { Service } from 'src/app/shared/models/service';
 import { JobStatus } from 'src/app/shared/models/job-status.enum';
@@ -41,12 +41,13 @@ export class SeekerCalendarComponent implements OnInit, OnDestroy {
   
   // State for booking form inputs
   seekerJobLocation: string | null = null;
-  selectedStartTime: string | null = '9:00 AM'; // Default start time
+  selectedStartTime: string | null = '09:00'; // Default start time
   selectedDurationHours: number = 2; 
   seekerJobDescription: string = '';
   
   // Calculation properties
   calculatedDrivingTimeMinutes: number = 0; 
+  calculatedTravelFee: number = 0;
   calculatedJobFee: number = 0;
 
   @ViewChild('addressInput') addressInput!: ElementRef;
@@ -290,13 +291,13 @@ generateCalendar(): void {
     // --- 1. Calculate Travel Fee (Round Trip) ---
     const totalDrivingTime = this.calculatedDrivingTimeMinutes; 
     
-    const travelFee = this.calculatedTravelFees(totalDrivingTime);
+    this.calculatedTravelFee = this.calculatedTravelFees(totalDrivingTime);
     
     // --- 2. Calculate Labor Cost ---
     const laborCost = duration * parseFloat(hourlyRate);
     
     // --- 3. Set Final Fee ---
-    this.calculatedJobFee = laborCost + travelFee!;
+    this.calculatedJobFee = laborCost + this.calculatedTravelFee!;
   }
   
   calculatedTravelFees(totalDrivingTime:number): number {
@@ -314,9 +315,29 @@ generateCalendar(): void {
       alert("Please ensure all booking details are filled and the fee is calculated.");
       return;
     }
+    const datePart = this.selectedDateData.date.toISOString().split('T')[0];
+    const combinedTimestamp = new Date(`${datePart}T${this.selectedStartTime}:00`);
 
-    const combinedTimestamp = new Date(`${this.selectedDateData.date}T${this.selectedStartTime}:00`);
-    const requestData: Job = { // 'any' used here to allow the new fields; update your Job interface later
+    const hourlyRate = this.selectedDateData?.availability?.customPrice || this.basePrice || 0;
+
+    const laborAmount = (this.selectedDurationHours * hourlyRate);
+
+    const priceBreakdown: PriceItem[] = [
+      { 
+        type: 'base', 
+        label: 'Service Fee', 
+        amount: laborAmount 
+      }
+    ];
+
+    if (this.calculatedTravelFee > 0) {
+      priceBreakdown.push({ 
+        type: 'travel', 
+        label: 'Travel Fee', 
+        amount: this.calculatedTravelFee 
+      });
+    }
+    const requestData: Job = {
       serviceId: this.service.id,
       performerId: this.service.userId,
       customerId: this.user?.id,
@@ -328,11 +349,11 @@ generateCalendar(): void {
       
       // Metadata
       location: this.seekerJobLocation,
-      fee: this.calculatedJobFee.toFixed(2),
-      hourlyRate: Number(this.selectedDateData.availability.customPrice),
+      priceBreakdown: priceBreakdown,
+      hourlyRate: hourlyRate,
       category: this.service.category,
       jobTitle: this.service.businessName,
-      description: this.seekerJobDescription.trim(),
+      jobDescription: this.seekerJobDescription.trim(),
       jobStatus: JobStatus.Pending // Always start the state machine here
     };
     

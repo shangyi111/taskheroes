@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AUTH_TOKEN_KEY } from 'src/app/shared/constants';
 import {Job} from "src/app/shared/models/job";
-import {map} from 'rxjs/operators';
 import { JobStatus } from "src/app/shared/models/job-status.enum";
 
 @Injectable({
@@ -25,12 +24,26 @@ export class JobService {
     return this.http.get<Job>(`${this.API_URL_JOB}/${id}`);
   }
 
-  getAllJobsByPerformerId(performerId:string):Observable<Job[]>{
-    return this.http.get<Job[]>(`${this.API_URL_JOB}/provider/${performerId}`);
+  // getAllJobsByPerformerId(performerId:string):Observable<Job[]>{
+  //   return this.http.get<Job[]>(`${this.API_URL_JOB}/provider/${performerId}`);
+  // }
+
+  // getAllOrdersByCustomerId(customerId:string):Observable<Job[]>{
+  //   return this.http.get<Job[]>(`${this.API_URL_SEEKER}/seeker/${customerId}`);
+  // }
+
+  getAllJobsByPerformerId(performerId: string, filter: any = {}): Observable<Job[]> {
+    // Convert the filter object to a JSON string
+    const params = new HttpParams().set('filter', JSON.stringify(filter));
+    
+    return this.http.get<Job[]>(`${this.API_URL_JOB}/provider/${performerId}`, { params });
   }
 
-  getAllOrdersByCustomerId(customerId:string):Observable<Job[]>{
-    return this.http.get<Job[]>(`${this.API_URL_SEEKER}/seeker/${customerId}`);
+  getAllOrdersByCustomerId(customerId: string, filter: any = {}): Observable<Job[]> {
+    // Use the same pattern for the seeker/orders endpoint
+    const params = new HttpParams().set('filter', JSON.stringify(filter));
+    
+    return this.http.get<Job[]>(`${this.API_URL_SEEKER}/seeker/${customerId}`, { params });
   }
 
   createJob(jobData: Job): Observable<{job:Job, chatroomId:number}> {

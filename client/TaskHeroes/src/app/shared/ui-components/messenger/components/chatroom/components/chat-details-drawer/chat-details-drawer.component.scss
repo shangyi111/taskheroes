@@ -1,61 +1,238 @@
-@use 'abstracts' as *;
+// --- Variables ---
+$th-teal: #00a699;
+$th-indigo: #4f46e5;
+$th-slate: #1e293b;
+$th-muted: #64748b;
+$th-border: #f1f5f9;
+$th-bg-light: #f8fafc;
+$radius-lg: 12px;
+$radius-md: 8px;
 
-/* Adaptive Drawer Design */
+// --- Drawer Core ---
 .details-drawer-overlay {
-    position: fixed;
-    top: 0;
+  position: relative;
+  top: 0;
+  right: -400px; // Hidden by default
+  width: 100%;
+  max-width: 400px;
+  height: 100vh;
+  background: white;
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+
+  &.active {
     right: 0;
-    height: 100%;
-    width: 380px; /* Desktop Drawer width */
-    background-color: white;
-    z-index: 1000;
+  }
+}
+
+.drawer-header {
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid $th-border;
+
+  h3 { margin: 0; font-size: 1.1rem; color: $th-slate; font-weight: 700; }
+  
+  .close-btn {
+    background: none; border: none; cursor: pointer; color: $th-muted;
+    &:hover { color: $th-slate; }
+  }
+}
+
+.drawer-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex-grow: 1;
+
+  .detail-group {
+    margin-bottom: 1.5rem;
+    
+    label {
+      display: block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      color: $th-muted;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+
+    p { margin: 0; color: $th-slate; font-weight: 500; font-size: 0.95rem; }
+  }
+}
+
+// --- Service Card ---
+.service-summary-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: linear-gradient(135deg, white 0%, rgba($th-teal, 0.05) 100%);
+  border: 1px solid rgba($th-teal, 0.1);
+  border-radius: $radius-lg;
+  margin-bottom: 2rem;
+  cursor: pointer;
+  transition: transform 0.2s;
+
+  &:hover { 
+    transform: translateY(-2px); 
+    border: 1px solid rgba($th-teal, 0.44);
+    box-shadow:var(--card-shadow);
+  }
+
+  .service-icon {
+    width: 40px;
+    height: 40px;
+    background: $th-teal;
+    color: white;
+    border-radius: $radius-md;
     display: flex;
-    flex-direction: column;
-    box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
-    animation: slideInRight 0.3s ease-out;
+    align-items: center;
+    justify-content: center;
+  }
 
-    /* 🟢 MOBILE TAKEOVER: Fill entire screen */
-    @media (max-width: $breakpoint-md) {
-        width: 100%;
-        left: 0;
-        animation: fadeIn 0.2s ease-in;
+  .service-info {
+    h4 { margin: 0; font-size: 1rem; color: $th-slate; }
+    .category-tag {
+      font-size: 0.65rem; font-weight: 700; color: $th-teal;
+      background: rgba($th-teal, 0.1); padding: 2px 8px; border-radius: 10px;
     }
+  }
+}
 
-    .drawer-header {
-        padding: $spacing-md;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid var(--card-border);
-        
-        h3 { margin: 0; font-size: 1.1rem; color: var(--text-primary); }
-        .close-btn { @include button-reset(); color: var(--text-secondary); }
+// --- Logistics & Appointment ---
+.appointment-section {
+  position: relative;
+
+  .clickable-area {
+    cursor: pointer;
+    padding: 10px;
+    margin: 0 -10px;
+    border-radius: $radius-md;
+    transition: background 0.2s;
+    &:hover { background: $th-bg-light; }
+  }
+
+  .main-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: $th-slate;
+
+    .divider { color: $th-muted; font-weight: 400; }
+    .duration-badge {
+      font-size: 0.7rem; background: rgba($th-teal, 0.1);
+      color: $th-teal; padding: 2px 8px; border-radius: 10px;
     }
+  }
+}
 
-    .drawer-body {
-        flex: 1;
-        overflow-y: auto;
-        padding: $spacing-lg;
+.calendar-options-menu {
+  position: absolute;
+  top: 100%; left: 0; right: 0;
+  background: white;
+  border: 1px solid $th-border;
+  border-radius: $radius-md;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  z-index: 10;
+  overflow: hidden;
 
-        .detail-group {
-            margin-bottom: $spacing-lg;
-            label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; }
-            p { 
-                margin: $spacing-xs 0 0; 
-                font-size: 1rem; 
-                color: var(--text-primary); 
+  a {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px; text-decoration: none; color: $th-slate; font-size: 0.85rem;
+    &:hover { background: $th-bg-light; color: $th-teal; }
+    i { font-size: 18px; color: $th-muted; }
+  }
+}
 
-                &::first-letter{
-                    text-transform: uppercase;
-                }
-            }
-            .fee-highlight { color: var(--primary-green, #27ae60); font-weight: 700; font-size: 1.2rem; }
+// --- Pricing (Read & Edit) ---
+.price-section {
+  background: $th-bg-light;
+  padding: 1.25rem;
+  border-radius: $radius-lg;
+  border: 1px solid $th-border;
+
+  .price-row {
+    display: flex; justify-content: space-between;
+    padding: 8px 0; border-bottom: 1px dashed #cbd5e1;
+    &:last-of-type { border-bottom: none; }
+    .item-label { color: $th-muted; font-size: 0.9rem; }
+    .item-amount { font-weight: 600; color: $th-slate; }
+  }
+
+  .total-row {
+    display: flex; justify-content: space-between;
+    margin-top: 12px; padding-top: 12px; border-top: 2px solid $th-slate;
+    font-size: 1.1rem; color: $th-slate;
+  }
+}
+
+.edit-quote-container {
+  .quote-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px; background: white; border-radius: $radius-md;
+    margin-bottom: 8px; border: 1px solid $th-border;
+
+    &.is-base {
+      background: #fffbeb; border-color: #fde68a;
+      .base-label { display: block; font-weight: 700; font-size: 0.85rem; color: $th-slate; }
+      .base-calculation {
+        display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: $th-muted;
+        .mini-input {
+          width: 45px; border: 1px solid #d1d5db; border-radius: 4px;
+          text-align: center; font-weight: 700; color: $th-teal;
         }
+      }
     }
+
+    .item-input { flex: 1; border: none; font-size: 0.9rem; &:focus { outline: none; } }
+    
+    .price-input-wrapper {
+      display: flex; align-items: center; gap: 2px; font-weight: 700;
+      .amount-input { width: 60px; border: none; text-align: right; background: transparent; }
+    }
+
+    .btn-remove { background: none; border: none; color: #ef4444; cursor: pointer; }
+  }
 }
 
-@keyframes slideInRight {
-    from { transform: translateX(100%); }
-    to { transform: translateX(0); }
+.final-summary {
+  display: flex; justify-content: space-between; align-items: center;
+  margin: 1.5rem 0; padding-top: 1rem; border-top: 1px solid #e2e8f0;
+  .total-amount { font-size: 1.5rem; font-weight: 800; color: $th-teal; }
 }
 
+// --- Buttons ---
+.btn-adjust {
+  width: 100%; margin-top: 1rem; padding: 10px;
+  background: white; border: 1px solid $th-teal; color: $th-teal;
+  border-radius: $radius-md; font-weight: 700; cursor: pointer;
+  display: flex;
+  align-items: center; 
+  justify-content: center;
+  gap:10px;
+
+  &:hover { background: $th-teal; color: white; }
+}
+
+.action-buttons, .btn-group {
+  display: flex; gap: 10px; margin-top: 1rem;
+  button { flex: 1; padding: 12px; border-radius: $radius-md; font-weight: 700; border: none; cursor: pointer; }
+  .btn-save, .btn-accept { background: $th-teal; color: white; }
+  .btn-cancel, .btn-decline { background: #e2e8f0; color: $th-slate; }
+}
+
+.btn-add-line {
+  width: 100%; padding: 8px; border: 1px dashed $th-muted;
+  background: transparent; color: $th-muted; border-radius: 6px;
+  display: flex;
+  align-items: center; gap: 10px;
+  justify-content: center;
+  cursor: pointer; font-size: 0.8rem; font-weight: 600;
+  &:hover { border-color: $th-teal; color: $th-teal; }
+}

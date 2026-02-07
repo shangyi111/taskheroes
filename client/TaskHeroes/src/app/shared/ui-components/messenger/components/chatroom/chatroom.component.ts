@@ -8,6 +8,8 @@ import { ChatroomService } from 'src/app/services/chatroom.service';
 import { UserDataService } from 'src/app/services/user_data.service';
 import { JobService } from 'src/app/services/job.service';
 import { ReviewService } from 'src/app/services/review.service';
+import { BusinessService } from 'src/app/services/business.service';
+import { Service } from 'src/app/shared/models/service';
 import { Chatroom } from 'src/app/shared/models/chatroom';
 import { User } from 'src/app/shared/models/user';
 import { Job } from 'src/app/shared/models/job';
@@ -42,6 +44,7 @@ export class ChatroomComponent implements OnInit, OnDestroy {
   private userDataService = inject(UserDataService);
   private jobService = inject(JobService);
   private reviewService = inject(ReviewService);
+  private businessService = inject(BusinessService);
   private route = inject(ActivatedRoute);
 
   currentUser: WritableSignal<User | null> = signal(null);
@@ -49,6 +52,8 @@ export class ChatroomComponent implements OnInit, OnDestroy {
   chatroom: WritableSignal<Chatroom | null> = signal(null); 
   messages: WritableSignal<Message[]> = signal([]);
   newMessageContent: WritableSignal<string> = signal('');
+  job: WritableSignal<Job | null> = signal(null);
+  service: WritableSignal<Service | null> = signal(null);
   currentPage = signal(0);
   pageSize = 20;
   allMessagesLoaded = signal(false);
@@ -89,10 +94,14 @@ export class ChatroomComponent implements OnInit, OnDestroy {
         jobDate: room.jobDate ? new Date(room.jobDate) : null,
         serviceName: room.jobTitle || 'General Inquiry',
         location: room.jobLocation || 'Not provided',
-        fee: room.fee,
+        jobHourlyRate: room.jobHourlyRate,
+        jobDuration:room.jobDuration,
         description: room.description || 'No description',
         jobStatus: room.jobStatus ? room.jobStatus 
-          : (room.jobDate && new Date(room.jobDate) < new Date() ? 'Past' : 'Pending')}
+          : (room.jobDate && new Date(room.jobDate) < new Date() ? 'Past' : 'Pending'),
+        customerId:room.customerId,
+        providerId:room.providerId,
+      }
   });
   
   // Fetches the partner's avatar URL from the enriched chatroom object
@@ -152,13 +161,21 @@ export class ChatroomComponent implements OnInit, OnDestroy {
     this.messages.set([]); // Clear the message list immediately
     this.chatroom.set(null); // Clear the header
     this.chatroomId.set(id);
+    this.job.set(null); 
+    this.service.set(null);
     this.allMessagesLoaded.set(false);  
     this.cleanupSocket(); // Leave the previous room's socket
   }
   private loadChatroomAndMessages(chatroomId: string, userId: string): Observable<Chatroom> {
     console.log(`Fetching chatroom ${chatroomId} for user ${userId} via ChatroomService.`);
     return this.chatroomService.getChatroomById(chatroomId).pipe(
-      tap(chatroom => this.validateAccess(chatroom, userId)),
+      tap(chatroom => {
+        this.validateAccess(chatroom, userId);
+        // Fetch the full Job and Service details separately
+        if (chatroom.jobId) {
+          this.fetchJobAndServiceDetails(chatroom.jobId);
+        }
+      }),
       // Fetch and Process Messages
       switchMap(chatroom => this.chatroomService.getMessagesForChatroom(chatroomId).pipe(
         tap(res => this.processInitialMessages(res)),
@@ -171,6 +188,30 @@ export class ChatroomComponent implements OnInit, OnDestroy {
         return throwError(()=>err);
       })
     );
+  }
+
+  private fetchJobAndServiceDetails(jobId: string): void {
+    this.jobService.getJobById(Number(jobId)).pipe(
+      tap((job) => {
+        this.job.set(job);
+        
+        // After we have the job, we know which specific service was booked
+        if (job?.serviceId) {
+          this.fetchServiceOffering(Number(job.serviceId));
+        }
+      }),
+      catchError(err => {
+        console.error('Failed to fetch job details', err);
+        return of(null);
+      })
+    ).subscribe();
+  }
+
+  private fetchServiceOffering(serviceId: number): void {
+    this.businessService.getServiceById(serviceId).subscribe({
+      next: (service) => this.service.set(service),
+      error: (err) => console.error('Failed to fetch service offering', err)
+    });
   }
 
   private validateAccess(chatroomData: Chatroom | null, userId: string): void {
@@ -218,13 +259,13 @@ export class ChatroomComponent implements OnInit, OnDestroy {
 
     this.subscriptions.add(this.chatroomMessageSubscription);
   }
-  sendMessage(): void {
+  sendMessage(customMessage?: string): void {
     if (!this.currentUser()) {
       this.error.set('User not logged in. Please sign in to send messages.');
       return;
     }
     
-    const messageText = this.newMessageContent().trim();
+    const messageText = customMessage || this.newMessageContent().trim();
     const userId = this.currentUser()!.id;
     const chatroomId = this.chatroomId();
 
@@ -247,7 +288,9 @@ export class ChatroomComponent implements OnInit, OnDestroy {
         readBy: [userId],
       };
       this.messages.update(msgs => [...msgs, optimisticMessage]);
-      this.newMessageContent.set('');
+      if (!customMessage) {
+        this.newMessageContent.set('');
+      }
       setTimeout(() => this.scrollToBottom(), 0);
 
       this.subscriptions.add(
@@ -371,12 +414,38 @@ export class ChatroomComponent implements OnInit, OnDestroy {
     this.jobService.updateJobStatus(room.jobId, newStatus).subscribe({
       next: (updatedJob) => {
         // Update the chatroom signal with the new job status
-        this.chatroom.update(current => current ? { ...current, jobStatus: updatedJob.jobStatus } : null);
-        console.log(`Job status updated to: ${updatedJob.jobStatus}`);
+        this.chatroom.update(current => current ? { 
+          ...current, 
+          jobStatus: updatedJob.jobStatus,
+          lastActionBy: updatedJob.lastActionBy
+        } : null);
+        const statusLabel = newStatus.toUpperCase();
+        this.sendMessage(`[System] Job status updated to: ${statusLabel}`);
       },
       error: (err) => {
         console.error('Failed to update status:', err);
         this.error.set(err.error?.message || 'Action failed. Please try again.');
+      }
+    });
+  }
+
+  handleJobUpdate(updatedJob: Job) {
+    if (!updatedJob.id) return;
+
+    // Call your service to update the PostgreSQL database
+    this.jobService.updateJob(updatedJob.id, updatedJob).subscribe({
+      next: (res) => {
+        console.log('Job updated successfully in DB', res);
+        // Optionally update your local job signal so the UI refreshes
+        this.job.set(res); 
+        this.showDetailsModal.set(false); // Close drawer on success
+
+          // CALL EXISTING SENDMESSAGE
+        this.sendMessage(`I've updated the quote details. Please view from details`);
+      },
+      error: (err) => {
+        console.error('Failed to update job', err);
+        alert('Could not save price changes.');
       }
     });
   }

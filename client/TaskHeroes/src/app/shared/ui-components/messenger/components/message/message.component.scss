@@ -26,6 +26,38 @@ $border-color: #e0eeef; // Light border for received messages
         margin-left: auto; /* Pushes the entire container to the right */
         justify-content: flex-end;
     }
+
+    // Global System Overlay
+    &.system-message {
+        .message-bubble {
+            background-color: #f8fafc; // Neutral background
+            color: #64748b;            // Muted slate text
+            border: 1px solid #e2e8f0;
+            box-shadow: none;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+
+            .message-text {
+                font-size: 11px;
+                font-weight: 600;
+                text-transform: none; // Keep it readable
+                letter-spacing: 0;
+            }
+
+            .system-icon {
+                font-size: 14px;
+                color: #94a3b8;
+            }
+        }
+
+        // Keep the timestamps small and muted
+        .message-timestamp {
+            text-align: inherit; 
+            opacity: 0.7;
+        }
+    }
 }
 
 /* --- Avatar Styling (Received only) --- */

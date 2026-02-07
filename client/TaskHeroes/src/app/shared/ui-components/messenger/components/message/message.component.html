@@ -1,7 +1,8 @@
 <div 
   class="message-container"
   [class.sent]="isSentMessage()"
-  [class.received]="!isSentMessage()">
+  [class.received]="!isSentMessage()"
+  [class.system-message]="isSystemMessage()">
   
   <div *ngIf="!isSentMessage()" class="message-avatar">
     <img [src]="senderAvatarUrl() || 'assets/img/default-avatar.png'" alt="Sender Avatar" class="avatar-img">
@@ -9,7 +10,8 @@
   
   <div class="message-bubble-group">
     <div class="message-bubble">
-      <p class="message-text">{{ message.text }}</p>
+      <i *ngIf="isSystemMessage()" class="material-icons system-icon">info_outline</i>
+      <p class="message-text">{{ displayText() }}</p>
     </div>
     <div class="message-timestamp">
       {{ message.createdAt | date:'shortTime' }}

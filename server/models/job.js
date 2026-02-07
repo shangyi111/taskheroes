@@ -57,9 +57,35 @@ const Job = sequelize.define('Job', {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
-  fee: {
-    type: DataTypes.DECIMAL(10, 2),
+  lastActionBy: {
+    type: DataTypes.INTEGER, // Match your User ID type
     allowNull: true,
+    references: {
+      model: User,
+      key: 'id',
+    },
+  },
+  priceBreakdown: {
+    type: DataTypes.JSONB,
+    allowNull: false,
+    defaultValue: [],
+    validate: {
+    isValidBreakdown(value) {
+      if (!Array.isArray(value)) {
+        throw new Error('priceBreakdown must be an array');
+      }
+      value.forEach(item => {
+        if (!item.type || !item.label || typeof item.amount !== 'number') {
+          throw new Error('Each breakdown item must have a type, label, and numeric amount');
+        }
+      });
+    }
+  }
+    // Example storage: 
+    // [
+    //   {"type":"base","label": "Service Fee", "amount": 300}, 
+    //   {"type":"custom","label": "Travel Fee", "amount": 50}
+    // ]
   },
   hourlyRate:{
     type: DataTypes.DECIMAL(10, 2),

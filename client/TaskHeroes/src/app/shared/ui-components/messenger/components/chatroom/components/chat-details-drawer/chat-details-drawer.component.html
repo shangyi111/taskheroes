@@ -8,28 +8,152 @@
         </header>
 
         <div class="drawer-body">
+            @if (serviceDetails(); as service) {
+                <section class="service-summary-card clickable" (click)="openServiceExternal()">
+                    <div class="service-icon">
+                        <i class="material-icons">{{ 'stars' }}</i>
+                    </div>
+                    <div class="service-info">
+                        <h4>{{ service.businessName }}</h4>
+                        <span class="category-tag">{{ service.category }}</span>
+                    </div>
+                </section>
+            }
+
             @if (jobDetails(); as details) {
-                <section class="detail-group">
-                    <label>Service</label>
-                    <p>{{ details.serviceName || 'General inquiry.' }}</p>
-                </section>
-                <section class="detail-group">
-                    <label>{{details.jobStatus || ''}} Requested Job Date</label>
-                    <p>{{ details.jobDate ? (details.jobDate | date:'fullDate') : 'Date TBD' }}</p>
-                </section>
-                <section class="detail-group">
-                    <label>Location</label>
-                    <p>{{ details.location || 'TBD'}}</p>
-                </section>
-                <section class="detail-group">
+                <div class="logistics-container">
+                    <!-- <section class="detail-group">
+                        <label>Job Title</label>
+                        <p>{{ details.jobTitle || 'General inquiry.' }}</p>
+                    </section> -->
+
+                    <section class="detail-group appointment-section"
+                             (mouseenter)="openMenu()" 
+                             (mouseleave)="closeMenu()">
+                        <!-- <label>Appointment</label> -->
+                        <div class="appointment-row clickable-area">
+                            <div class="main-info">
+                                <span class="date">{{ details.jobDate | date:'EEE, MMM d' }}</span>
+                                <span class="divider">at</span>
+                                <span class="time">{{ details.startTime }}</span>
+                                <span class="duration-badge">{{ (details.duration || 0) / 60 }} hrs</span>
+                            </div>
+                        </div>  
+                        <section class="detail-group">
+                            <p>{{ details.location || 'TBD'}}</p>
+                        </section>
+                            
+                        @if (showCalendarMenu()) {
+                            <div class="calendar-options-menu">
+                                <a [href]="generateCalendarLink()" target="_blank" (click)="$event.stopPropagation(); showCalendarMenu.set(false)">
+                                   <i class="material-icons">event</i> Add to Google Calendar
+                                </a>
+                                <a [href]="generateICalLink()" [download]="'taskheroes-job.ics'" (click)="$event.stopPropagation(); showCalendarMenu.set(false)">
+                                   <i class="material-icons">download</i> Download Apple Calendar
+                                </a>
+                            </div>
+                        }
+                    </section>
+                </div>
+
+                <section class="detail-group price-section">
                     <label>Fee Quoted</label>
-                    <p class="fee-highlight">
-                        {{ details.fee ? (details.fee | currency:'USD':'symbol':'1.0-2') : 'TBD' }}
-                    </p>
+            
+                    @if (!isEditingPrice()) {
+                        <div class="fee-display">
+                            @for (item of details.priceBreakdown; track $index) {
+                                <div class="price-row">
+                                    <span class="item-label">{{ item.label }}</span>
+                                    <span class="item-amount">{{ item.amount | currency }}</span>
+                                </div>
+                            }
+                            <div class="total-row">
+                                <strong>Total Quote</strong>
+                                <strong>{{ readonlyTotal() | currency }}</strong>
+                            </div>
+                            
+                            @if (state()?.canRequestChange) {
+                                <button class="btn-adjust" (click)="startEdit()">
+                                    <i class="material-icons">payments</i> Adjust Quote
+                                </button>
+                            }
+                        </div>
+
+                        @if (state()?.canActionJob) {
+                            <div class="seeker-actions">
+                                <div class="btn-group">
+                                    <button class="btn-decline" (click)="updateJobStatus(JobStatus.Cancelled)">Decline</button>
+                                    <button class="btn-accept" (click)="updateJobStatus(JobStatus.Accepted)">Confirm & Book</button>
+                                </div>
+                            </div>
+                        }
+                    } @else {
+                        <div class="edit-quote-container">
+                            <div class="items-list-editor">
+                                @for (item of lineItems(); track $index) {
+                                   <div class="quote-row" [class.is-base]="item.type === 'base'">
+                                        <div class="item-info">
+                                            @if (item.type === 'base') {
+                                                <span class="base-label">Service Fee</span>
+                                                <div class="base-calculation">
+                                                    <input type="number" 
+                                                           [ngModel]="duration()/60" 
+                                                           (ngModelChange)="duration.set($event * 60); updateBaseItem()" 
+                                                           class="mini-input">
+                                                    <span class="unit">hrs</span>
+                                                    <span class="op">&#64;</span>
+                                                    <span class="unit">$</span>
+                                                    <input type="number" 
+                                                           [ngModel]="hourlyRate()" 
+                                                           (ngModelChange)="hourlyRate.set($event); updateBaseItem()" 
+                                                           class="mini-input">
+                                                    <span class="unit">/hr</span>
+                                                </div>
+                                            } @else {
+                                                <input [(ngModel)]="item.label" placeholder="Item name" class="item-input">
+                                            }
+                                        </div>
+                                        
+                                        <div class="price-input-wrapper">
+                                            <span>$</span>
+                                            <input type="number" 
+                                                   [(ngModel)]="item.amount" 
+                                                   [readonly]="item.type === 'base'" 
+                                                   class="amount-input">
+                                        </div>
+
+                                        @if (item.type !== 'base') {
+                                            <button (click)="removeItem($index)" class="btn-remove">
+                                                <i class="material-icons">delete_outline</i>
+                                            </button>
+                                        }
+                                    </div>
+                                }
+                                <button class="btn-add-line" (click)="addItem()">
+                                    <i class="material-icons">add</i> Add Extra Fee
+                                </button>
+                            </div>
+
+                            <div class="final-summary">
+                                <label>New Total Quote:</label>
+                                <span class="total-amount">{{ calculatedTotal() | currency }}</span>
+                            </div>
+
+                            <div class="action-buttons">
+                                <button class="btn-cancel" (click)="cancelEdit()">Cancel</button>
+                                <button class="btn-save" 
+                                        [disabled]="isSubmitting() || calculatedTotal() <= 0" 
+                                        (click)="submitAdjustment()">
+                                    Send Request
+                                </button>
+                            </div>
+                        </div>
+                    }               
                 </section>
+
                 <div class="detail-group description">
                     <label>Description</label>
-                    <p>{{ details.description || 'No detailed description available.' }}</p>
+                    <p>{{ details.jobDescription || 'No detailed description available.' }}</p>
                 </div>
             }
         </div>

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject , shareReplay, Observable, of} from 'rxjs';
+import { BehaviorSubject , shareReplay, Observable, of, tap} from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { User } from 'src/app/shared/models/user';
 import { catchError } from 'rxjs/operators';
@@ -66,5 +66,20 @@ export class UserDataService {
         })
     );
   }
-    
+
+  /**
+   * Orchestrator: Fetches the full profile and updates the app state.
+   * Uses the "dumb" getUserById helper internally.
+   */
+  fetchAndSyncProfile(userId: string): Observable<User | null> {
+    return this.getUserById(userId).pipe(
+      tap(fullUser => {
+        if (fullUser) {
+          this.setUserData(fullUser);
+          console.log('UserDataService: State re-hydrated with full profile.');
+        }
+      })
+    );
+  }
+      
 }
