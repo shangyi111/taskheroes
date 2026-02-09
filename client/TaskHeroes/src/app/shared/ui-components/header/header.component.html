@@ -15,10 +15,10 @@
             [routerLinkActiveOptions]="{ exact: true }">Listings</a>
             <a [routerLink]="['/provider', user.id, 'jobs']" 
             routerLinkActive="active-link"
-            [routerLinkActiveOptions]="{ exact: true }">Jobs</a>
+            [routerLinkActiveOptions]="{ exact: true }">Upcomings</a>  
           } @else {
             <a routerLink="/search" routerLinkActive="active-link">Search</a>
-            <a [routerLink]="['/seeker', user.id, 'orders']" routerLinkActive="active-link">Orders</a>
+            <a [routerLink]="['/seeker', user.id, 'orders']" routerLinkActive="active-link">Upcomings</a>
           }
 
           <div class="nav-divider"></div>

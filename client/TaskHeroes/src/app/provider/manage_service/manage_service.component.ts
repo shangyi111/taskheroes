@@ -32,6 +32,7 @@ export class ManageServiceComponent implements OnInit {
   private dialog = inject(MatDialog);
 
   service = signal<Service | null>(null);
+  viewMode = signal<'details' | 'calendar'>('details');
 
   ngOnInit(): void {
     // 1. Get serviceId from route: /user/:userId/provider/manage/:serviceId
@@ -43,6 +44,15 @@ export class ManageServiceComponent implements OnInit {
     ).subscribe(data => {
       if (data) this.service.set(data);
     });
+  }
+
+  setViewMode(mode: 'details' | 'calendar') {
+    this.viewMode.set(mode);
+  }
+
+  viewPublic(): void {
+    const s = this.service();
+    if (s) window.open(`/service/${s.id}`, '_blank');
   }
 
   goBack(): void {
