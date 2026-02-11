@@ -24,10 +24,6 @@ const Service = sequelize.define('Service', {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  description: {
-    type: DataTypes.TEXT,
-    allowNull: true,
-  },
   profilePicture: {
     type: DataTypes.JSONB,
     allowNull: true,
@@ -45,6 +41,17 @@ const Service = sequelize.define('Service', {
   hourlyRate:{
     type: DataTypes.DECIMAL(10, 2),
     allowNull: true,
+  },
+  customSections: {
+    type: DataTypes.JSONB,
+    allowNull: false,
+    defaultValue: {
+      general: { content: '', isPublic: true },
+      faq: { content: '', isPublic: true },     // Includes "What to expect"
+      payment: { content: '', isPublic: false }, // Private by default
+      links: [],      // Array of { platform: string, url: string, isPublic: boolean }
+      additional: []  // Escape hatch for everything else
+    }
   },
   availabilityWindowDays: {
       type: DataTypes.INTEGER,

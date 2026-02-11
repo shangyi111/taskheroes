@@ -6,13 +6,40 @@ const {
   sendServiceDeleted,
 } = require('../websocket/handlers/serviceHandler');
 
+
+/**
+ * Utility to remove private JSONB slots for Seekers.
+ * If the requester is the owner, return the full object.
+ */
+const scrubService = (service, requesterId) => {
+  const data = service.get({ plain: true });
+  const isOwner = requesterId && String(data.userId) === String(requesterId);
+
+  if (!isOwner && data.customSections) {
+    // 1. Check fixed slots (FAQ is public, Payment is private)
+    if (data.customSections.payment && !data.customSections.payment.isPublic) {
+      delete data.customSections.payment;
+    }
+    
+    // 2. Filter dynamic arrays
+    if (Array.isArray(data.customSections.links)) {
+      data.customSections.links = data.customSections.links.filter(l => l.isPublic);
+    }
+    if (Array.isArray(data.customSections.additional)) {
+      data.customSections.additional = data.customSections.additional.filter(a => a.isPublic);
+    }
+  }
+  
+  return { ...data, isOwner };
+};
 // Get all services
 exports.getAllServices = async (req, res) => {
   try {
     const services = await Service.findAll({
       include:[ Review]
     });
-    res.json(services);
+    const scrubbed = services.map(s => scrubService(s, req.user?.id));
+    res.json(scrubbed); 
   } catch (error) {
     console.log("error inside get all services",error);
     res.status(500).json({ message: error.message });
@@ -24,7 +51,8 @@ exports.getServiceById = async (req, res) => {
   try {
     const service = await Service.findByPk(req.params.id);
     if (service) {
-      res.json(service);
+      const scrubbed = scrubService(service, req.user?.id);
+      res.json(scrubbed);
     } else {
       res.status(404).json({ message: 'Service not found' });
     }

@@ -5,6 +5,7 @@ import { MatInputModule, MatInput } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core'; 
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIcon, MatIconModule } from '@angular/material/icon';
 import { ImageUploadComponent } from '../image-upload/image-upload.component';
@@ -27,7 +28,7 @@ export interface FormFieldConfig {
   templateUrl: './form.component.html',
   imports: [ReactiveFormsModule, MatDatepickerModule,MatNativeDateModule,
     MatFormFieldModule, MatInputModule, MatButtonModule, MatExpansionModule,MatIconModule,
-    AddressAutocompleteDirective, ImageUploadComponent],
+    AddressAutocompleteDirective, ImageUploadComponent, MatCheckboxModule],
 })
 export class FormComponent {
     private formBuilder = inject(FormBuilder);
@@ -48,6 +49,7 @@ export class FormComponent {
     initForm(): void {
       const formControls: { [key: string]: any } = {};
       this.fields.forEach((field) => {
+        const defaultVal = field.type === 'checkbox' ? false : '';
         formControls[field.name] = ['', field.validators];
       });
       this.formGroup = this.formBuilder.group(formControls);
@@ -73,6 +75,10 @@ export class FormComponent {
         }
     }
 
+    isArray(val: any): boolean {
+      return Array.isArray(val);
+    }
+
     clearForm(): void {
       this.formGroup.reset();
       this.formClear.emit();
@@ -92,10 +98,10 @@ export class FormComponent {
       this.formGroup.get(fieldName)?.markAsDirty();
     }
 
-    removeFile(fieldName: string, index: number) {
+    removeFile(fieldName: string, index?: number) {
       const value = this.formGroup.get(fieldName)?.value;
 
-      if (Array.isArray(value)) {
+      if (Array.isArray(value) && index !== undefined) {
         const updatedValues = [...value];
         updatedValues.splice(index, 1);
         this.formGroup.patchValue({ [fieldName]: updatedValues });

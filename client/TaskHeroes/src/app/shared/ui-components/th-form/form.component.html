@@ -16,19 +16,39 @@
             [folder]="field.folder || 'general'">
           </image-upload>
 
-          @if (field.multiple && formGroup.get(field.name)?.value?.length) {
-            <div class="portfolio-grid">
-              @for (img of formGroup.get(field.name)?.value; track $index) {
-                <div class="thumb">
-                  <img [src]="img.url" />
-                  <button type="button" class="remove-btn" (click)="removeFile(field.name, $index)">
-                    <mat-icon>close</mat-icon>
+          @let currentFiles = formGroup.get(field.name)?.value;
+          @if (currentFiles) {
+            <div class="preview-container" [class.grid]="field.multiple">
+
+              @if (field.multiple && isArray(currentFiles)) {
+                @for (img of currentFiles; track img.public_id || $index) {
+                  <div class="thumb">
+                    <img [src]="img.url" alt="Preview" />
+                    <button type="button" class="remove-btn" (click)="removeFile(field.name, $index)">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </div>
+                }
+              } 
+              
+              @else if (!field.multiple && currentFiles.url) {
+                <div class="thumb single-preview">
+                  <img [src]="currentFiles.url" alt="Profile Preview" />
+                  <button type="button" class="remove-btn" (click)="removeFile(field.name)">
+                    <mat-icon>delete</mat-icon>
                   </button>
                 </div>
               }
             </div>
           }
         </div>
+      }
+      @else if (field.type === 'checkbox') {
+      <div class="checkbox-wrapper">
+        <mat-checkbox [formControlName]="field.name" color="primary">
+          {{ field.label }}
+        </mat-checkbox>
+      </div>
       }@else if (field.type === 'address') {
         <mat-form-field appearance="outline">
           <mat-label>{{ field.label }}</mat-label>
@@ -57,6 +77,8 @@
         </mat-form-field>
       }
     }
+
+    <ng-content></ng-content>
     <div class="buttons-row">
         <button mat-button class="btn-primary" type="submit">{{ actionName || 'Submit' }}</button>
         <button mat-button class="btn-secondary" type="button" (click)="clearForm()">Clear</button>

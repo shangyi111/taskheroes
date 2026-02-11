@@ -1,21 +1,25 @@
-<div class="upload-container">
-  <label class="upload-box" [class.has-image]="previewUrl">
+<div class="upload-wrapper">
+  <label class="compact-upload-tile" [class.has-image]="previewUrl">
     <input type="file" (change)="onFileSelected($event)" accept="image/*" hidden>
     
-    <ng-container *ngIf="!previewUrl; else previewTemplate">
-      <mat-icon>add_a_photo</mat-icon>
-      <span>Click to upload work</span>
-    </ng-container>
-
-    <ng-template #previewTemplate>
-      <img [src]="previewUrl" alt="Preview" class="preview-img">
-      <div class="overlay">
-        <mat-icon>edit</mat-icon>
+    @if (!previewUrl) {
+      <div class="state-container">
+        <mat-icon>add_a_photo</mat-icon>
+        <span class="tile-label">Add Photo</span>
       </div>
-    </ng-template>
+    } @else {
+      <div class="state-container preview">
+        <img [src]="previewUrl" alt="Preview" class="tile-img">
+        <div class="hover-overlay">
+          <mat-icon>refresh</mat-icon>
+        </div>
+      </div>
+    }
   </label>
 
-  <div *ngIf="isUploading" class="progress-bar">
-    <div class="progress-fill"></div>
-  </div>
+  @if (isUploading) {
+    <div class="mini-progress">
+      <div class="fill"></div>
+    </div>
+  }
 </div>

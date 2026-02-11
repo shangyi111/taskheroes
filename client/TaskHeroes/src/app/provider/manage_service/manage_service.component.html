@@ -106,9 +106,77 @@
               }
             </div>
 
-            <div class="description-block">
-              <h3>About the Service</h3>
-              <p>{{ s.description }}</p>
+            
+
+            <div class="dynamic-sections-container">
+              @if (s.customSections) {
+                @if (s.customSections.links?.length) {
+                  <div class="description-block">
+                    <h3>Social Links</h3>
+                    <div class="social-links-strip">
+                      @for (link of s.customSections.links; track link.url) {
+                        <a [href]="link.url" target="_blank" class="social-icon-btn" [title]="link.platform">
+                          <mat-icon>{{ getSocialIcon(link.platform) }}</mat-icon>
+                        </a>
+                      }
+                    </div>
+                  </div>
+                }
+                
+                @if (s.customSections.general) {
+                  <div class="description-block">
+                    <h3>About the Service</h3>
+                    <p class="formatted-text">{{ s.customSections.general.content || 'No description provided.' }}</p>
+                  </div>
+                }
+
+                @if (s.customSections.faq?.content) {
+                  <div class="description-block">
+                    <div class="section-header">
+                      <h3>FAQ</h3>
+                      <mat-icon class="visibility-hint" 
+                                [title]="s.customSections.faq?.isPublic ? 'Visible to public' : 'Private'">
+                        {{ s.customSections.faq?.isPublic ? 'visibility' : 'visibility_off' }}
+                      </mat-icon>
+                    </div>
+                    <p class="formatted-text">{{ s.customSections.faq?.content }}</p>
+                  </div>
+                }
+
+                @if (s.customSections.payment?.content) {
+                  <div class="description-block private-note">
+                    <div class="section-header">
+                      <h3>Payment Details</h3>
+                      <mat-icon class="visibility-hint" 
+                                [title]="s.customSections.payment?.isPublic ? 'Visible to public' : 'Private'">
+                        {{ s.customSections.payment?.isPublic ? 'visibility' : 'visibility_off' }}
+                      </mat-icon>
+                      <span class="private-badge">Sensitive Info</span>
+                    </div>
+                    <p class="formatted-text">{{ s.customSections.payment?.content }}</p>
+                  </div>
+                }
+
+                @if (s.customSections.additional) {
+                  @for (section of s.customSections.additional; track $index) {
+                    <div class="description-block">
+                      <div class="section-header">
+                        <h3>{{ section.title }}</h3>
+                        <mat-icon class="visibility-hint" 
+                                  [title]="section.isPublic ? 'Visible to public' : 'Private'">
+                          {{ section.isPublic ? 'visibility' : 'visibility_off' }}
+                        </mat-icon>
+                      </div>  
+                      <p class="formatted-text">{{ section.content }}</p>
+                    </div>
+                  }
+                }
+              } @else {
+                <div class="description-block">
+                  <h3>About the Service</h3>
+                  <p class="formatted-text">Service details are being updated...</p>
+                </div>
+              }
             </div>
           </section>
         </div>
@@ -130,98 +198,3 @@
     </main>
   }
 </div>
-
-<!-- <div class="manage-wrapper">
-  <div class="manage-header-nav">
-    <button mat-button (click)="goBack()" class="back-btn">
-      <mat-icon>arrow_back</mat-icon> Back to Dashboard
-    </button>
-  </div>
-
-  @if (service(); as s) {
-    <div class="manage-grid">
-      
-      <div class="main-content">
-        <div class="service-summary-card">
-          <img [src]="s.profilePicture?.url" class="manage-avatar" alt="Service avatar">
-          <div class="header-info">
-            <h1 class="service-title">{{ s.businessName }}</h1>
-            <div class="category-badge">
-              <span class="modern-display-tag">{{ s.category }}</span>
-            </div>
-          </div>
-        </div>
-
-        <section class="info-section description-section">
-          <h3 class="section-label">Description</h3>
-          <p class="description-text">{{ s.description }}</p>
-        </section>
-
-        @if (s.portfolio && s.portfolio.length > 0) {
-            <section class="info-section portfolio-section">
-                <div class="section-header-inline">
-                <h3 class="section-label">Work Gallery</h3>
-                <span class="count-tag">{{ s.portfolio.length }} Photos</span>
-                </div>
-                
-                <div class="manage-portfolio-grid">
-                @for (img of s.portfolio; track img.public_id) {
-                    <div class="portfolio-card">
-                    <img [src]="img.url.replace('/upload/', '/upload/w_300,h_300,c_fill,g_auto,f_auto,q_auto/')" 
-                        alt="Portfolio item">
-                    </div>
-                }
-                </div>
-            </section>
-        }@else {
-            <section class="info-section empty-portfolio" (click)="openEditModal()">
-                <mat-icon>add_a_photo</mat-icon>
-                <p>Add portfolio photos to show seekers your best work.</p>
-            </section>
-        }
-
-        <section class="calendar-section">
-          <div class="section-header">
-            <h3>Manage Availability</h3>
-            <p>Click on dates to set hourly availability and pricing.</p>
-          </div>
-          <div class="calendar-container">
-            <provider-calendar 
-              [serviceId]="s.id!" 
-              [providerId]="s.userId!" 
-              [basePrice]="s.hourlyRate!">
-            </provider-calendar>
-          </div>
-        </section>
-      </div>
-
-      <aside class="admin-sidebar">
-        <div class="stats-card">
-          <div class="stat-row">
-            <span class="label">Hourly Rate</span>
-            <span class="value price">{{ s.hourlyRate | currency }}/hr</span>
-          </div>
-          <div class="stat-row">
-            <span class="label">Location</span>
-            <span class="value address">{{ s.businessAddress }}</span>
-          </div>
-        </div>
-
-        <div class="action-stack">
-          <button class="secondary-outline-btn primary-edit-btn" (click)="openEditModal()">
-            <mat-icon>edit</mat-icon> Edit Service Details
-          </button>
-
-          <a [href]="'/service/' + s.id" target="_blank" class="secondary-outline-btn preview-btn">
-            <mat-icon>open_in_new</mat-icon> Preview Public Page
-          </a>
-          
-          <button class="secondary-outline-btn danger-outline-btn" (click)="deleteService()">
-            <mat-icon>delete</mat-icon> Delete Service
-          </button>
-        </div>
-      </aside>
-
-    </div>
-  }
-</div> -->

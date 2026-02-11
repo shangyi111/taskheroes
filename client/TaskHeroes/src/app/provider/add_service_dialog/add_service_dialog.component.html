@@ -6,8 +6,6 @@
         <div class="shimmer-grid">
           <div class="shimmer-item box"></div>
           <div class="shimmer-item box"></div>
-          <div class="shimmer-item box"></div>
-          <div class="shimmer-item box"></div>
         </div>
       </div>
     </div>
@@ -20,23 +18,169 @@
           {{ isEditMode ? 'Edit Service Details' : 'Add New Service' }}
         </h2>
         <p class="subtitle">
-          Update your information to keep your profile accurate for seekers.
+          Manage your core details, media gallery, and custom content slots.
         </p>
       </div>
-      
       <button mat-icon-button (click)="onClose()" class="close-btn" type="button">
         <mat-icon>close</mat-icon>
       </button>
     </header>
 
-    <mat-dialog-content>
-      <th-form 
-        [fields]="formFields" 
-        [actionName]="isEditMode ? 'Update Service' : 'Create Service'"
-        [data]="initialData"
-        (formSubmit)="onAddSubmit($event)"
-        (cancel)="onClose()">
-      </th-form>
+    <mat-dialog-content class="modern-scroll">
+      
+      <section class="form-section">
+        <div class="field-row">
+          <mat-form-field appearance="outline" class="flex-3">
+            <mat-label>Service Name</mat-label>
+            <input matInput [(ngModel)]="localData.businessName" placeholder="e.g. Joy Chen Art">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="flex-2">
+            <mat-label>Category</mat-label>
+            <input matInput [(ngModel)]="localData.category" placeholder="e.g. Live Sketching">
+          </mat-form-field>
+        </div>
+
+        <div class="field-row">
+          <mat-form-field appearance="outline" class="flex-1">
+            <mat-label>Hourly Rate ($)</mat-label>
+            <input matInput type="number" [(ngModel)]="localData.hourlyRate">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="flex-2">
+            <mat-label>Zip Code / Service Area</mat-label>
+            <input matInput [(ngModel)]="localData.businessAddress">
+          </mat-form-field>
+        </div>
+      </section>
+
+      <hr class="section-divider">
+
+      <section class="form-section media-section">
+        <h3 class="inner-subtitle">Visual Gallery</h3>
+        <div class="media-grid">
+          <div class="media-item">
+            <label>Profile Photo</label>
+            <image-upload [isMultiple]="false" folder="profile" (imageUploaded)="handleProfilePic($event)"></image-upload>
+            @if (localData.profilePicture) {
+              <div class="preview-thumb">
+                <img [src]="localData.profilePicture.url" alt="Profile">
+                <button (click)="localData.profilePicture = undefined"><mat-icon>delete</mat-icon></button>
+              </div>
+            }
+          </div>
+
+          <div class="media-item">
+            <label>Work Gallery (Up to 6)</label>
+            <image-upload [isMultiple]="true" folder="portfolios" (imageUploaded)="handlePortfolio($event)"></image-upload>
+            <div class="portfolio-previews">
+              @for (img of localData.portfolio; track img.public_id; let i = $index) {
+                <div class="preview-thumb mini">
+                  <img [src]="img.url" alt="Work">
+                  <button (click)="removePortfolioItem(i)"><mat-icon>close</mat-icon></button>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="section-divider">
+
+      <section class="form-section">
+        <h3 class="inner-subtitle">Service Description</h3>
+        <mat-form-field appearance="outline" class="custom-field full-width">
+          <mat-label>About the Service</mat-label>
+          <textarea matInput rows="4" [(ngModel)]="flattenedSlots.generalContent"></textarea>
+        </mat-form-field>
+
+        <div class="slot-group">
+          <mat-form-field appearance="outline" class="custom-field full-width">
+            <mat-label>FAQ</mat-label>
+            <textarea matInput rows="3" [(ngModel)]="flattenedSlots.faqContent" placeholder="Please fill in FAQs here. "></textarea>
+          </mat-form-field>
+          <mat-checkbox class="custom-field-checkbox"[(ngModel)]="flattenedSlots.faqPublic" >Show FAQ publicly</mat-checkbox>
+        </div>
+
+        <div class="slot-group">
+          <mat-form-field appearance="outline" class=" custom-field full-width">
+            <mat-label>Payment Methods & Handles</mat-label>
+            <textarea matInput rows="2" [(ngModel)]="flattenedSlots.paymentContent" placeholder="Venmo: @YourHandle, Zelle, etc."></textarea>
+          </mat-form-field>
+          <mat-checkbox class = "custom-field-checkbox" [(ngModel)]="flattenedSlots.paymentPublic" >Show handles to public</mat-checkbox>
+        </div>
+      </section>
+
+      <hr class="section-divider">
+
+      <section class="form-section">
+        <div class="section-header-inline">
+          <h3 class="inner-subtitle">Social & Marketplace Links</h3>
+          <button mat-button class="theme-btn-text" (click)="addSocialLink()">
+            <mat-icon>add</mat-icon> Add Link
+          </button>
+        </div>
+
+        <div class="social-links-list">
+          @for (link of socialLinks(); track $index) {
+            <div class="social-link-item">
+              <mat-form-field appearance="outline" class="platform-select">
+                <mat-select [(ngModel)]="link.platform">
+                  <mat-option value="instagram">Instagram</mat-option>
+                  <mat-option value="facebook">Facebook</mat-option>
+                  <mat-option value="etsy">Etsy</mat-option>
+                  <mat-option value="website">Personal Website</mat-option>
+                  <mat-option value="google">Google Business</mat-option>
+                  <mat-option value="yelp">Yelp Business</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="url-input">
+                <input matInput [(ngModel)]="link.url" placeholder="https://...">
+              </mat-form-field>
+
+              <button mat-icon-button color="warn" (click)="removeSocialLink($index)">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </div>
+          }
+        </div>
+      </section>
+
+      <hr class="section-divider">
+
+      <section class="form-section additional-info">
+        <div class="section-header-inline">
+          <h3 class="inner-subtitle">Additional Details</h3>
+          <button mat-button class="theme-btn-text" (click)="addCustomSection()">
+            <mat-icon>add</mat-icon> Add Custom Section
+          </button>
+        </div>
+
+        <div class="additional-list">
+          @for (section of additionalSections(); track $index) {
+            <div class="additional-card">
+              <div class="card-top">
+                <input 
+                  class="inline-title" 
+                  [value]="section.title" 
+                  (input)="updateSectionTitle($index, $any($event.target).value)"
+                  placeholder="Enter Section Title (e.g. Travel Policy)">
+                <button mat-icon-button color="warn" (click)="removeCustomSection($index)">
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
+              </div>
+              <textarea [(ngModel)]="section.content" placeholder="Enter details..." rows="3"></textarea>
+              <mat-checkbox class="custom-field-checkbox" [(ngModel)]="section.isPublic" >Visible to public</mat-checkbox>
+            </div>
+          }
+        </div>
+      </section>
     </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-button class="cancel-btn" (click)="onClose()">Cancel</button>
+      <button mat-flat-button class="save-btn" (click)="onAddSubmit()">
+        {{ isEditMode ? 'Update Service' : 'Launch Service' }}
+      </button>
+    </mat-dialog-actions>
   </div>
 </div>

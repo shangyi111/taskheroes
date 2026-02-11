@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { switchMap, take } from 'rxjs';
-
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { BusinessService } from 'src/app/services/business.service';
 import { Service } from 'src/app/shared/models/service';
 import { ProviderCalendarComponent } from '../calendar/provider_calendar.component';
@@ -19,7 +19,8 @@ import { AddServiceDialogComponent } from '../add_service_dialog/add_service_dia
     MatButtonModule, 
     MatIconModule, 
     MatDialogModule, 
-    ProviderCalendarComponent
+    ProviderCalendarComponent,
+    MatTooltipModule
   ],
   templateUrl: './manage_service.component.html',
   styleUrls: ['./manage_service.component.scss']
@@ -59,6 +60,19 @@ export class ManageServiceComponent implements OnInit {
     this.location.back();
   }
 
+  getSocialIcon(platform: string): string {
+    const icons: { [key: string]: string } = {
+      'instagram': 'photo_camera',
+      'facebook': 'facebook',
+      'linkedin': 'business',
+      'etsy': 'storefront',
+      'website': 'language',
+      'yelp': 'reviews',
+      'google': 'location_on'
+    };
+    return icons[platform.toLowerCase()] || 'link';
+  }
+  
   openEditModal(): void {
   const currentService = this.service();
   if (!currentService) return;

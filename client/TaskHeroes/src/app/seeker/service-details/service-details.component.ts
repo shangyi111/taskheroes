@@ -52,6 +52,8 @@ export class ServiceDetailsComponent implements OnInit {
   providerId: string = '';
   activeImageUrl: string = '';
   currentIndex: number = 0;
+
+  viewMode = signal<'details' | 'calendar'>('details');
   
   // Enterprise UX Signals
   showAuthOptions = signal(false);
@@ -75,6 +77,10 @@ export class ServiceDetailsComponent implements OnInit {
         setTimeout(() => this.initializeGoogleButton(), 100);
       }
     });
+  }
+
+  setViewMode(mode: 'details' | 'calendar') {
+    this.viewMode.set(mode);
   }
   ngOnInit(): void {
     this.user = this.userService.getUserData();
@@ -164,6 +170,22 @@ export class ServiceDetailsComponent implements OnInit {
     );
   }
 
+  /**
+   * Helper to map social platform strings to Material Icons.
+   * Ensures your Business Profile renders the correct branding.
+   */
+  getSocialIcon(platform: string): string {
+    const icons: { [key: string]: string } = {
+      'instagram': 'photo_camera',
+      'facebook': 'facebook',
+      'linkedin': 'business',
+      'etsy': 'storefront',
+      'website': 'language',
+      'yelp': 'reviews',
+      'google': 'location_on'
+    };
+    return icons[platform?.toLowerCase()] || 'link';
+  }
   goBackToSearch(): void { 
     if (window.history.length > 1) {
       this.location.back();

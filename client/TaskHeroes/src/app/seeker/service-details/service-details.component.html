@@ -1,4 +1,152 @@
-@if (service$ | async; as service) {
+@if (service$ | async; as s) {
+<div class="service-details-wrapper">
+  
+  <header class="seeker-header">
+    <div class="header-left">
+      <button class="icon-btn" (click)="goBackToSearch()" title="Back">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+    </div>
+
+    <div class="header-middle">
+      <div class="pill-toggle">
+        <button [class.active]="viewMode() === 'details'" (click)="setViewMode('details')">Details</button>
+        <button [class.active]="viewMode() === 'calendar'" (click)="setViewMode('calendar')">Book</button>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <button class="action-icon-btn"><mat-icon>share</mat-icon></button>
+    </div>
+  </header>
+
+  <main class="content-container fade-in">
+    @if (viewMode() === 'details') {
+      <div class="details-layout">
+        
+        <section class="gallery-preview-container">
+          @if (s.portfolio && s.portfolio.length > 0) {
+            <div class="mosaic-grid">
+              <div class="mosaic-main">
+                <img [src]="s.portfolio[0].url.replace('/upload/', '/upload/w_800,c_fill/')" alt="Featured">
+              </div>
+              <div class="mosaic-side">
+                @for (img of s.portfolio.slice(1, 3); track img.public_id) {
+                  <div class="side-item">
+                    <img [src]="img.url.replace('/upload/', '/upload/w_400,h_400,c_fill/')" alt="Gallery">
+                  </div>
+                }
+                @if (s.portfolio.length > 3) {
+                  <div class="side-item more-overlay">
+                    <span>+{{ s.portfolio.length - 3 }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </section>
+
+        <section class="service-core-info">
+          <div class="main-title-row">
+            <h1 class="business-name">{{ s.businessName }}</h1>
+            @if (averageRating$ | async; as avg) {
+              <div class="rating-pill">
+                <mat-icon>star</mat-icon>
+                <span>{{ avg | number:'1.1-1' }} ({{ reviewCount$ | async }})</span>
+              </div>
+            }
+          </div>
+
+          <div class="quick-info-bar">
+            <div class="info-item">
+              <mat-icon>category</mat-icon>
+              <div class="details">
+                <label>Category</label>
+                <span>{{ s.category }}</span>
+              </div>
+            </div>
+            <div class="info-item">
+              <mat-icon>payments</mat-icon>
+              <div class="details">
+                <label>Hourly Rate</label>
+                <span>{{ s.hourlyRate | currency }}/hr</span>
+              </div>
+            </div>
+            @if(s.businessAddress){
+              <div class="info-item">
+                <mat-icon>location_on</mat-icon>
+                <div class="details">
+                  <label>Service Area</label>
+                  <span>{{ s.businessAddress }}</span>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="dynamic-sections-container">
+            @if (s.customSections?.links?.length) {
+              <div class="description-block">
+                <h3>Social & Marketplace Links</h3>
+                <div class="social-links-strip">
+                  @for (link of s.customSections?.links; track link.url) {
+                    <a [href]="link.url" target="_blank" class="social-icon-btn" [title]="link.platform">
+                      <mat-icon>{{ getSocialIcon(link.platform) }}</mat-icon>
+                    </a>
+                  }
+                </div>
+              </div>
+            }
+            @if (s.customSections?.general?.content) {
+              <div class="description-block">
+                <h3>About</h3>
+                <p class="formatted-text">{{ s.customSections?.general?.content }}</p>
+              </div>
+            }
+
+            @if (s.customSections?.faq?.isPublic && s.customSections?.faq?.content) {
+              <div class="description-block">
+                <h3>FAQ</h3>
+                <p class="formatted-text">{{ s.customSections?.faq?.content }}</p>
+              </div>
+            }
+            @if (s.customSections?.payment?.isPublic && s.customSections?.payment?.content) {
+              <div class="description-block public-payment-note">
+                <h3>Payment Methods</h3>
+                <p class="formatted-text">{{ s.customSections?.payment?.content }}</p>
+              </div>
+            }
+            @for (section of s.customSections?.additional; track $index) {
+              @if (section.isPublic) {
+                <div class="description-block">
+                  <h3>{{ section.title }}</h3>
+                  <p class="formatted-text">{{ section.content }}</p>
+                </div>
+              }
+            }
+          </div>
+        </section>
+
+        <hr class="section-divider">
+        <section class="reviews-section">
+          <app-service-reviews [serviceId]="s.id"></app-service-reviews>
+        </section>
+      </div>
+    }
+
+    @if (viewMode() === 'calendar') {
+      <div class="calendar-layout">
+        <div class="calendar-header-block">
+          <h3>Check Availability</h3>
+          <p>Select a date and time to book {{ s.businessName }}</p>
+        </div>
+        <seeker-calendar [service]="s" [user]="user!" (bookRequest)="handleBookingSubmission($event)"></seeker-calendar>
+      </div>
+    }
+  </main>
+</div>
+}
+
+<!-- @if (service$ | async; as service) {
 <div class="service-details-container">
   <button mat-button class="back-to-search-link" (click)="goBackToSearch()">
     <mat-icon>arrow_back</mat-icon>
@@ -142,4 +290,4 @@
       </div>
     </div>
   </div>
-}
+} -->
