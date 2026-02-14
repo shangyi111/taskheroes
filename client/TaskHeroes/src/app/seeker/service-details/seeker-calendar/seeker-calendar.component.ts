@@ -165,58 +165,92 @@ generateCalendar(): void {
     this.fetchCalendarData(); 
   }
 
+  /**
+   * NEW: Load script with support for the new Place Autocomplete Element
+   */
   private loadGoogleMapsScript(callback: () => void): void {
-    // Check if the script is already loaded (i.e., 'google' object exists)
     if (typeof google !== 'undefined' && google.maps && google.maps.places) {
-      callback(); // Script is loaded, run the callback immediately
+      callback();
       return;
     }
-    
-    // Check if the script is already being added to avoid duplicates
-    if (document.getElementById('google-maps-script')) {
-      return;
-    }
+    if (document.getElementById('google-maps-script')) return;
 
     const script = document.createElement('script');
     script.id = 'google-maps-script';
-    // Use the API key from your environment file here
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${environment.googleMapsApiKey}&libraries=places`;
+    // Note the addition of v=beta or weekly to ensure component support
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${environment.googleMapsApiKey}&libraries=places,maps&v=weekly`;
     script.async = true;
     script.defer = true;
-    
-    // Once the script loads, execute the callback (initAutocomplete)
-    script.onload = () => {
-      this.ngZone.run(() => {
-        callback(); 
-      });
-    };
-    
+    script.onload = () => { this.ngZone.run(() => callback()); };
     document.head.appendChild(script);
   }
+
+  /**
+   * MODERN: Initialize using the new PlaceAutocompleteElement API
+   */
   initAutocomplete(): void {
-    // Check if the Google Maps library is loaded and the element is available
-    if (typeof google !== 'undefined' && this.addressInput && this.addressInput.nativeElement) {
-      const inputElement = this.addressInput.nativeElement;
-      
-      this.autocomplete = new google.maps.places.Autocomplete(inputElement, {
-        types: ['address'], // Restrict predictions to physical addresses
-        componentRestrictions: { 'country': ['us'] } // Optional: Restrict to US
+  // Check if the library is loaded
+  if (typeof google !== 'undefined' && google.maps && google.maps.places && this.addressInput) {
+    // Bypass the type error using bracket notation or type casting
+    const places = google.maps.places as any;
+    
+    if (places.PlaceAutocompleteElement) {
+      const autocompleteElement = new places.PlaceAutocompleteElement({
+        componentRestrictions: { country: 'us' }
       });
 
-      // Listener for when a place (address) is selected from the dropdown
-      this.autocomplete.addListener('place_changed', () => {
-                this.ngZone.run(() => {
-                    const place = this.autocomplete!.getPlace();
-                    
-                    // Update the ngModel (seekerJobLocation)
-                    this.seekerJobLocation = place.formatted_address || place.name;
-                    
-                    // Trigger the fee calculation chain
-                    this.handleTimeOrLocationChange(); 
-                }); // <--- END NGZONE.RUN
-            });
+      const container = this.addressInput.nativeElement;
+      container.innerHTML = ''; 
+      container.appendChild(autocompleteElement);
+
+      autocompleteElement.addEventListener('gmp-select', async (event: any) => {
+       const prediction = event.placePrediction;
+
+        if (!prediction) {
+          this.ngZone.run(() => { this.seekerJobLocation = null; });
+          return;
+        }
+        try {
+              // 2. Convert the prediction into a Place object
+              // 'prediction.toPlace()' is the magic method here
+              const place = await prediction.toPlace();
+
+              // 3. Now fetch the actual address data (this costs 1 'details' hit)
+              await place.fetchFields({ 
+                fields: ['displayName', 'formattedAddress'] 
+              });
+
+              this.ngZone.run(() => {
+                // 4. Access the data
+                this.seekerJobLocation = place.formattedAddress || place.displayName;
+                this.calculateFee();
+              });
+            } catch (err) {
+              console.error("Error resolving place from prediction:", err);
+            }
+      });
+
+      /**
+       * 5. BINDING B: Handle Manual Typing & Clear Button
+       * The 'gmp-placeselect' doesn't always fire when the 'X' button is clicked.
+       * We listen to the internal input value to ensure your variable stays in sync.
+       */
+      autocompleteElement.addEventListener('input', (event: any) => {
+        this.ngZone.run(() => {
+          // If the internal input is empty, reset our local variable
+          if (!event.target.value) {
+            this.seekerJobLocation = null;
+            this.calculateFee();
+            console.log('Location Bound (Cleared)');
+          }
+        });
+      });
+    } else {
+      // Fallback: If for some reason the beta/weekly version didn't load the element
+      console.warn("PlaceAutocompleteElement not found, ensure v=weekly is in script URL");
     }
   }
+}
   // Seeker interaction
   selectDay(day: any): void {
     if (!day.isBookable) {
@@ -237,11 +271,11 @@ generateCalendar(): void {
       this.selectedDateData = day;
       this.showTimeSlotModal = true; 
       this.loadGoogleMapsScript(() => {
-          // Since the address input is in the modal, ensure the modal is open 
-          // before calling initAutocomplete
-          if (this.showTimeSlotModal) {
-            this.initAutocomplete();
-          }
+      // 2. Use a double-timeout or requestAnimationFrame to ensure 
+      // the @if has finished rendering the modal into the DOM.
+      setTimeout(() => {
+          this.initAutocomplete();
+        }, 50);
       });
       // Recalculate based on new date and current time/location inputs
       this.getDrivingTimeFromBackend(); 
@@ -313,6 +347,10 @@ generateCalendar(): void {
     if (!this.selectedDateData || !this.selectedStartTime || this.selectedDurationHours < 1 
         || !this.seekerJobLocation || this.calculatedJobFee === 0 ||isDescriptionMissing) {
       alert("Please ensure all booking details are filled and the fee is calculated.");
+      return;
+    }
+    if(this.service.userId == this.user.id){
+      alert("You cannot book your own service.");
       return;
     }
     const datePart = this.selectedDateData.date.toISOString().split('T')[0];

@@ -45,5 +45,13 @@
     <th-empty-state 
         message="No services found matching your criteria.">
     </th-empty-state>
+  } @else {
+    <mat-paginator 
+      [length]="(totalServices$ | async) || 0"
+      [pageSize]="(pageState$ | async)?.size"
+      [pageSizeOptions]="[5, 10, 20, 50]"
+      (page)="onPageChange($event)"
+      aria-label="Select page of services">
+    </mat-paginator>
   }
 </div>

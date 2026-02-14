@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { Observable, of, throwError } from 'rxjs';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { switchMap, tap, map, shareReplay, catchError } from 'rxjs/operators';
 
 // Services & Models
@@ -16,6 +17,7 @@ import { UserDataService } from 'src/app/services/user_data.service';
 import { AuthService } from 'src/app/auth/auth.service'; // Added for Google Login
 import { Service } from 'src/app/shared/models/service';
 import { Job } from 'src/app/shared/models/job';
+import { Review } from 'src/app/shared/models/review';
 import { User } from 'src/app/shared/models/user';
 import { environment } from 'src/environments/environment';
 import { AUTH_TOKEN_KEY } from 'src/app/shared/constants';
@@ -43,7 +45,7 @@ declare var google: any;
 export class ServiceDetailsComponent implements OnInit {
   // Observables for data streaming
   service$: Observable<Service | null> = of(null);
-  averageRating$: Observable<number> = of(0);
+  averageRating$: Observable<number | undefined> = of(0);
   reviewCount$: Observable<number> = of(0);
   
   // State Signals
@@ -67,6 +69,7 @@ export class ServiceDetailsComponent implements OnInit {
   private userService = inject(UserDataService);
   private authService = inject(AuthService);
   private location = inject(Location);
+  private snackBar = inject(MatSnackBar);
 
   constructor() {
     // 2. This effect watches the showAuthOptions signal. 
@@ -105,8 +108,30 @@ export class ServiceDetailsComponent implements OnInit {
     );
   }
 
-  // --- Booking Flow & Decision Bridge ---
+  shareService(serviceName: string): void {
+    const shareData = {
+      title: `${serviceName} on TaskHeroes`,
+      text: `Check out ${serviceName} for professional artistic services!`,
+      url: window.location.href // Current page URL
+    };
 
+    // 1. Try Native Web Share API (Mobile)
+    if (navigator.share && navigator.canShare?.(shareData)) {
+      navigator.share(shareData)
+        .then(() => console.log('Shared successfully'))
+        .catch((err) => console.log('Error sharing:', err));
+    } else {
+      // 2. Fallback: Copy to Clipboard (Desktop)
+      navigator.clipboard.writeText(shareData.url).then(() => {
+        this.snackBar.open('Link copied to clipboard!', 'Close', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom',
+          panelClass: ['success-snackbar'] // You can style this in global.scss
+        });
+      });
+    }
+  }
   handleBookingSubmission(bookingDetails: Job) {
     if (!this.user || !this.user.id) {
       // 1. Preserve Intent: Save details so they aren't lost
@@ -164,10 +189,10 @@ export class ServiceDetailsComponent implements OnInit {
 
   private fetchReviewStats(serviceId: string): void {
     const reviews$ = this.reviewService.getAllReviewsByServiceId(serviceId).pipe(shareReplay(1));
-    this.reviewCount$ = reviews$.pipe(map(reviews => reviews.length));
-    this.averageRating$ = reviews$.pipe(
-      map(reviews => reviews.length === 0 ? 0 : reviews.reduce((s, r) => s + (r.rating || 0), 0) / reviews.length)
+    this.reviewCount$ = reviews$.pipe(
+      map(res => res.totalItems || 0)
     );
+    this.averageRating$ = reviews$.pipe(map(res => res.averageRating));
   }
 
   /**

@@ -1,5 +1,5 @@
 const { Review, Job, User } = require('../models');
-const { Op } = require('sequelize');
+const { Op, fn, col } = require('sequelize');
 const {
   sendReviewUpdated,
   sendReviewCreated,
@@ -7,6 +7,7 @@ const {
 } = require('../websocket/handlers/reviewHandler');
 const NotificationService = require('../services/notificationService');
 const { reviewEligibility } = require('../constants/reviewEligibility');
+const  { getPagination, getPagingData } = require('../utils/pagination');
 
 
 // Get all reviews
@@ -192,28 +193,45 @@ exports.updateReview = async (req, res) => {
 exports.getReviewsByServiceId = async (req, res) => {
   try {
     const { serviceId } = req.params;
+    const { page, size } = req.query;
 
     // 1. Validate the input ID
     if (!serviceId || isNaN(parseInt(serviceId))) {
       return res.status(400).json({ message: 'Invalid service ID provided.' });
     }
 
-    // 2. Find all reviews matching the serviceId column
-    const reviews = await Review.findAll({
-      where: {
-        serviceId: serviceId,
-        isPublished:true
-      },
-      order: [['addedDate', 'DESC']], // Order by date (newest first)
-    });
+    const { limit, offset } = getPagination(page, size);
+    const whereClause = { serviceId, isPublished: true };
 
-    // 3. Return the results
-    if (reviews.length > 0) {
-      res.json(reviews);
-    } else {
-      // Return an empty array and 200 status if no reviews are found
-      res.json([]); 
-    }
+    // 2. Find all reviews matching the serviceId column
+    const [data, stats] = await Promise.all([
+      Review.findAll({
+        where: whereClause,
+        limit,
+        offset,
+        order: [['addedDate', 'DESC']],
+        raw: true
+      }),
+      Review.findOne({
+        where: whereClause,
+        attributes: [
+          [fn('COUNT', col('id')), 'totalItems'],
+          [fn('AVG', col('rating')), 'averageRating']
+        ],
+        raw: true
+      })
+    ]);
+    const totalItems = parseInt(stats.totalItems) || 0;
+    const averageRating = parseFloat(parseFloat(stats.averageRating || 0).toFixed(1));
+    const totalPages = Math.ceil(totalItems / limit);
+    const currentPage = page ? +page : 1;
+    res.json({
+      items: data,
+      totalItems,
+      totalPages,
+      currentPage,
+      averageRating
+    });
   } catch (error) {
     console.log("Error inside getReviewsByServiceId:", error);
     res.status(500).json({ message: 'Failed to retrieve reviews for the service.' });

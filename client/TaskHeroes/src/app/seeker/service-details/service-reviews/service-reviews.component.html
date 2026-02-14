@@ -1,43 +1,68 @@
 <mat-card class="reviews-section">
-  <h3>Customer Reviews ({{ (reviews$ | async)?.length || 0 }})</h3>
+  @if ({ 
+    reviews: enrichedReviews$ | async, 
+    total: totalItems$ | async 
+  }; as data) {
+    
+    @if (data.reviews !== null) {
+    
+      <h3>Customer Reviews ({{ data.total || 0 }})</h3>
 
-  @if (averageRating$ | async; as avg) {
-  <div class="average-rating-display">
-    <mat-icon class="large-star">star</mat-icon>
-    <span class="score">{{ avg.toFixed(1) }}</span>
-    <div class="rating-stats">
-      <span class="max-score">out of 5</span>
-      <span class="count">{{ (reviews$ | async)?.length || 0 }} global ratings</span>
-    </div>
-  </div>
-  }
-
-  <div class="review-list">
-    @for (review of reviews$ | async; track review.id) {
-    <div class="review-item">
-      <div class="user-sidebar">
-        <div class="user-info">
-          <div class="user-avatar">{{ review.reviewerUsername?.charAt(0) }}</div>
-          <span class="user-name">{{ review.reviewerUsername }}</span>
-          <span class="review-date">{{ review.addedDate | date:'mediumDate' }}</span>
+      @if (averageRating$ | async; as avg) {
+      <div class="average-rating-display">
+        <mat-icon class="large-star">star</mat-icon>
+        <span class="score">{{ avg.toFixed(1) }}</span>
+        <div class="rating-stats">
+          <span class="max-score">out of 5</span>
+          <span class="count">{{ data.total || 0 }} global ratings</span>
         </div>
       </div>
+      }
 
-      <div class="review-body">
-        <div class="review-content">
-          <div class="stars-display">
-            @for (i of [1, 2, 3, 4, 5]; track i) {
-            <mat-icon class="star" [class.filled]="review.rating! >= i">star</mat-icon>
-            }
+      <div class="review-list">
+        @for (review of data.reviews; track review.id) {
+        <div class="review-item">
+          <div class="user-sidebar">
+            <div class="user-info">
+              @if (review.reviewerAvatar) {
+                <img [src]="review.reviewerAvatar" class="user-avatar-img" alt="Reviewer profile picture" />
+              } @else {
+                <div class="user-avatar">{{ review.reviewerUsername?.charAt(0) }}</div>
+              }
+              <span class="user-name">{{ review.reviewerUsername }}</span>
+              <span class="review-date">{{ review.addedDate | date:'mediumDate' }}</span>
+            </div>
           </div>
-          <p class="review-text">"{{ review.comment }}"</p>
+
+          <div class="review-body">
+            <div class="review-content">
+              <div class="stars-display">
+                @for (i of [1, 2, 3, 4, 5]; track i) {
+                <mat-icon class="star" [class.filled]="review.rating! >= i">star</mat-icon>
+                }
+              </div>
+              <p class="review-text">"{{ review.comment }}"</p>
+            </div>
+          </div>
         </div>
+        } @empty {
+          <th-empty-state class="review-empty-state"
+            message="No reviews yet. Be the first to leave one!">
+          </th-empty-state>
+        }
       </div>
-    </div>
-    } @empty {
-      <th-empty-state class="review-empty-state"
-        message="No reviews yet. Be the first to leave one!">
-      </th-empty-state>
+
+      <mat-paginator  class="mat-paginator"
+        [length]="data.total || 0"
+        [pageSize]="5"
+        [pageSizeOptions]="[5, 10, 25]"
+        (page)="onPageChange($event)"
+        aria-label="Select page of reviews">
+      </mat-paginator>
     }
-  </div>
+  } @else {
+    <div class="loading-padding">
+      <th-loading type="skeleton" message="Loading reviews..."></th-loading>
+    </div>
+  }
 </mat-card>

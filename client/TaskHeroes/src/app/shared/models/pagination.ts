@@ -5,6 +5,7 @@ export interface PaginatedResponse<T> {
   items: T[];
   totalPages: number;
   currentPage: number;
+  averageRating?: number;//for reviews
 }
 
 export interface PaginatedMessages {

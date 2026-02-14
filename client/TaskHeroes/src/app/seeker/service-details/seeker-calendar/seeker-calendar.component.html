@@ -45,6 +45,81 @@
 @if (showTimeSlotModal && selectedDateData) {
   <div class="modal-overlay">
     <div class="modal-content">
+    <button class="close-btn" (click)="closeTimeSlotModal()">&times;</button>
+    
+    <h3>Request Quote: {{ service!.businessName }}</h3>
+    <p class="modal-subtitle">Fill in the details below to receive a custom quote.</p>
+    
+    <div class="form-group">
+      <label for="jobLocation">Your Job Location:</label>
+      <div #addressInput class="modern-autocomplete-container"  ></div>
+      @if (seekerJobLocation) {
+        <div class="address-confirmation-pill fade-in">
+          <mat-icon>location_on</mat-icon>
+          <span>{{ seekerJobLocation }}</span>
+        </div>
+      } @else {
+        <small class="hint-text">Enter the location to help calculate potential travel fees.</small>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="jobDescription">Job & Package Details:</label>
+      <textarea 
+        id="jobDescription" 
+        rows="4"
+        [(ngModel)]="seekerJobDescription" 
+        placeholder="e.g., 'Looking for a 4-hour face painting package' or 'Custom 18x24 oil portrait request. Please include details about style or themes.'"
+        required
+      ></textarea>
+    </div>
+
+    <div class="job-time-selector">
+      <div class="form-group">
+        <label for="startTime">Preferred Start Time (Optional):</label>
+        <input id="startTime" type="time" [(ngModel)]="selectedStartTime">
+        <small class="hint-text">Leave blank if time is TBD or for project-based work.</small>
+      </div>
+      
+      <div class="form-group">
+        <label for="durationHours">Duration (Hours):</label>
+        <input id="durationHours" type="number" [(ngModel)]="selectedDurationHours" (change)="calculateFee()" min="0">
+        <small class="hint-text">Approximate time needed.</small>
+      </div>
+    </div>
+
+    <div class="fee-summary flexible-summary">
+      <div class="estimate-detail">
+        <span class="label">Base Rate</span>
+        <span class="value">{{ selectedDateData.availability.customPrice !== null ? 
+                          (selectedDateData.availability.customPrice | currency) : 
+                          (basePrice | currency) }}/hr</span>
+      </div>
+      
+      <div class="estimate-detail highlighted">
+        <span class="label">Travel & Setup Fees</span>
+        <span class="value status-tbd">TBD (To be calculated by provider)</span>
+      </div>
+
+      <div class="total-quote-row">
+        <div class="label-group">
+          <span class="final-label">Initial Estimate</span>
+          <small>Final total will be confirmed in chat</small>
+        </div>
+        <span class="final-value">{{ (selectedDurationHours > 0 ? calculatedJobFee : 0) | currency }} + TBD</span>
+      </div>
+    </div>
+    
+    <button 
+      class="request-btn" 
+      [disabled]="!seekerJobLocation || !seekerJobDescription" 
+      (click)="sendBookingRequestFromModal()">
+      Send Inquiry for Quote
+    </button>
+  </div>
+  </div>
+  <!-- <div class="modal-overlay">
+    <div class="modal-content">
       <button class="close-btn" (click)="closeTimeSlotModal()">&times;</button>
       
       <h3>Book {{ service!.businessName }} on {{ selectedDateData.date | date:'mediumDate' }}</h3>
@@ -107,5 +182,5 @@
       </button>
 
     </div>
-  </div>
+  </div> -->
 }

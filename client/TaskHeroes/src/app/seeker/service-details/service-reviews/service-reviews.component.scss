@@ -1,7 +1,5 @@
 .reviews-section {
   max-width: 1000px;
-  margin: 2rem auto;
-  padding: 2.5rem;
   background: var(--dashboard-bg);
   border-radius: 20px;
   box-shadow: none;
@@ -10,7 +8,8 @@
   h3 {
     font-size: 1.4rem;
     font-weight: 700;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
+    margin-top:0;
     color:var(--text-secondary);
   }
 }
@@ -19,12 +18,10 @@
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  padding: 1.5rem;
   background-color:transparent;
   color:var(--text-primary);
   border-radius: 16px;
-  width: fit-content; // This is key - don't let it stretch!
-  margin-bottom: 3rem;
+  width: fit-content;
 
   .large-star {
     color: #ffb400;
@@ -133,4 +130,9 @@
     padding: 0px;
     align-self: flex-start;
     margin-top: -10%;
+}
+
+.mat-paginator {
+  color:var(--text-secondary);
+  font-family: var(--global-font-family);
 }

@@ -1,5 +1,6 @@
 const authMiddleware = require('../auth/authMiddleware'); 
 const User = require('../models/user'); 
+const { Op } = require('sequelize');
 
 exports.getUserById = async (req, res) => {
     try {
@@ -13,7 +14,6 @@ exports.getUserById = async (req, res) => {
         res.status(200).json({
             id: user.id,
             username: user.username,
-            role: user.role,
             profilePicture: user.profilePicture // Needed for the messenger component
             // Do NOT include password hash, email (unless public), or sensitive tokens
         });
@@ -48,3 +48,27 @@ exports.updateMe = [authMiddleware, async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 }];
+
+exports.getUsersBatch = async (req, res) => {
+    try {
+        const { ids } = req.body; // Expecting { "ids": [1, 2, 3] }
+
+        if (!ids || !Array.isArray(ids)) {
+            return res.status(400).json({ error: 'An array of IDs is required.' });
+        }
+
+        // Fetch all users whose ID is in the provided list
+        const users = await User.findAll({
+            where: {
+                id: { [Op.in]: ids }
+            },
+            // Always sanitize: only return public info
+            attributes: ['id', 'username', 'profilePicture']
+        });
+
+        res.status(200).json(users);
+    } catch (error) {
+        console.error("BATCH USER ERROR:", error);
+        res.status(500).json({ error: 'Server error retrieving batch user profiles.' });
+    }
+};

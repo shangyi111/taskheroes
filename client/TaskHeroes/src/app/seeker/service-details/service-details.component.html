@@ -16,7 +16,9 @@
     </div>
 
     <div class="header-right">
-      <button class="action-icon-btn"><mat-icon>share</mat-icon></button>
+      <button class="action-icon-btn" (click)="shareService(s.businessName!)" title="Share Service">
+          <mat-icon>share</mat-icon>
+      </button> 
     </div>
   </header>
 

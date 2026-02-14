@@ -128,8 +128,11 @@
         }
       }
     }
-
-    .reviews-section { margin-top: 48px; border-top: 1px solid #f1f5f9; padding-top: 40px; }
+    .section-divider { 
+      border: 0; 
+      border-top: 1px solid #f1f5f9; 
+      margin: 32px 0; 
+    }
   }
 
   // --- 4. CALENDAR VIEW ---

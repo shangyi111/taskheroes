@@ -132,6 +132,7 @@
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  color:var(--text-primary);
 }
 
 .modal-content {
@@ -142,6 +143,14 @@
   max-width: 450px;
   width: 90%;
   position: relative;
+
+  .modal-subtitle {
+    font-size: 1 rem;
+    font-weight: 400;
+    margin-top:0;
+    margin-bottom: 20px;
+    color: var(--text-secondary);
+  }
 }
 
 .close-btn {
@@ -156,7 +165,7 @@
 }
 
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 35px;
 }
 
 .form-group label {
@@ -172,7 +181,6 @@
     border: 1px solid #ccc;
     border-radius: 5px;
     box-sizing: border-box;
-    height:36px;
 }
 
 .job-time-selector {
@@ -181,31 +189,31 @@
     margin-bottom: 20px;
 }
 
-/* --- Fee Summary --- */
-.fee-summary {
-    border-top: 1px solid #eee;
-    padding-top: 15px;
-    margin-bottom: 25px;
-}
+// /* --- Fee Summary --- */
+// .fee-summary {
+//     border-top: 1px solid #eee;
+//     padding-top: 15px;
+//     margin-bottom: 25px;
+// }
 
-.estimate-detail {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 5px;
-    font-size: 0.95rem;
-    color: #555;
-}
+// .estimate-detail {
+//     display: flex;
+//     justify-content: space-between;
+//     margin-bottom: 5px;
+//     font-size: 0.95rem;
+//     color: #555;
+// }
 
-.estimate-text {
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: var(--text-primary, #333);
-}
+// .estimate-text {
+//     font-size: 1.1rem;
+//     font-weight: bold;
+//     color: var(--text-primary, #333);
+// }
 
-.final-price .value {
-    color: var(--primary-green, #28a745);
-    font-size: 1.2rem;
-}
+// .final-price .value {
+//     color: var(--primary-green, #28a745);
+//     font-size: 1.2rem;
+// }
 
 /* --- Request Button --- */
 .request-btn {
@@ -223,4 +231,73 @@
 .request-btn:disabled {
   background-color: #ccc;
   cursor: not-allowed;
+}
+
+.flexible-summary {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 20px 0;
+  border: 1px solid #e2e8f0;
+
+  .estimate-detail {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: #64748b;
+    
+    .status-tbd {
+      color: var(--text-primary);
+      font-weight: 700;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+    }
+  }
+
+  .total-quote-row {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 2px dashed #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+
+    .label-group {
+      display: flex;
+      flex-direction: column;
+      .final-label { font-weight: 800; color: #1e293b; font-size: 1.1rem; }
+      small { font-size: 0.75rem; color: #94a3b8; }
+    }
+
+    .final-value {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+  }
+}
+
+.hint-text {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.modern-autocomplete-container {
+  margin-top: 8px;
+  
+  // These variables target the internal parts of the Google Web Component
+  gmpx-place-autocomplete {
+    --gmpx-font-family: var(--global-font-family, 'Inter', sans-serif);
+    --gmpx-font-size: 1rem;
+    --gmpx-border-radius: 8px;
+    --gmpx-border-color: #e2e8f0;
+    --gmpx-outline-color: var(--text-primary); // Matches your brand
+    
+    // Ensure it spans full width like your other inputs
+    width: 100%;
+  }
 }

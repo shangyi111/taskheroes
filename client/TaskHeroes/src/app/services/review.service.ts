@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AUTH_TOKEN_KEY } from 'src/app/shared/constants';
 import {Review} from "src/app/shared/models/review";
 import {map} from 'rxjs/operators';
+import { PaginatedResponse } from 'src/app/shared/models/pagination';
 
 @Injectable({
   providedIn: 'root',
@@ -23,8 +24,11 @@ export class ReviewService {
     return this.http.get<Review>(`${this.API_URL}/${id}`);
   }
 
-  getAllReviewsByServiceId(serviceId: string): Observable<Review[]> {
-    return this.http.get<Review[]>(`${this.API_URL}/service/${serviceId}`);
+  getAllReviewsByServiceId(serviceId: string, page: number = 1, size: number = 10): Observable<PaginatedResponse<Review>> {
+    const params = new HttpParams()
+    .set('page', page.toString())
+    .set('size', size.toString());
+    return this.http.get<PaginatedResponse<Review>>(`${this.API_URL}/service/${serviceId}`, { params });
   }
 
   createReview(serviceData: Review): Observable<Review> {
