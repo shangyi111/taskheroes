@@ -3,6 +3,7 @@ const eventBus = require('../../utils/eventBus');
 const crypto = require('crypto');
 const { getPagination, getPagingData } = require('../../utils/pagination');
 const { Op } = require('sequelize');
+const messageService = require('../../services/messageService');
 
 const algorithm = 'aes-256-cbc';
 const encryptionKeyHex = process.env.MESSAGE_ENCRYPTION_KEY;
@@ -32,43 +33,55 @@ function decryptMessage(ivHex, encryptedData) {
   return decrypted;
 }
 
-exports.saveMessage = async (req,res) => {
+// exports.saveMessage = async (req,res) => {
+//   try {
+//     const messageData = req.body;
+//     const encrypted = encryptMessage(messageData.text); 
+//     const savedMessage = await Message.create({
+//       chatroomId: messageData.chatroomId,
+//       senderId: messageData.senderId,
+//       encryptedContent: encrypted.encryptedData, // Store encrypted
+//       iv: encrypted.iv, // Store IV
+//     });
+
+//     let senderUsername = 'Unknown User';
+//     const senderUser = await User.findByPk(savedMessage.senderId);
+//     if (senderUser && senderUser.username) {
+//         senderUsername = senderUser.username;
+//     }
+
+//     const decryptedText = decryptMessage(savedMessage.iv, savedMessage.encryptedContent);
+
+//     const messageToSend = {
+//       // Include all saved message properties (like ID, timestamps)
+//       ...savedMessage.dataValues,
+//       chatroomId: String(savedMessage.chatroomId),
+//       senderUsername: senderUsername, // Use 'senderUsername' to match frontend interface
+//       text: decryptedText, // Use 'text' to match frontend interface, contains decrypted content
+//     };
+//     eventBus.emit('NEW_MESSAGE_SAVED', messageToSend);
+//     await Chatroom.update(
+//       { lastActivityAt: new Date() },
+//       { where: { id: messageData.chatroomId } }
+//     );
+//     return res.json(messageToSend);
+//   } catch (err) {
+//     console.error('Error saving message:', err);
+//     throw err;
+//   }
+// };
+
+
+exports.saveMessage = async (req, res) => {
   try {
-    const messageData = req.body;
-    const encrypted = encryptMessage(messageData.text); 
-    const savedMessage = await Message.create({
-      chatroomId: messageData.chatroomId,
-      senderId: messageData.senderId,
-      encryptedContent: encrypted.encryptedData, // Store encrypted
-      iv: encrypted.iv, // Store IV
-    });
-
-    let senderUsername = 'Unknown User';
-    const senderUser = await User.findByPk(savedMessage.senderId);
-    if (senderUser && senderUser.username) {
-        senderUsername = senderUser.username;
-    }
-
-    const decryptedText = decryptMessage(savedMessage.iv, savedMessage.encryptedContent);
-
-    const messageToSend = {
-      // Include all saved message properties (like ID, timestamps)
-      ...savedMessage.dataValues,
-      chatroomId: String(savedMessage.chatroomId),
-      senderUsername: senderUsername, // Use 'senderUsername' to match frontend interface
-      text: decryptedText, // Use 'text' to match frontend interface, contains decrypted content
-    };
-    eventBus.emit('NEW_MESSAGE_SAVED', messageToSend);
-    await Chatroom.update(
-      { lastActivityAt: new Date() },
-      { where: { id: messageData.chatroomId } }
-    );
-    return res.json(messageToSend);
+    const { chatroomId, senderId, text } = req.body;
+    const message = await messageService.sendInternalMessage({ chatroomId, senderId, text });
+    return res.json(message);
   } catch (err) {
-    console.error('Error saving message:', err);
-    throw err;
+    res.status(500).json({ message: 'Error saving message' });
   }
 };
+
 
 exports.getMessagesByChatroom = async (req, res) => {
   try {

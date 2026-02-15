@@ -356,7 +356,7 @@ generateCalendar(): void {
     const datePart = this.selectedDateData.date.toISOString().split('T')[0];
     const combinedTimestamp = new Date(`${datePart}T${this.selectedStartTime}:00`);
 
-    const hourlyRate = this.selectedDateData?.availability?.customPrice || this.basePrice || 0;
+    const hourlyRate = Number(this.selectedDateData?.availability?.customPrice || this.basePrice || 0);
 
     const laborAmount = (this.selectedDurationHours * hourlyRate);
 

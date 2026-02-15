@@ -10,6 +10,7 @@ const {
   sendChatroomCreated,
 } = require('../message-server/realtime/notification-handler');
 const NotificationService = require('../services/notificationService');
+const messageService = require('../services/messageService');
 const STATUS_RULES = require('../constants/jobStatusRules');
 
 exports.getJobById = async (req, res) => {
@@ -146,6 +147,11 @@ exports.createJob = async (req, res) => {
       name: `Chat for ${newJob.jobTitle || 'New Job'}` // Optional: give it a name
     });
 
+    await messageService.sendInternalMessage({
+      chatroomId: chatroom.id,
+      senderId: req.body.customerId,
+      text: `[System] Job request or inquiry created. Please review. Thank you.`
+    });
     // 4. Return the consolidated response
     res.status(201).json({ 
       job: newJob, 
