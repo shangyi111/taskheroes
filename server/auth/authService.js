@@ -6,7 +6,11 @@ const User = require('../models/user');
 // Signup service
 const signup = async (email, username, password) => {
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{10,}$/;
+    if (!passwordRegex.test(password)) {
+      throw new Error('Password does not meet security requirements.');
+    }
+    const hashedPassword = await bcrypt.hash(password, 12);
     const user = await User.create({ email, password: hashedPassword, username });
     const token = generateToken(user);
     return { user, token };

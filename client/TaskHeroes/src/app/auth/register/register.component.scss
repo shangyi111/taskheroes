@@ -69,6 +69,11 @@ button[type="submit"] {
   font-weight: 500;
   margin-top: 10px;
   transition: background-color 0.2s;
+
+  &:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
 }
 
 .submit-button:hover {
@@ -142,4 +147,28 @@ a:hover {
 
 .signup-link a:hover {
   text-decoration: underline;
+}
+
+
+.password-checklist {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    font-size: 0.85rem;
+
+    p {
+      margin: 0.25rem 0;
+      color: #dc3545; // Default Red (Not met)
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: color 0.3s ease;
+
+      &.met {
+        color: #28a745; // Green (Requirement met)
+        text-decoration: line-through;
+        opacity: 0.8;
+      }
+    }
 }

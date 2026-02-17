@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { User } from 'src/app/shared/models/user';
@@ -18,12 +18,25 @@ declare var google: any;
 export class RegistrationComponent {
   email = '';
   newUsername = '';
-  newPassword = '';
+  newPassword = signal('');
   errorMessage: string | null = null;
   isSubmitting = signal(false);
   private authService = inject(AuthService);
   private userDataService = inject(UserDataService);
   private router = inject(Router);
+
+  passwordRequirements = computed(() => {
+    const p = this.newPassword();
+    return {
+      length: p.length >= 10,
+      hasUpper: /[A-Z]/.test(p),
+      hasLower: /[a-z]/.test(p),
+      hasNumber: /\d/.test(p),
+      hasSpecial: /[@$!%*?&]/.test(p),
+      // Full regex match for final validation
+      isValid: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{10,}$/.test(p)
+    };
+  });
   
   ngAfterViewInit(): void {
     if (typeof google !== 'undefined') {
@@ -56,7 +69,7 @@ export class RegistrationComponent {
     const newUser:User = {
       email:this.email,
       username:this.newUsername,
-      password:this.newPassword,
+      password:this.newPassword(),
     }
     this.authService.register(newUser).subscribe({
       next: (user:User) => {
