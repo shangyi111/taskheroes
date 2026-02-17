@@ -1,0 +1,41 @@
+<div class="dialog-backdrop" (click)="cancel.emit()">
+  <div class="dialog-card" (click)="$event.stopPropagation()">
+    <header>
+      <h3>Decline Request</h3>
+      <p>Let the customer know why you can't take this job.</p>
+    </header>
+
+    <div class="reason-chips">
+      @for (reason of PRESET_REASONS; track reason) {
+        <button 
+          type="button" 
+          class="chip" 
+          [class.active]="selectedReason() === reason"
+          (click)="setReason(reason)">
+          {{ reason }}
+        </button>
+      }
+    </div>
+
+    <div class="input-area">
+      <label for="details">Additional Details (Optional)</label>
+      <textarea 
+        id="details"
+        [(ngModel)]="customMessage"
+        placeholder="Type a short message..."
+        rows="3">
+      </textarea>
+    </div>
+
+    <footer class="actions">
+      <button class="btn-ghost" (click)="cancel.emit()">Cancel</button>
+      <button 
+        class="btn-primary" 
+        [disabled]="!selectedReason() && !customMessage().trim()"
+        (click)="submit()">
+        Send & Decline
+      </button>
+    </footer>
+  </div>
+</div>
+

@@ -24,14 +24,6 @@ export class JobService {
     return this.http.get<Job>(`${this.API_URL_JOB}/${id}`);
   }
 
-  // getAllJobsByPerformerId(performerId:string):Observable<Job[]>{
-  //   return this.http.get<Job[]>(`${this.API_URL_JOB}/provider/${performerId}`);
-  // }
-
-  // getAllOrdersByCustomerId(customerId:string):Observable<Job[]>{
-  //   return this.http.get<Job[]>(`${this.API_URL_SEEKER}/seeker/${customerId}`);
-  // }
-
   getAllJobsByPerformerId(performerId: string, filter: any = {}): Observable<Job[]> {
     // Convert the filter object to a JSON string
     const params = new HttpParams().set('filter', JSON.stringify(filter));

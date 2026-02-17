@@ -20,15 +20,9 @@
                         
                             @if (actions.showAccept || actions.showDecline) {
                                 <div class="btn-group">
-                                    <button class="status-btn decline" (click)="updateStatus('cancelled')">Decline</button>
-                                    <button class="status-btn accept" (click)="updateStatus('accepted')">Accept Job</button>
+                                    <button class="status-btn decline" (click)="handleDeclineClick()">Decline</button>
+                                    <button class="status-btn accept" (click)="updateStatus(JobStatus.Accepted)">Accept Job</button>
                                 </div>
-                            }
-                            @if (actions.showConfirmDeposit) {
-                                <button class="status-btn deposit" (click)="updateStatus('booked')">Confirm Deposit</button>
-                            }
-                            @if (actions.showDepositSent) {
-                                <button class="status-btn sent" (click)="updateStatus('depositSent')">I Sent Deposit</button>
                             }
 
                             @if (actions.showReviewAction) {
@@ -40,7 +34,7 @@
                             }
 
                             @if (actions.showCancel) {
-                                <button class="status-btn cancel" (click)="updateStatus('cancelled')">Cancel</button>
+                                <button class="status-btn cancel" (click)="updateStatus(JobStatus.Cancelled)">Cancel</button>
                             }
                         </div>
                     }
@@ -50,3 +44,10 @@
         <p class="detail-link" (click)="detailsOpened.emit()">View details</p>
     </div>
 </header>
+
+@if (showDeclineModal()) {
+    <decline-reason-dialog
+        (confirm)="onDeclineConfirm($event)"
+        (cancel)="showDeclineModal.set(false)">
+    </decline-reason-dialog>
+}

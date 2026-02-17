@@ -12,6 +12,7 @@ const {
 const NotificationService = require('../services/notificationService');
 const messageService = require('../services/messageService');
 const STATUS_RULES = require('../constants/jobStatusRules');
+const { reconcileJobStatus } = require('../services/jobStatusService');
 
 exports.getJobById = async (req, res) => {
   try {
@@ -19,7 +20,8 @@ exports.getJobById = async (req, res) => {
     const job = await Job.findByPk(jobId);
     
     if (job) {
-      res.json(job);
+      const updatedJob = await reconcileJobStatus(job); 
+      res.json(updatedJob);
     } else {
       res.status(404).json({ message: 'Job not found' });
     }

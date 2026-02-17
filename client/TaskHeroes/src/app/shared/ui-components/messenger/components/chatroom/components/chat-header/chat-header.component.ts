@@ -4,16 +4,18 @@ import { Chatroom } from 'src/app/shared/models/chatroom';
 import { User } from 'src/app/shared/models/user';
 import { JobStatus } from 'src/app/shared/models/job-status.enum';
 import { ReviewEligibility } from 'src/app/shared/models/chatroom';
+import { DeclineReasonDialogComponent } from '../decline-reason-dialog/decline-reason-dialog.component';
 
 @Component({
   selector: 'app-chat-header',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DeclineReasonDialogComponent],
   templateUrl: './chat-header.component.html',
   styleUrls: ['./chat-header.component.scss']
 })
 export class ChatHeaderComponent {
   readonly DEFAULT_AVATAR = 'assets/img/default-avatar.png';
+  readonly JobStatus = JobStatus; // Expose enum to template
   // Inputs (Signals)
   chatroom = input.required<Chatroom | null>();
   currentUser = input.required<User | null>();
@@ -22,12 +24,13 @@ export class ChatHeaderComponent {
   chatPartnerAvatarUrl = input.required<string | null>();
 
   // Outputs (Emitters)
-  statusUpdated = output<string>();
+  statusUpdated = output<{ status: JobStatus; reason?: string }>();
   backClicked = output<void>();
   detailsOpened = output<void>();
   reviewOpened = output<void>();
 
   imgError = signal(false);
+  showDeclineModal = signal(false);
 
   reviewEligibility = computed(() => {
     const room = this.chatroom();
@@ -67,11 +70,8 @@ export class ChatHeaderComponent {
       // Provider triggers
       showAccept: isProvider && status === JobStatus.Pending,
       showDecline: isProvider && status === JobStatus.Pending,
-      showConfirmDeposit: isProvider && (status === JobStatus.Accepted || status === JobStatus.DepositSent),
-      showBook: isProvider && status === JobStatus.DepositReceived,
       // Seeker triggers: The "Confirm & Book" button
       showConfirmBook: showSeekerConfirm,
-      showDepositSent: isCustomer && status === JobStatus.Accepted,
 
       // Waiting State: Show a "Waiting..." label if it's Pending but not my turn
       isWaiting: status === JobStatus.Pending && !isMyTurn,
@@ -99,9 +99,9 @@ export class ChatHeaderComponent {
     }, { allowSignalWrites: true });
   }
 
-  updateStatus(status: string) {
-    this.statusUpdated.emit(status);
-  }
+    updateStatus(status: JobStatus, reason?: string) {
+      this.statusUpdated.emit({ status, reason });
+    }
 
   openReview() {
     this.reviewOpened.emit();
@@ -115,4 +115,13 @@ export class ChatHeaderComponent {
     }
     this.imgError.set(true);
  }
+
+ handleDeclineClick() {
+    this.showDeclineModal.set(true);
+  }
+
+  onDeclineConfirm(reason: string) {
+    this.showDeclineModal.set(false);
+    this.statusUpdated.emit({ status: JobStatus.Cancelled, reason });
+  }
 }

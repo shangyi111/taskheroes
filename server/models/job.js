@@ -70,17 +70,17 @@ const Job = sequelize.define('Job', {
     allowNull: false,
     defaultValue: [],
     validate: {
-    isValidBreakdown(value) {
-      if (!Array.isArray(value)) {
-        throw new Error('priceBreakdown must be an array');
-      }
-      value.forEach(item => {
-        if (!item.type || !item.label || typeof item.amount !== 'number') {
-          throw new Error('Each breakdown item must have a type, label, and numeric amount');
+      isValidBreakdown(value) {
+        if (!Array.isArray(value)) {
+          throw new Error('priceBreakdown must be an array');
         }
-      });
+        value.forEach(item => {
+          if (!item.type || !item.label || typeof item.amount !== 'number') {
+            throw new Error('Each breakdown item must have a type, label, and numeric amount');
+          }
+        });
+      }
     }
-  }
     // Example storage: 
     // [
     //   {"type":"base","label": "Service Fee", "amount": 300}, 

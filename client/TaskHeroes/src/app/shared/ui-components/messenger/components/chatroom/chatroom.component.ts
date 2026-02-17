@@ -10,6 +10,7 @@ import { JobService } from 'src/app/services/job.service';
 import { ReviewService } from 'src/app/services/review.service';
 import { BusinessService } from 'src/app/services/business.service';
 import { Service } from 'src/app/shared/models/service';
+import { JobStatus } from 'src/app/shared/models/job-status.enum';
 import { Chatroom } from 'src/app/shared/models/chatroom';
 import { User } from 'src/app/shared/models/user';
 import { Job } from 'src/app/shared/models/job';
@@ -194,7 +195,7 @@ export class ChatroomComponent implements OnInit, OnDestroy {
     this.jobService.getJobById(Number(jobId)).pipe(
       tap((job) => {
         this.job.set(job);
-        
+        this.chatroomService.updateRoomStatus(job.id!, job.jobStatus!);
         // After we have the job, we know which specific service was booked
         if (job?.serviceId) {
           this.fetchServiceOffering(Number(job.serviceId));
@@ -406,12 +407,13 @@ export class ChatroomComponent implements OnInit, OnDestroy {
     }
   }
 
-  updateStatus(newStatus: string): void {
+  updateStatus(event: { status: JobStatus; reason?: string }): void {
+    const { status, reason } = event;
     const room = this.chatroom();
     if (!room || !room.jobId) return;
 
     // Set loading state if you have one for the button
-    this.jobService.updateJobStatus(room.jobId, newStatus).subscribe({
+    this.jobService.updateJobStatus(room.jobId, status).subscribe({
       next: (updatedJob) => {
         // Update the chatroom signal with the new job status
         this.chatroom.update(current => current ? { 
@@ -419,8 +421,12 @@ export class ChatroomComponent implements OnInit, OnDestroy {
           jobStatus: updatedJob.jobStatus,
           lastActionBy: updatedJob.lastActionBy
         } : null);
-        const statusLabel = newStatus.toUpperCase();
+        this.chatroomService.updateRoomStatus(updatedJob.id!, status);
+        const statusLabel = status.toUpperCase();
         this.sendMessage(`[System] Job status updated to: ${statusLabel}`);
+        if (reason) {
+          this.sendMessage(`${reason}`);
+        }
       },
       error: (err) => {
         console.error('Failed to update status:', err);

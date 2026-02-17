@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { Chatroom } from '../../app/shared/models/chatroom';
+import { JobStatus } from '../shared/models/job-status.enum';
 import { Message } from '../shared/models/message';
 import { catchError, throwError } from 'rxjs';
 import { SocketIoService } from './socket-io.service';
@@ -23,7 +24,9 @@ export class ChatroomService {
   private activeRoomId = new BehaviorSubject<string | null>(null);
 
   // This is the "Single Source of Truth" for the socket room state
-  private roomSubscription: Subscription | undefined; 
+  private roomSubscription: Subscription | undefined;   
+  private chatroomsSignal = signal<Chatroom[]>([]); 
+  chatrooms = this.chatroomsSignal.asReadonly();
 
   constructor(private http: HttpClient,private socketIoService: SocketIoService) {}
 
@@ -62,6 +65,21 @@ export class ChatroomService {
       'Content-Type': 'application/json',
       Authorization: token ? `Bearer ${token}` : '', // Include token if available
     });
+  }
+
+  updateChatroomsList(rooms: Chatroom[]): void {
+    this.chatroomsSignal.set(rooms);
+  }
+
+  updateRoomStatus(jobId: string | number, newStatus: JobStatus): void {
+    const idStr = jobId.toString();
+    this.chatroomsSignal.update(rooms => 
+      rooms.map(room => 
+        room.jobId?.toString() === idStr 
+          ? { ...room, jobStatus: newStatus } 
+          : room
+      )
+    );
   }
 
   getChatroomsByProviderId(providerId: string, page: number, size: number): Observable<PaginatedResponse<Chatroom>> {

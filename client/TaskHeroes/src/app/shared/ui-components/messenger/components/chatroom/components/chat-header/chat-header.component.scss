@@ -64,9 +64,7 @@
         &:hover { opacity: 0.4; 
                   background-color:rgba(#dc3545, 0.1); }
     }
-    &.accept,
-    &.sent,
-    &.deposit { 
+    &.accept { 
         border: 1px solid #28a745; 
         color:#28a745; 
          &:hover { opacity: 0.4; 

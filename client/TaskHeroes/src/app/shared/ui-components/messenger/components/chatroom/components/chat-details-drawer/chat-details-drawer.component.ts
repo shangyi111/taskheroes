@@ -36,7 +36,7 @@ export class ChatDetailsDrawerComponent {
   // Outputs
   close = output<void>();
   jobUpdated = output<Job>();
-  statusChange = output<JobStatus>();
+  statusChange = output<{ status: JobStatus; reason?: string }>();
 
   state = computed(() => {
     const details = this.jobDetails();
@@ -113,7 +113,7 @@ export class ChatDetailsDrawerComponent {
   }
 
   updateJobStatus(newStatus: JobStatus) {
-    this.statusChange.emit(newStatus);
+    this.statusChange.emit({ status: newStatus });
   }
 
   cancelEdit() {

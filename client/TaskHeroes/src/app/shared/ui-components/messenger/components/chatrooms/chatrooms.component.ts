@@ -26,7 +26,7 @@ export class ChatroomsComponent implements OnInit, OnDestroy {
   private chatRoomservice = inject(ChatroomService);
   private userDataService = inject(UserDataService);
 
-  chatrooms = signal<Chatroom[]>([]);
+  chatrooms = this.chatRoomservice.chatrooms;
   user = signal<User | null>(null);
   currentUserRole = signal<string | null>(null);
   activeChatId = signal<string | null>(null);
@@ -102,7 +102,7 @@ export class ChatroomsComponent implements OnInit, OnDestroy {
 
         // RESET PAGINATION if user/role changes to avoid data pollution
         if (this.user()?.id !== user.id || this.currentUserRole() !== user.role) {
-          this.chatrooms.set([]);
+          this.chatRoomservice.updateChatroomsList([]);
           this.currentPage = 1;
           this.hasMore.set(true);
         }
@@ -134,8 +134,8 @@ export class ChatroomsComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       request$.subscribe({
         next: (response) => {
-          // Append data
-          this.chatrooms.update(prev => [...prev, ...response.items]);
+          const updatedList = [...this.chatrooms(), ...response.items];
+          this.chatRoomservice.updateChatroomsList(updatedList);
           
           // Logic for next page
           if (this.currentPage >= response.totalPages) {
