@@ -9,6 +9,7 @@ import { ChatroomComponent } from './shared/ui-components/messenger/components/c
 import { BusinessPageComponent } from 'src/app/provider/business_page/business_page.component';
 import { ChatroomsComponent } from './shared/ui-components/messenger/components/chatrooms/chatrooms.component';
 import { OrdersComponent } from './seeker/orders/orders.component';
+import { SeekerPortfolioComponent } from './seeker/portfolio/seeker-portfolio.component';
 import { ManageServiceComponent } from './provider/manage_service/manage_service.component';
 import { ServiceDetailsComponent } from './seeker/service-details/service-details.component';
 import { MessengerLayoutComponent } from './shared/ui-components/messenger/messenger-layout/messenger-layout.component';
@@ -47,6 +48,7 @@ export const routes: Routes = [
     children: [
       { path: 'orders', component: OrdersComponent },
       { path: 'chatrooms', redirectTo: '/messenger', pathMatch: 'full' },
+      { path: 'portfolio', component: SeekerPortfolioComponent }
     ]
   },
   {

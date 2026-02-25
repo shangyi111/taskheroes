@@ -1,4 +1,4 @@
-const { Review, Job, User } = require('../models');
+const { Review, Job, User, Chatroom, Service } = require('../models');
 const { Op, fn, col } = require('sequelize');
 const {
   sendReviewUpdated,
@@ -9,7 +9,69 @@ const NotificationService = require('../services/notificationService');
 const { reviewEligibility } = require('../constants/reviewEligibility');
 const  { getPagination, getPagingData } = require('../utils/pagination');
 
+// 1. Get reviews RECEIVED by a user (The "Reputation" view)
+exports.getReviewsByRevieweeId = async (req, res) => {
+  try {
+    const { revieweeId } = req.params;
+    const { chatroomId } = req.query; // Passed from frontend when opening the drawer
+    const requesterId = req.user.id;
 
+    // 1. SECURITY: Ensure a chatroom exists between these two users
+    const activeChat = await Chatroom.findOne({
+      where: {
+        id: chatroomId,
+        [Op.or]: [
+          { customerId: requesterId, providerId: revieweeId },
+          { customerId: revieweeId, providerId: requesterId }
+        ]
+      }
+    });
+
+    if (!activeChat) {
+      return res.status(403).json({ message: 'Reputation access is restricted to active chat participants.' });
+    }
+
+    // 2. FETCH: Standard paginated and published reviews
+    const { page, size } = req.query;
+    const { limit, offset } = getPagination(page, size);
+
+    const data = await Review.findAndCountAll({
+      where: { revieweeId, isPublished: true },
+      limit,
+      offset,
+      order: [['addedDate', 'DESC']],
+      include: [{ model: User, as: 'reviewer', attributes: ['username', 'profilePicture'] }]
+    });
+
+    res.json(getPagingData(data, page, limit));
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+// 2. Get reviews POSTED by a user (The "Portfolio/Activity" view)
+exports.getReviewsByReviewerId = async (req, res) => {
+  try {
+    const { reviewerId } = req.params;
+    const { page, size } = req.query;
+    const { limit, offset } = getPagination(page, size);
+
+    // Private view: Seeker/Provider can see their own unpublished reviews
+    const isOwner = req.user && req.user.id === parseInt(reviewerId);
+    const whereClause = isOwner ? { reviewerId } : { reviewerId, isPublished: true };
+
+    const reviews = await Review.findAndCountAll({
+      where: whereClause,
+      limit,
+      offset,
+      order: [['addedDate', 'DESC']],
+      include: [{ model: User, as: 'reviewee', attributes: ['username', 'profilePicture'] }]
+    });
+
+    res.json(getPagingData(reviews, page, limit));
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 // Get all reviews
 exports.getAllReviews = async (req, res) => {
   try {
@@ -112,6 +174,8 @@ exports.createReview = async (req, res) => {
     if (otherReview) {
       // BOTH parties have reviewed! Reveal both.
       await Review.update({ isPublished: true }, { where: { jobId: jobId } });
+      await review.reload();
+      await otherReview.reload();
       // Notify both parties that reviews are now public
       await NotificationService.sendReviewsRevealedNotification(jobId);
     } else {
@@ -200,8 +264,15 @@ exports.getReviewsByServiceId = async (req, res) => {
       return res.status(400).json({ message: 'Invalid service ID provided.' });
     }
 
+    const service = await Service.findByPk(serviceId);
+    if (!service) {
+      return res.status(404).json({ message: 'Service not found.' });
+    }
+
     const { limit, offset } = getPagination(page, size);
-    const whereClause = { serviceId, isPublished: true };
+    const whereClause = { serviceId, 
+                          revieweeId:service.userId,
+                          isPublished: true };
 
     // 2. Find all reviews matching the serviceId column
     const [data, stats] = await Promise.all([

@@ -8,6 +8,23 @@
         </header>
 
         <div class="drawer-body">
+            @if (state()?.isProvider && jobDetails(); as job) {
+                <section class="service-summary-card seeker-card clickable" (click)="openSeekerPortfolio()">
+                    <div class="service-icon seeker-avatar">
+                        <i class="material-icons">person_search</i>
+                    </div>
+                    <div class="service-info">
+                        <h4>Seeker Portfolio</h4>
+                        <span class="category-tag">Verified User</span>
+                        @if (partnerReputation(); as rep) {
+                            <div class="rating-mini">
+                                <i class="material-icons">star</i>
+                                <span>{{ rep.averageRating || 'No' }} ({{ rep.totalItems }} reviews)</span>
+                            </div>
+                        } 
+                    </div>
+                </section>
+            }
             @if (serviceDetails(); as service) {
                 <section class="service-summary-card clickable" (click)="openServiceExternal()">
                     <div class="service-icon">
@@ -22,15 +39,10 @@
 
             @if (jobDetails(); as details) {
                 <div class="logistics-container">
-                    <!-- <section class="detail-group">
-                        <label>Job Title</label>
-                        <p>{{ details.jobTitle || 'General inquiry.' }}</p>
-                    </section> -->
 
                     <section class="detail-group appointment-section"
                              (mouseenter)="openMenu()" 
                              (mouseleave)="closeMenu()">
-                        <!-- <label>Appointment</label> -->
                         <div class="appointment-row clickable-area">
                             <div class="main-info">
                                 <span class="date">{{ details.jobDate | date:'EEE, MMM d' }}</span>
@@ -79,14 +91,43 @@
                             }
                         </div>
 
-                        @if (state()?.canActionJob) {
-                            <div class="seeker-actions">
-                                <div class="btn-group">
-                                    <button class="btn-decline" (click)="updateJobStatus(JobStatus.Cancelled)">Decline</button>
-                                    <button class="btn-accept" (click)="updateJobStatus(JobStatus.Accepted)">Confirm & Book</button>
-                                </div>
-                            </div>
-                        }
+                        <section class="drawer-action-hub">
+                            @if (state(); as ui) {
+                                @if (ui.canAcceptInquiry) {
+                                    <div class="action-card inquiry-phase">
+                                        <p>Accept this inquiry to move to the confirmation phase.</p>
+                                        <div class="btn-group-vertical">
+                                            <button class="btn-primary" (click)="updateJobStatus(JobStatus.Accepted)">Accept Inquiry</button>
+                                            <button class="btn-outline" (click)="updateJobStatus(JobStatus.CancelledByProvider)">Decline</button>
+                                        </div>
+                                    </div>
+                                }
+
+                                @if (ui.needsMyConfirmation) {
+                                    <div class="action-card confirmation-phase">
+                                        <h4>Confirm Booking</h4>
+                                        <p>By confirming, you acknowledge that all offline payment terms (e.g. 20% deposit) have been settled.</p>
+                                        <button class="btn-confirm-booking" (click)="updateJobStatus(JobStatus.Booked)">
+                                            Confirm My Side
+                                        </button>
+                                    </div>
+                                }
+
+                                @if (ui.isWaitingForPartner) {
+                                    <div class="waiting-badge">
+                                        <i class="material-icons rotating">sync</i>
+                                        <span>Awaiting partner's confirmation...</span>
+                                    </div>
+                                }
+
+                                @if (ui.isFullyBooked) {
+                                    <div class="booked-badge">
+                                        <i class="material-icons">check_circle</i>
+                                        <span>This job is officially Booked!</span>
+                                    </div>
+                                }
+                            }
+                        </section>
                     } @else {
                         <div class="edit-quote-container">
                             <div class="items-list-editor">
@@ -151,10 +192,63 @@
                     }               
                 </section>
 
-                <div class="detail-group description">
-                    <label>Description</label>
-                    <p>{{ details.jobDescription || 'No detailed description available.' }}</p>
-                </div>
+                <section class="detail-group agreement-section">
+                    <div class="section-header">
+                        <label>Job Terms</label>
+                        @if (state()?.canRequestChange && !isEditingAgreement()) {
+                            <button class="btn-text-action" (click)="isEditingAgreement.set(true)">
+                                <i class="material-icons">edit</i> Edit
+                            </button>
+                        }
+                    </div>
+
+                    @if (!isEditingAgreement()) {
+                        <div class="agreement-display">
+                            <p class="terms-text" [innerHTML]="jobDetails()?.providerTerms || 'No specific terms provided.'"></p>
+                            
+                            @if (jobDetails()?.documents?.length) {
+                                <div class="links-list">
+                                    @for (doc of jobDetails()?.documents; track doc.url) {
+                                        <a [href]="doc.url" target="_blank" rel="noopener noreferrer" class="external-link">
+                                            <i class="material-icons">link</i> {{ doc.name }}
+                                        </a>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    } @else {
+                        <div class="agreement-editor">
+
+                            <div class="quill-wrapper">
+                                <div id="quill-editor" style="height: 150px;"></div>
+                            </div>
+                            
+                            <div class="link-builder">
+                                <div class="link-inputs">
+                                    <input [(ngModel)]="tempLinkName" placeholder="Link Label (e.g. Contract)">
+                                    <input [(ngModel)]="tempLinkUrl" placeholder="URL (Google Drive/Dropbox)">
+                                    <button class="btn-add-link" (click)="addLink()" [disabled]="!tempLinkUrl">
+                                        <i class="material-icons">add</i>
+                                    </button>
+                                </div>
+
+                                <div class="pending-links">
+                                    @for (link of localLinks(); track $index) {
+                                        <div class="link-tag">
+                                            <span>{{ link.name }}</span>
+                                            <i class="material-icons" (click)="removeLink($index)">close</i>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="editor-actions">
+                                <button class="btn-cancel-small" (click)="isEditingAgreement.set(false)">Cancel</button>
+                                <button class="btn-save-small" (click)="saveAgreementWithQuill()">Update Agreement</button>
+                            </div>
+                        </div>
+                    }
+                </section>
             }
         </div>
     </div>

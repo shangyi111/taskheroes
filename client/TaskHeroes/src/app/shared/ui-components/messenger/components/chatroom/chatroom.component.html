@@ -53,7 +53,9 @@
         [jobDetails]="job()"
         [serviceDetails]="service()"
         [currentUser]="currentUser()"
-        (jobUpdated)="handleJobUpdate($event)"
+        (jobUpdated)="handleQuoteUpdate($event)"
+        [partnerReputation]="partnerReputation()"
+        [chatroomId]="chatroomId()!"
         (statusChange)="updateStatus($event)"
         (close)="closeDetailsModal()">
     </app-chat-details-drawer>

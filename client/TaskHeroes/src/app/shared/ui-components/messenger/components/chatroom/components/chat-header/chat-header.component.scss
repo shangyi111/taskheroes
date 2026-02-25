@@ -1,137 +1,249 @@
-@use 'abstracts' as *;
-/* Header Styles */
+// @use 'abstracts' as *;
+// /* Header Styles */
+// .chat-header {
+//     background-color: white; /* No direct var for white, using literal */
+//     padding: var(--dashboard-padding); /* Using :root variable */
+//     display: flex;
+//     align-items: center;
+//     justify-content: space-between;
+//     border-bottom: 1px solid var(--card-border);
+//     box-shadow: var(--card-shadow);
+
+//     .mobile-menu-toggle {
+//         @include button-reset();
+//         font-size: var(--title-font-size); /* Using a more appropriate font size from :root */
+//         color: var(--text-primary);
+//         margin-right: $spacing-md;
+//         cursor: pointer;
+//         @media (max-width: $breakpoint-md) {
+//             display: block;
+//         }
+//     }
+
+//     .chat-title {
+//         font-size: var(--title-font-size);
+//         font-weight: 600;
+//         color: var(--text-primary);
+//         margin: 0;
+//         flex-grow: 1;
+//     }
+
+//     .chat-options {
+//         display: flex;
+//         gap: $spacing-md;
+//     }
+// }
+
+// .chat-header-mid-section {
+//     display:flex;
+//     flex-flow:column;
+// }
+// .status-actions {
+//   display: flex;
+//   gap: 8px;
+//   margin-top: 4px;
+
+//   .btn-group {
+//     display:flex;
+//     gap:5px;
+//   }
+
+//   .status-btn {
+//     padding: 4px 12px;
+//     border-radius: 16px;
+//     border: none;
+//     font-size: 12px;
+//     font-weight: 600;
+//     cursor: pointer;
+//     background: none;
+    
+//     &.cancel,
+//     &.decline { 
+//         color:#dc3545;
+//         border: 1px solid #dc3545; 
+//         &:hover { opacity: 0.4; 
+//                   background-color:rgba(#dc3545, 0.1); }
+//     }
+//     &.accept { 
+//         border: 1px solid #28a745; 
+//         color:#28a745; 
+//          &:hover { opacity: 0.4; 
+//                   background-color:rgba(#28a745, 0.1); }
+//     }
+//     &.verify { 
+//         border: 1px solid #6f42c1; 
+//         color: #6f42c1; 
+//           &:hover { opacity: 0.4; 
+//                   background-color:rgba(#6f42c1, 0.1); }
+
+//     }
+//   }
+// }
+
+// .review-action-wrapper {
+//     display: flex;
+//     flex-direction: row;
+//     align-items: center;
+//     gap: 6px;
+
+//     .expiry-label {
+//         font-size: 0.7rem;
+//         font-weight: 400;
+//         text-transform: uppercase;
+//         letter-spacing: 0.5px;
+//         color: black; // Soft red
+//         margin-bottom: 2px;
+//     }
+
+//     .status-btn.review {
+//         background: none; // Very light blue
+//         color:lightseagreen;
+//         border: 1px solid #91d5ff;
+//         border-radius: 20px;
+//         padding: 6px 16px;
+//         font-weight: 600;
+//         transition: all 0.2s;
+
+//         &:hover {
+//           background: #bae7ff;
+//         }
+//     }
+// }
+
+
+// /* Ensure detail-link is prominent */
+// .detail-link {
+//     cursor: pointer;
+//     color: var(--text-primary);
+//     font-weight: 500;
+//     text-decoration: none;
+//     font-family:var(--global-font-family);
+//     background-color:rgba(0, 168, 150, 0.08);
+//     font-size: 1.2rem;
+//     border-radius: 30px;
+//     padding: 13px 16px;
+//     &:hover { color: color-mix(in srgb, var(--text-primary) 80%, black); }
+// }
+
+// .avatar-img{
+//     height:32px;
+//     width:32px;
+// }
+
+// .chat-title-group{
+//     display:flex;
+//     gap:8px;
+// }
+
+
 .chat-header {
-    background-color: white; /* No direct var for white, using literal */
-    padding: var(--dashboard-padding); /* Using :root variable */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #ffffff;
+  border-bottom: 1px solid #edf2f7;
+  height: 72px;
+
+  .mobile-menu-toggle {
+    background: none;
+    border: none;
+    color: #4a5568;
+    cursor: pointer;
+    margin-right: 12px;
+  }
+
+  .chat-header-mid-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .chat-title-group {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--card-border);
-    box-shadow: var(--card-shadow);
+    gap: 12px;
 
-    .mobile-menu-toggle {
-        @include button-reset();
-        font-size: var(--title-font-size); /* Using a more appropriate font size from :root */
-        color: var(--text-primary);
-        margin-right: $spacing-md;
-        cursor: pointer;
-        @media (max-width: $breakpoint-md) {
-            display: block;
-        }
+    .chat-partner-avatar {
+      .avatar-img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #f7fafc;
+      }
     }
 
     .chat-title {
-        font-size: var(--title-font-size);
-        font-weight: 600;
-        color: var(--text-primary);
-        margin: 0;
-        flex-grow: 1;
-    }
-
-    .chat-options {
-        display: flex;
-        gap: $spacing-md;
-    }
-}
-
-.chat-header-mid-section {
-    display:flex;
-    flex-flow:column;
-}
-.status-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 4px;
-
-  .btn-group {
-    display:flex;
-    gap:5px;
-  }
-
-  .status-btn {
-    padding: 4px 12px;
-    border-radius: 16px;
-    border: none;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    background: none;
-    
-    &.cancel,
-    &.decline { 
-        color:#dc3545;
-        border: 1px solid #dc3545; 
-        &:hover { opacity: 0.4; 
-                  background-color:rgba(#dc3545, 0.1); }
-    }
-    &.accept { 
-        border: 1px solid #28a745; 
-        color:#28a745; 
-         &:hover { opacity: 0.4; 
-                  background-color:rgba(#28a745, 0.1); }
-    }
-    &.verify { 
-        border: 1px solid #6f42c1; 
-        color: #6f42c1; 
-          &:hover { opacity: 0.4; 
-                  background-color:rgba(#6f42c1, 0.1); }
-
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #2d3748;
+      margin: 0;
     }
   }
-}
 
-.review-action-wrapper {
+  // Status Group Styling
+  .status-indicator-group {
     display: flex;
-    flex-direction: row;
     align-items: center;
     gap: 6px;
+    margin-top: 2px;
+    font-size: 0.85rem;
 
-    .expiry-label {
-        font-size: 0.7rem;
-        font-weight: 400;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: black; // Soft red
-        margin-bottom: 2px;
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
     }
 
-    .status-btn.review {
-        background: none; // Very light blue
-        color:lightseagreen;
-        border: 1px solid #91d5ff;
-        border-radius: 20px;
-        padding: 6px 16px;
-        font-weight: 600;
-        transition: all 0.2s;
-
-        &:hover {
-          background: #bae7ff;
-        }
+    .status-label {
+      font-weight: 500;
+      color: #4a5568;
     }
+
+    .status-subtext {
+      color: #718096;
+    }
+
+    // Dynamic Status Colors
+    &.pending .status-dot { background: #ecc94b; }     // Yellow
+    &.accepted .status-dot { background: #4299e1; }    // Blue
+    &.booked .status-dot { background: #48bb78; }      // Green
+    &.completed .status-dot { background: #9f7aea; }   // Purple
+    &.cancelled .status-dot { background: #f56565; }   // Red
+  }
+
+  .chat-options {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .icon-action-btn {
+      background: none;
+      border: none;
+      color: #718096;
+      cursor: pointer;
+      padding: 4px;
+      transition: color 0.2s;
+
+      &:hover { color: #ecc94b; } // Gold for stars
+      
+      .material-icons { font-size: 24px; }
+    }
+
+    .detail-link {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #319795; // Matching your teal/mint theme
+      cursor: pointer;
+      margin: 0;
+      padding: 8px 12px;
+      background: #e6fffa;
+      border-radius: 20px;
+      transition: background 0.2s;
+
+      &:hover { background: #b2f5ea; }
+    }
+  }
 }
-
-
-/* Ensure detail-link is prominent */
-.detail-link {
-    cursor: pointer;
-    color: var(--text-primary);
-    font-weight: 500;
-    text-decoration: none;
-    font-family:var(--global-font-family);
-    background-color:rgba(0, 168, 150, 0.08);
-    font-size: 1.2rem;
-    border-radius: 30px;
-    padding: 13px 16px;
-    &:hover { color: color-mix(in srgb, var(--text-primary) 80%, black); }
-}
-
-.avatar-img{
-    height:32px;
-    width:32px;
-}
-
-.chat-title-group{
-    display:flex;
-    gap:8px;
-}
-

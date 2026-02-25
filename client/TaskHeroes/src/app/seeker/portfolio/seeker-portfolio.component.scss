@@ -1,0 +1,101 @@
+.portfolio-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  font-family: 'Inter', sans-serif;
+
+  .loading-state {
+    text-align: center;
+    padding: 100px 0;
+    color: #718096;
+    .rotating { animation: spin 2s linear infinite; font-size: 40px; margin-bottom: 16px; }
+  }
+
+  .portfolio-hero {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 24px;
+    padding: 32px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+
+    .hero-content {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 32px;
+
+      .avatar-wrapper i {
+        font-size: 80px;
+        color: #cbd5e0;
+      }
+
+      .user-meta {
+        h1 { font-size: 1.8rem; font-weight: 700; color: #2d3748; margin: 0; }
+        .badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 0.85rem;
+          font-weight: 600;
+          padding: 4px 12px;
+          border-radius: 20px;
+          &.verified { background: #ebf8ff; color: #3182ce; margin-top: 8px; }
+          i { font-size: 16px; }
+        }
+      }
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      border-top: 1px solid #edf2f7;
+      padding-top: 24px;
+
+      .stat-card {
+        text-align: center;
+        .stat-value { display: block; font-size: 1.5rem; font-weight: 800; color: #2d3748; }
+        .stat-label { font-size: 0.85rem; color: #718096; text-transform: uppercase; }
+      }
+    }
+  }
+
+  .portfolio-content {
+    h3 { font-size: 1.25rem; font-weight: 700; color: #2d3748; margin-bottom: 4px; }
+    .subtitle { color: #718096; margin-bottom: 24px; font-size: 0.95rem; }
+
+    .review-card {
+      background: #f8fafc;
+      border: 1px solid #edf2f7;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+
+      .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+
+        .reviewer-name { display: block; font-weight: 600; color: #2d3748; }
+        .review-date { font-size: 0.8rem; color: #a0aec0; }
+        
+        .rating-stars {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          background: #ffffff;
+          padding: 4px 8px;
+          border-radius: 8px;
+          border: 1px solid #e2e8f0;
+          .rating-number { font-weight: 700; color: #2d3748; }
+          i { color: #f6e05e; font-size: 18px; }
+        }
+      }
+      .review-text { font-size: 0.95rem; color: #4a5568; line-height: 1.6; margin: 0; }
+    }
+  }
+}
+
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }

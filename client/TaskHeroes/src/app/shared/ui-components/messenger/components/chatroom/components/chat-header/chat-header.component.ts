@@ -60,30 +60,40 @@ export class ChatHeaderComponent {
     const isProvider = user.id === room.providerId;
     const isCustomer = user.id === room.customerId;
     const status = room.jobStatus as JobStatus;
-    const isMyTurn = job.lastActionBy !== user.id;
-    const showSeekerConfirm = isCustomer && status === JobStatus.Pending && isMyTurn;
+    // Handshake logic for sub-text
+    const iHaveConfirmed = isProvider ? !!job.confirmedByProviderAt : !!job.confirmedBySeekerAt;
+    const partnerHasConfirmed = isProvider ? !!job.confirmedBySeekerAt : !!job.confirmedByProviderAt;
+    let subText = '';
+    switch (status) {
+        case JobStatus.Pending:
+            label = 'Inquiry Received';
+            subText = isProvider ? 'Awaiting your acceptance' : 'Waiting for provider';
+            break;
+        case JobStatus.Accepted:
+            label = 'Handshake in Progress';
+            subText = !iHaveConfirmed ? 'Action Required: Confirm Details' : 'Waiting for partner to confirm';
+            break;
+        case JobStatus.Booked:
+            label = 'Confirmed & Booked';
+            break;
+        case JobStatus.Completed:
+            label = 'Job Completed';
+            break;
+        case JobStatus.Expired:
+                    label = 'Inquiry Expired';
+                    break;
+        default:
+            label = status.charAt(0).toUpperCase() + status.slice(1);
+            subText = '';
+    }
 
 
     return {
       isProvider,
       isCustomer,
-      // Provider triggers
-      showAccept: isProvider && status === JobStatus.Pending,
-      showDecline: isProvider && status === JobStatus.Pending,
-      // Seeker triggers: The "Confirm & Book" button
-      showConfirmBook: showSeekerConfirm,
-
-      // Waiting State: Show a "Waiting..." label if it's Pending but not my turn
-      isWaiting: status === JobStatus.Pending && !isMyTurn,
-    //   showVerify: isCustomer && status === JobStatus.Completed,
-      // Cancellation
-      showCancel: isCustomer && ![
-        JobStatus.Pending, 
-        JobStatus.Completed, 
-        JobStatus.Verified, 
-        JobStatus.Cancelled
-      ].includes(status),
-
+      statusLabel: label,
+      subText: subText,
+      statusClass: status.toLowerCase(),
       showReviewAction: eligibility.allowed,
       reviewActionLabel: label,
       daysRemaining: eligibility.daysRemaining,
@@ -122,6 +132,6 @@ export class ChatHeaderComponent {
 
   onDeclineConfirm(reason: string) {
     this.showDeclineModal.set(false);
-    this.statusUpdated.emit({ status: JobStatus.Cancelled, reason });
+    this.statusUpdated.emit({ status: JobStatus.Expired, reason });
   }
 }

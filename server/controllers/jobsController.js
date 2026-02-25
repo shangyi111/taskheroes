@@ -42,61 +42,71 @@ exports.getAllJobs = async (req, res) => {
   }
 };
 
-// Get a specific job by ID
+// GET /api/order/performer/:id
 exports.getJobsByPerformerId = async (req, res) => {
   try {
-    // Parse the filter from query params (e.g., ?filter={"startDate":"2026-02-01"})
-    const filter = req.query.filter ? JSON.parse(req.query.filter) : {};
-    const whereClause = { performerId: req.params.id };
-
-    // Apply Date Filters if they exist
-    if (filter.startDate || filter.endDate) {
-      whereClause.jobDate = {};
-      if (filter.startDate) whereClause.jobDate[Op.gte] = new Date(filter.startDate);
-      if (filter.endDate) whereClause.jobDate[Op.lte] = new Date(filter.endDate);
-    }
-
-    // Apply Status Filter if it exists
-    if (filter.status) {
-      whereClause.jobStatus = filter.status;
-    }
+    const { whereClause, order } = buildJobQuery(req.params, req.query);
+    whereClause.performerId = req.params.id; // Target the Performer
 
     const jobs = await Job.findAll({
       where: whereClause,
       include: [{ model: User, as: 'customer', attributes: ['id', 'username', 'profilePicture'] }],
-      order: [['jobDate', filter.order || 'ASC']]
+      order: order
     });
 
     res.json(jobs);
   } catch (error) {
-    res.status(500).json({ message: "Filter parsing error or " + error.message });
+    res.status(500).json({ message: "Search error: " + error.message });
   }
 };
 
-// Get a specific job by customer ID
+// GET /api/order/seeker/:id
 exports.getJobsByCustomerId = async (req, res) => {
   try {
-    const job = await Job.findAll({
-      where: {customerId:req.params.id},
-      include: [
-        {
-          model: User,
-          as: 'performer',
-          attributes: ['id', 'username', 'profilePicture']
-        }
-      ],
-      order: [['jobDate', 'ASC']]
-    });
-    if (job) {
-      res.json(job);
-    } else {
-      res.status(404).json({ message: 'Order(s) not found' });
-    }
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-}
+    const { whereClause, order } = buildJobQuery(req.params, req.query);
+    whereClause.customerId = req.params.id; // Target the Seeker
 
+    const jobs = await Job.findAll({
+      where: whereClause,
+      include: [{ model: User, as: 'performer', attributes: ['id', 'username', 'profilePicture'] }],
+      order: order
+    });
+
+    res.json(jobs);
+  } catch (error) {
+    res.status(500).json({ message: "Search error: " + error.message });
+  }
+};
+/**
+ * Shared helper to build Sequelize where clauses based on URL filters
+ * @param {Object} params - The request params (id)
+ * @param {Object} query - The request query (filter)
+ * @param {String} roleIdField - 'performerId' or 'customerId'
+ * @returns {Object} - { whereClause, order }
+ */
+const buildJobQuery = (params, query) => {
+  const filter = query.filter ? JSON.parse(query.filter) : {};
+  
+  // Initialize where clause with the specific user filter
+  const whereClause = {};
+  
+  // Apply Date Filters if they exist
+  if (filter.startDate || filter.endDate) {
+    whereClause.jobDate = {};
+    if (filter.startDate) whereClause.jobDate[Op.gte] = new Date(filter.startDate);
+    if (filter.endDate) whereClause.jobDate[Op.lte] = new Date(filter.endDate);
+  }
+
+  // Apply Status Filter if it exists
+  if (filter.status) {
+    whereClause.jobStatus = filter.status;
+  }
+
+  return {
+    whereClause,
+    order: [['jobDate', filter.order || 'ASC']]
+  };
+};
 // Create a new job
 exports.createJob = async (req, res) => {
   try {
@@ -225,6 +235,7 @@ exports.updateJob = async (req, res) => {
   try {
     const { newStatus } = req.body;
     const userId = req.user.id;
+    
     const job = await Job.findByPk(req.params.id,{
         include: [
                   {
@@ -241,6 +252,9 @@ exports.updateJob = async (req, res) => {
     });
 
     if (!job) return res.status(404).json({ message: 'Job not found' });
+
+    const isProvider = userId === job.performerId;
+    const isSeeker = userId === job.customerId;
     // 1. Handle Cancellation (Wildcard) separately if needed
     if (newStatus === JobStatus.CANCELLED) {
       if ([JobStatus.IN_PROGRESS, JobStatus.COMPLETED, JobStatus.IN_PROGRESS].includes(job.jobStatus)) {
@@ -253,18 +267,34 @@ exports.updateJob = async (req, res) => {
       return res.status(400).json({ message: "Time-based transitions are handled automatically." });
     }
 
-    // 2. Validate using the Rules Map
-    const rule = STATUS_RULES[newStatus]; 
-
-    if (!rule) {
-      return res.status(400).json({ message: "Invalid status or system-protected transition." });
+    // 1. PHASE: ACCEPTANCE (Pending -> Accepted)
+    if (newStatus === JobStatus.ACCEPTED && isProvider) {
+      job.jobStatus = JobStatus.ACCEPTED;
+      job.lastActionBy = userId;
     }
 
-    if (!rule.from.includes(job.jobStatus) || !rule.actor.some(field => job[field] === userId) || job.lastActionBy === userId) {
-      return res.status(403).json({ 
-        message: job.lastActionBy === userId ? "Waiting for other party to respond." : rule.errorMessage 
-      });
+    if (newStatus === JobStatus.BOOKED) {
+      if (isProvider) job.confirmedByProviderAt = new Date();
+      if (isSeeker) job.confirmedBySeekerAt = new Date();
+
+      // The "Lock": Only flip to BOOKED if both have timestamps
+      if (job.confirmedByProviderAt && job.confirmedBySeekerAt) {
+        job.jobStatus = JobStatus.BOOKED;
+      }
     }
+
+    // // 2. Validate using the Rules Map
+    // const rule = STATUS_RULES[newStatus]; 
+
+    // if (!rule) {
+    //   return res.status(400).json({ message: "Invalid status or system-protected transition." });
+    // }
+
+    // if (!rule.from.includes(job.jobStatus) || !rule.actor.some(field => job[field] === userId) || job.lastActionBy === userId) {
+    //   return res.status(403).json({ 
+    //     message: job.lastActionBy === userId ? "Waiting for other party to respond." : rule.errorMessage 
+    //   });
+    // }
     // 3. Success - Update database and trigger notifications
     return await finalizeStatusUpdate(job, newStatus, userId, res);
 

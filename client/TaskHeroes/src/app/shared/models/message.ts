@@ -7,6 +7,8 @@ export interface Message {
     createdAt: Date;
     updatedAt: Date;
     readBy:string[];
+    type?: 'ACTION_PENDING' | 'LEAVE_REVIEW' | 'DEFAULT'; 
+    isSystem?: boolean;
     // Add other relevant properties as needed
   }
   

@@ -72,7 +72,7 @@ cron.schedule('0 0 * * *', async () => {
     // and haven't had their reviews "locked/published" yet.
     const expiredJobs = await Job.findAll({
       where: {
-        jobStatus: { [Op.in]: ['completed', 'verified'] },
+        jobStatus: { [Op.in]: ['completed'] },
         jobDate: { [Op.lte]: tenDaysAgo }
       },
       attributes: ['id']

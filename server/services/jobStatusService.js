@@ -12,7 +12,7 @@ exports.reconcileJobStatus = async (job) => {
   let hasChanged = false;
 
   // 1. AUTO-START: Booked -> In Progress
-  if ((job.jobStatus === JobStatus.BOOKED || job.jobStatus === JobStatus.ACCEPTED) && new Date(job.jobDate) <= now) {
+  if ((job.jobStatus === JobStatus.BOOKED ) && new Date(job.jobDate) <= now) {
     job.jobStatus = JobStatus.IN_PROGRESS;
     hasChanged = true;
   }
@@ -32,12 +32,13 @@ exports.reconcileJobStatus = async (job) => {
   // 3. AUTO-CANCEL: Pending -> Cancelled (If the date has passed)
   // This handles requests that were never accepted/declined
   if (job.jobStatus === JobStatus.PENDING && new Date(job.jobDate) < now) {
-    job.jobStatus = JobStatus.CANCELLED;
+    job.jobStatus = JobStatus.EXPIRED;
     job.statusNote = "[System] Request expired.";
     hasChanged = true;
   }
 
   if (hasChanged) {
+    console.log(`Job ID ${job.id} status auto-updated to ${job.jobStatus}`);
     await job.save();
     sendJobUpdated(job); // Sync the UI via Socket
   }

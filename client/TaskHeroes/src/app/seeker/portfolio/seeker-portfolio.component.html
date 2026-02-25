@@ -1,0 +1,60 @@
+<div class="portfolio-container">
+  @if (isLoading()) {
+    <th-loading type="skeleton" [height]="'300px'"></th-loading>
+  } @else {
+    <header class="portfolio-hero">
+      <div class="hero-content">
+        <div class="avatar-wrapper">
+           <i class="material-icons">account_circle</i>
+        </div>
+        <div class="user-meta">
+          <h1>Verified Seeker</h1>
+          <div class="trust-badges">
+            <span class="badge verified">
+              <i class="material-icons">verified</i> Verified Account
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-value">{{ reputationData()?.averageRating || '0.0' }}</span>
+          <span class="stat-label">Average Rating</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value">{{ reputationData()?.totalItems || 0 }}</span>
+          <span class="stat-label">Total Reviews</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="portfolio-content">
+      <h3>Professional References</h3>
+      <p class="subtitle">Feedback from past providers on TaskHeroes.</p>
+
+      <div class="review-list">
+        @for (review of reputationData()?.items; track review.id) {
+          <div class="review-card">
+            <div class="review-header">
+              <div class="reviewer-info">
+                <span class="reviewer-name">{{ review.reviewer?.username }}</span>
+                <span class="review-date">{{ review.addedDate | date:'MMM yyyy' }}</span>
+              </div>
+              <div class="rating-stars">
+                 <span class="rating-number">{{ review.rating }}</span>
+                 <i class="material-icons">star</i>
+              </div>
+            </div>
+            <p class="review-text">{{ review.comment }}</p>
+          </div>
+        } @empty {
+          <div class="empty-reviews">
+            <i class="material-icons">rate_review</i>
+            <p>No reviews yet. This seeker is ready for their first booking!</p>
+          </div>
+        }
+      </div>
+    </main>
+  }
+</div>

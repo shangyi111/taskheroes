@@ -55,6 +55,7 @@ export class ChatroomComponent implements OnInit, OnDestroy {
   newMessageContent: WritableSignal<string> = signal('');
   job: WritableSignal<Job | null> = signal(null);
   service: WritableSignal<Service | null> = signal(null);
+  partnerReputation: WritableSignal<any | null> = signal(null);
   currentPage = signal(0);
   pageSize = 20;
   allMessagesLoaded = signal(false);
@@ -260,7 +261,7 @@ export class ChatroomComponent implements OnInit, OnDestroy {
 
     this.subscriptions.add(this.chatroomMessageSubscription);
   }
-  sendMessage(customMessage?: string): void {
+  sendMessage(customMessage?: string, type: 'ACTION_PENDING' | 'LEAVE_REVIEW' | 'DEFAULT' = 'DEFAULT', isSystem: boolean = false): void {
     if (!this.currentUser()) {
       this.error.set('User not logged in. Please sign in to send messages.');
       return;
@@ -271,13 +272,14 @@ export class ChatroomComponent implements OnInit, OnDestroy {
     const chatroomId = this.chatroomId();
 
     if (messageText && userId && chatroomId) {
-      console.log('Attempting to send message:', messageText);
 
       const messageToSend = {
         chatroomId: chatroomId,
         senderId: userId,
         text: messageText,
         senderUsername: this.currentUser()!.username!,
+        type: type, 
+        isSystem: isSystem
       };
 
       const tempMessageId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
@@ -312,7 +314,25 @@ export class ChatroomComponent implements OnInit, OnDestroy {
   }
 
   openDetailsModal(): void {
-      this.showDetailsModal.set(true);
+    const currentJob = this.job();
+    const roomId = this.chatroomId();
+    const user = this.currentUser();
+
+    // If the logged-in user is the PROVIDER, fetch the SEEKER'S reputation
+    if (user?.id === currentJob?.performerId && currentJob?.customerId && roomId) {
+        this.reviewService.getReviewsByRevieweeId(currentJob.customerId, roomId).subscribe({
+            next: (repData) => {
+                this.partnerReputation.set(repData);
+                this.showDetailsModal.set(true);
+            },
+            error: (err) => {
+                console.error('Failed to fetch seeker reputation:', err);
+                this.showDetailsModal.set(true); // Open anyway, just without rep data
+            }
+        });
+    } else {
+        this.showDetailsModal.set(true);
+    }
   }
 
   closeDetailsModal(): void {
@@ -423,7 +443,27 @@ export class ChatroomComponent implements OnInit, OnDestroy {
         } : null);
         this.chatroomService.updateRoomStatus(updatedJob.id!, status);
         const statusLabel = status.toUpperCase();
-        this.sendMessage(`[System] Job status updated to: ${statusLabel}`);
+        
+       if (status === JobStatus.Accepted) {
+        this.sendMessage("The inquiry has been accepted! Please view details to confirm and book.", 'ACTION_PENDING', true);
+      } 
+      else if (status === JobStatus.Booked) {
+        if (updatedJob.jobStatus === JobStatus.Booked) {
+          this.sendMessage("Booking is officially CONFIRMED! Both parties have agreed to the terms.", 'DEFAULT', true);
+        } else {
+          // If only one person confirmed, notify the partner
+          const partnerRole = this.currentUser()?.id === updatedJob.performerId ? 'Customer' : 'Provider';
+          this.sendMessage(`I've confirmed my side! Waiting for ${partnerRole} to confirm.`, 'ACTION_PENDING', true);
+        }
+      } if (status === JobStatus.Completed) {
+          this.sendMessage(
+            "Service completed! Please share your experience by leaving a review.", 
+            'LEAVE_REVIEW', 
+            true
+          );
+      } else {
+        this.sendMessage(`Job status updated to: ${status.toUpperCase()}`, 'DEFAULT', true);
+      }
         if (reason) {
           this.sendMessage(`${reason}`);
         }
@@ -434,8 +474,7 @@ export class ChatroomComponent implements OnInit, OnDestroy {
       }
     });
   }
-
-  handleJobUpdate(updatedJob: Job) {
+  handleQuoteUpdate(updatedJob: Job) {
     if (!updatedJob.id) return;
 
     // Call your service to update the PostgreSQL database
@@ -447,7 +486,7 @@ export class ChatroomComponent implements OnInit, OnDestroy {
         this.showDetailsModal.set(false); // Close drawer on success
 
           // CALL EXISTING SENDMESSAGE
-        this.sendMessage(`I've updated the quote details. Please view from details`);
+        this.sendMessage(`[System] Provider updated the quote details. Please view from details to confirm booking if looking good to you. Thank you. `);
       },
       error: (err) => {
         console.error('Failed to update job', err);

@@ -16,6 +16,29 @@ export class ReviewService {
 
   constructor(private http: HttpClient) {}
 
+  /**
+   * Fetches reviews RECEIVED by a user (the "Reputation" view).
+   * Note: The authInterceptor handles the Authorization header automatically.
+   */
+  getReviewsByRevieweeId(revieweeId: string, chatroomId: string, page: number = 1, size: number = 10): Observable<PaginatedResponse<Review>> {
+    const params = new HttpParams()
+      .set('chatroomId', chatroomId) // Backend security check
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    return this.http.get<PaginatedResponse<Review>>(`${this.API_URL}/reviewee/${revieweeId}`, { params });
+  }
+
+  /**
+   * Fetches reviews POSTED by a user (their activity history).
+   */
+  getReviewsByReviewerId(reviewerId: string, page: number = 1, size: number = 10): Observable<PaginatedResponse<Review>> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+
+    return this.http.get<PaginatedResponse<Review>>(`${this.API_URL}/reviewer/${reviewerId}`, { params });
+  }
   getAllReviews(): Observable<Review[]> {
     return this.http.get<Review[]>(this.API_URL);
   }

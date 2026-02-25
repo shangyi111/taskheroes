@@ -6,6 +6,15 @@ export interface PriceItem {
   amount: number;
 }
 
+// Added to handle the external links/documents specifically
+export interface JobDocument {
+  name: string;
+  url: string;
+  public_id?: string; // Optional: Only if using Cloudinary
+  uploadedBy?: string; 
+  uploadedAt?: Date;
+}
+
 export interface Job {
     id?: string;               // Job ID
     performerId?: string;      // User ID of the Provider
@@ -32,4 +41,12 @@ export interface Job {
     // State Machine
     jobStatus?: JobStatus;     // Strictly typed to our 9-step Enum
     lastActionBy?: number;
+
+    providerTerms?: string;    // Custom text for the "Job Terms" section
+    documents?: JobDocument[];
+
+    confirmedByProviderAt?: Date;
+    confirmedBySeekerAt?: Date;
+    cancellationReason?: string;  
+    cancelledAt?: Date;
 }

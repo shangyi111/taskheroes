@@ -25,6 +25,12 @@ router.post('/', authMiddleware, reviewsController.createReview);
 // Update a review (protected)
 router.put('/:id', authMiddleware, reviewsController.updateReview);
 
+// Public: Anyone can see the reputation of a seeker or provider
+router.get('/reviewee/:revieweeId', authMiddleware, reviewsController.getReviewsByRevieweeId);
+
+// Private/Public: Reviewer's own activity history
+router.get('/reviewer/:reviewerId', authMiddleware, reviewsController.getReviewsByReviewerId);
+
 // Delete a review (protected) **disabled until authSet to be verified by Shangyi Chen only**
 // router.delete('/:id', authMiddleware, reviewsController.deleteReview);
 

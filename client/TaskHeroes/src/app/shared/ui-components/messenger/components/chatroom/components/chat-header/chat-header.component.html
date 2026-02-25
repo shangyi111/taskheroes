@@ -15,32 +15,25 @@
                     {{ chatPartnerName() }}   
                 </h1>
             </div>
-            @if (headerState(); as actions) {
-                        <div class="status-actions">
-                        
-                            @if (actions.showAccept || actions.showDecline) {
-                                <div class="btn-group">
-                                    <button class="status-btn decline" (click)="handleDeclineClick()">Decline</button>
-                                    <button class="status-btn accept" (click)="updateStatus(JobStatus.Accepted)">Accept Job</button>
-                                </div>
-                            }
-
-                            @if (actions.showReviewAction) {
-                                <div class="review-action-wrapper">
-                                    <button class="status-btn review" (click)="reviewOpened.emit()">
-                                        {{ actions.reviewActionLabel }}
-                                    </button>
-                                </div>
-                            }
-
-                            @if (actions.showCancel) {
-                                <button class="status-btn cancel" (click)="updateStatus(JobStatus.Cancelled)">Cancel</button>
-                            }
-                        </div>
-                    }
+            @if (headerState(); as state) {
+                    <div class="status-indicator-group" [class]="state.statusClass">
+                        <span class="status-dot"></span>
+                        <span class="status-label">{{ state.statusLabel }}</span>
+                        @if (state.subText) {
+                            <span class="status-subtext">• {{ state.subText }}</span>
+                        }
+                    </div>
+            }
         }
     </div>
     <div class="chat-options">
+        @if (headerState().showReviewAction) {
+            <button class="icon-action-btn" 
+                    (click)="reviewOpened.emit()" 
+                    [title]="headerState().reviewActionLabel">
+                <i class="material-icons">grade</i>
+            </button>
+        }
         <p class="detail-link" (click)="detailsOpened.emit()">View details</p>
     </div>
 </header>

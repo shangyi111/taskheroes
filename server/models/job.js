@@ -87,6 +87,17 @@ const Job = sequelize.define('Job', {
     //   {"type":"custom","label": "Travel Fee", "amount": 50}
     // ]
   },
+  providerTerms: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    defaultValue: "No specific terms provided."
+  },
+  documents: {
+    type: DataTypes.JSONB,
+    allowNull: false,
+    defaultValue: [],
+    // Example: [{"name": "Wedding Contract", "url": "https://drive.google.com/...", "addedAt": "2026-02-17"}]
+  },
   hourlyRate:{
     type: DataTypes.DECIMAL(10, 2),
     allowNull: true,
@@ -99,6 +110,22 @@ const Job = sequelize.define('Job', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  confirmedByProviderAt: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  confirmedBySeekerAt: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  cancellationReason: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  cancelledAt: {
+    type: DataTypes.DATE,
+    allowNull: true
+  }
 });
 
 module.exports = Job;

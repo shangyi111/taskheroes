@@ -7,6 +7,7 @@ import { Job, PriceItem } from 'src/app/shared/models/job';
 import { Service } from 'src/app/shared/models/service';
 import { JobStatus } from 'src/app/shared/models/job-status.enum';
 
+declare var Quill: any;
 @Component({
   selector: 'app-chat-details-drawer',
   standalone: true,
@@ -16,6 +17,7 @@ import { JobStatus } from 'src/app/shared/models/job-status.enum';
 })
 export class ChatDetailsDrawerComponent {
 
+  quill: any;
   public readonly JobStatus = JobStatus;
   private router= inject(Router);
   private closeTimer: any;
@@ -27,11 +29,21 @@ export class ChatDetailsDrawerComponent {
 
   // Local UI State
   isEditingPrice = signal(false);
+  isProcessingAction = signal(false);
   isSubmitting = signal(false);
   hourlyRate = signal(0);
   duration = signal(0);
   lineItems = signal<PriceItem[]>([]);
   showCalendarMenu = signal(false);
+  partnerReputation = input<any | null>(null);
+  chatroomId = input<string | null>(null);
+ 
+  // Agreement State
+  isEditingAgreement = signal(false);
+  localTerms = ''; // Keep as string for simple textarea binding
+  localLinks = signal<any[]>([]);
+  tempLinkName = '';
+  tempLinkUrl = '';
 
   // Outputs
   close = output<void>();
@@ -45,18 +57,69 @@ export class ChatDetailsDrawerComponent {
 
     const isProvider = user.id === details.performerId;
     const isCustomer = user.id === details.customerId;
-    const status = details.jobStatus;
+    const status = details.jobStatus!;
     const isMyTurn = details.lastActionBy !== user.id;
+
+    const iHaveConfirmed = isProvider ? !!details.confirmedByProviderAt : !!details.confirmedBySeekerAt;
+    const partnerHasConfirmed = isProvider ? !!details.confirmedBySeekerAt : !!details.confirmedByProviderAt;
 
     return {
       isProvider,
       isCustomer,
-      // Logic: Can edit if they are the provider and job isn't finished
-      canRequestChange: isProvider && status && [JobStatus.Pending, JobStatus.Accepted].includes(status),
-      // Seeker sees buttons only when job is Pending (awaiting their move)
-      canActionJob: isCustomer && status === JobStatus.Pending && isMyTurn
+      // Phase 1: Provider Accept/Decline (PENDING state)
+      canAcceptInquiry: isProvider && status === JobStatus.Pending,
+      
+      // Phase 2: Mutual Confirmation (ACCEPTED state)
+      needsMyConfirmation: status === JobStatus.Accepted && !iHaveConfirmed,
+      isWaitingForPartner: status === JobStatus.Accepted && iHaveConfirmed && !partnerHasConfirmed,
+      
+      // Phase 3: Booked (Finalized)
+      isFullyBooked: status === JobStatus.Booked,
+      // PRICE: Provider can adjust the quote during negotiation or before completion.
+      canRequestChange: isProvider && [JobStatus.Pending, JobStatus.Accepted].includes(status) && !iHaveConfirmed
     };
   });
+
+  addLink() {
+    const url = this.tempLinkUrl.trim().toLowerCase();
+    
+    // 1. Basic Protocol Check
+    if (!url.startsWith('https://')) {
+      alert("For security, only secure 'https' links from trusted providers are allowed.");
+      return;
+    }
+
+    // 2. Blacklisted Extensions Check (Prevent direct script/exe uploads)
+    const maliciousExtensions = ['.exe', '.bat', '.js', '.sh', '.zip', '.rar'];
+    if (maliciousExtensions.some(ext => url.endsWith(ext))) {
+      alert("Direct links to executable or compressed files are not permitted.");
+      return;
+    }   
+    const name = this.tempLinkName || 'Document';
+    this.localLinks.update(links => [...links, { name, url: this.tempLinkUrl }]);
+    this.tempLinkName = '';
+    this.tempLinkUrl = '';
+  }
+
+  removeLink(index: number) {
+      this.localLinks.update(links => links.filter((_, i) => i !== index));
+  }
+
+  saveAgreementWithQuill() {
+        const currentJob = this.jobDetails();
+        if (!currentJob || !this.quill) return;
+
+        // Get the full HTML (including <strong> for bold)
+        const updatedContent = this.quill.root.innerHTML;
+
+        this.jobUpdated.emit({
+            ...currentJob,
+            providerTerms: updatedContent,
+            documents: this.localLinks()
+        });
+
+        this.isEditingAgreement.set(false);
+  }
 
   calculatedTotal = computed(() => {
     return this.lineItems().reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
@@ -73,11 +136,38 @@ export class ChatDetailsDrawerComponent {
     effect(() => {
         const currentJob = this.jobDetails();
         if (currentJob) {
-        this.cancelEdit(); // Reset everything to a clean state
+          this.isProcessingAction.set(false);
+          this.cancelEdit(); // Reset everything to a clean state
+        }
+
+        if (this.isEditingAgreement()) {
+            // Wait for Angular to render the div before initializing Quill
+            setTimeout(() => this.initializeQuill(), 0);
+        } else {
+            this.quill = null; // Cleanup
         }
     }, { allowSignalWrites: true });
   }
 
+private initializeQuill() {
+        const container = document.getElementById('quill-editor');
+        if (!container) return;
+
+        this.quill = new Quill('#quill-editor', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    ['bold', 'italic'],
+                    [{ 'list': 'bullet' }],
+                    ['clean'] // Removes formatting
+                ]
+            },
+            placeholder: 'Enter your terms (e.g. 20% non-refundable deposit...)'
+        });
+
+        // Set initial content from current job details
+        this.quill.root.innerHTML = this.jobDetails()?.providerTerms || '';
+  }
   openServiceExternal() {
     const service = this.serviceDetails();
     if (!service?.id) return;
@@ -94,12 +184,12 @@ export class ChatDetailsDrawerComponent {
     this.showCalendarMenu.set(true);
   }
 
-    closeMenu() {
-        // 200ms delay gives a "softer" feel and prevents accidental closing
-        this.closeTimer = setTimeout(() => {
-            this.showCalendarMenu.set(false);
-        }, 200);
-    }
+  closeMenu() {
+      // 200ms delay gives a "softer" feel and prevents accidental closing
+      this.closeTimer = setTimeout(() => {
+          this.showCalendarMenu.set(false);
+      }, 200);
+  }
   // Update the 'base' type item in the list when hours or rate change
   updateBaseItem() {
     const baseAmount = (this.hourlyRate() * this.duration()) / 60;
@@ -113,11 +203,12 @@ export class ChatDetailsDrawerComponent {
   }
 
   updateJobStatus(newStatus: JobStatus) {
+    this.isProcessingAction.set(true);
     this.statusChange.emit({ status: newStatus });
   }
-
   cancelEdit() {
     this.isEditingPrice.set(false);
+    this.isEditingAgreement.set(false);
     this.resetToDatabaseValues();
   }
   submitAdjustment() {
@@ -247,5 +338,22 @@ export class ChatDetailsDrawerComponent {
 
     // Create a Data URI so it downloads on click
     return `data:text/calendar;charset=utf8,${encodeURIComponent(icsContent)}`;
+  }
+
+  openSeekerPortfolio() {
+    const job = this.jobDetails();
+    const roomId = this.chatroomId(); // Get the ID from the new input
+    
+    if (!job?.customerId || !roomId) return;
+
+    // Generate the URL with the security token (chatroomId)
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(
+        ['/seeker', job.customerId, 'portfolio'], 
+        { queryParams: { chatroomId: roomId } } 
+      )
+    );
+    
+    window.open(url, '_blank');
   }
 }
