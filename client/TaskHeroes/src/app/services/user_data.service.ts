@@ -1,4 +1,5 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { BehaviorSubject , shareReplay, Observable, of, tap} from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { User } from 'src/app/shared/models/user';
@@ -21,6 +22,7 @@ export class UserDataService {
   userData$ = this.userDataSubject.asObservable().pipe(
       shareReplay({ bufferSize: 1, refCount: true })
   );
+  userSignal = toSignal(this.userData$, { initialValue: this.GUEST_USER });
 
   setUserData(userData: User): void {
     this.userDataSubject.next(userData);

@@ -13,6 +13,8 @@ const messageRoutes = require('./message-server/routes/message');
 const chatroomRoutes = require('./message-server/routes/chatroom');
 const calendarRoutes = require('./routes/calendar');
 const portfolioRoutes = require('./routes/portfolio');
+const stripeWebhookController = require('./routes/webhook');
+const identityRoutes = require('./routes/identity');
 const mapRoutes = require('./routes/map');
 const websocket = require('./websocket/socketServer');
 const sequelize = require('./config/db');
@@ -22,6 +24,7 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), stripeWebhookController.handleStripeWebhook);
 app.use(cors());
 app.use(bodyParser.json());
 app.use('/api/auth', authRoutes); // Use the authentication routes
@@ -35,6 +38,7 @@ app.use('/api/calendar', calendarRoutes);
 app.use('/api/map',mapRoutes);
 app.use('/api/user',userRoutes);
 app.use('/api/portfolio', portfolioRoutes);
+app.use('/api/identity', identityRoutes);
 // Example protected route
 app.get('/api/protected', authenticateToken, (req, res) => {
   res.json({ message: 'Authenticated access granted', user: req.user });

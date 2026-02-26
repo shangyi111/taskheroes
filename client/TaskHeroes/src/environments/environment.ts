@@ -6,5 +6,6 @@ export const environment = {
     appName: 'TaskHeroes', // For branding or meta info
     googleMapsApiKey:'AIzaSyCXVK-Zf_-i71AaS0yOf6byA1Jxt_0C-Uk',
     googleAuthClientId:'103826977928-i8evmq0lqiil6hslgf63sqsssjt8q26e.apps.googleusercontent.com',
+    stripePublicKey: 'pk_test_51T4g6KFPJCx6aNrePfkqZ4TubY13hEYbr6S4l1Iw0pC0npBAFbyS6RaaMdbSLjeKoAK7HVCAbydzn7BRXDB849ex0014mhewfo',
   };
   

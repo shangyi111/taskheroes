@@ -1,8 +1,8 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap,map } from 'rxjs/operators';
-import {User} from 'src/app/shared/models/user';
+import { User } from 'src/app/shared/models/user';
 import { UserDataService } from '../services/user_data.service';
 import { LOCAL_STORAGE_USER_KEY, AUTH_TOKEN_KEY } from 'src/app/shared/constants';
 

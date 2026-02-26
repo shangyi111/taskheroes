@@ -19,6 +19,28 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  stripeVerificationFingerprint: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    unique: true, 
+  },
+  stripeVerificationSessionId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    unique: true, // One session per ID check
+  },
+
+  // The "Truth" flag for your Seeker Portfolio badge
+  isIdentityVerified: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+
+  // Metadata for auditing and trust building
+  identityVerifiedAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  }
 });
 
 module.exports = User;

@@ -54,7 +54,8 @@ const googleLogin = async (req, res) => {
         email, 
         googleId: sub,
         profilePicture: picture,
-        role: 'seeker' // Default role, adjust as needed
+        role: 'seeker', // Default role, adjust as needed
+        isIdentityVerified: false
       });
     }
 

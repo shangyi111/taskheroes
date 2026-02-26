@@ -1,0 +1,21 @@
+@if (isVisible()) {
+  <div class="banner-container">
+    <div class="banner-content">
+      <div class="icon-wrapper">
+        <i class="material-icons">verified_user</i>
+      </div>
+      <div class="text-group">
+        <p class="title">Verify your Identity</p>
+        <p class="description">Increase your trust score.</p>
+      </div>
+    </div>
+    
+    <button (click)="startVerification()" [disabled]="isLoading()" class="verify-btn">
+      @if (isLoading()) {
+        <span class="spinner"></span>
+      } @else {
+        Get Verified
+      }
+    </button>
+  </div>
+}
