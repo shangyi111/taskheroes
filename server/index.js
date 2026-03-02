@@ -13,7 +13,7 @@ const messageRoutes = require('./message-server/routes/message');
 const chatroomRoutes = require('./message-server/routes/chatroom');
 const calendarRoutes = require('./routes/calendar');
 const portfolioRoutes = require('./routes/portfolio');
-const stripeWebhookController = require('./routes/webhook');
+const webhookRoutes = require('./routes/webhook');
 const identityRoutes = require('./routes/identity');
 const mapRoutes = require('./routes/map');
 const websocket = require('./websocket/socketServer');
@@ -24,7 +24,7 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), stripeWebhookController.handleStripeWebhook);
+app.use('/api/webhooks', webhookRoutes);
 app.use(cors());
 app.use(bodyParser.json());
 app.use('/api/auth', authRoutes); // Use the authentication routes
@@ -39,10 +39,7 @@ app.use('/api/map',mapRoutes);
 app.use('/api/user',userRoutes);
 app.use('/api/portfolio', portfolioRoutes);
 app.use('/api/identity', identityRoutes);
-// Example protected route
-app.get('/api/protected', authenticateToken, (req, res) => {
-  res.json({ message: 'Authenticated access granted', user: req.user });
-});
+
 // require('./cron/jobAutomations');
 
 // Create the HTTP server instance
@@ -61,21 +58,3 @@ sequelize.sync() // This will sync your models with the database
   .catch((err) => {
     console.error('Error syncing database models:', err);
   });
-
-// Dummy authenticateToken middleware (replace with your actual implementation)
-function authenticateToken(req, res, next) {
-  // In a real application, you would verify a JWT or other token here
-  const token = req.headers['authorization']?.split(' ')[1]; // Assuming token in Authorization header
-
-  if (!token) {
-    return res.status(401).json({ message: 'Unauthorized: No token provided' });
-  }
-
-  // Replace this with your actual token verification logic
-  if (token === 'valid-token') {
-    req.user = { id: 1, username: 'testuser' }; // Mock user data
-    next();
-  } else {
-    return res.status(403).json({ message: 'Forbidden: Invalid token' });
-  }
-}

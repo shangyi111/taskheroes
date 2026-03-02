@@ -7,9 +7,8 @@ exports.createVerificationSession = async (req, res) => {
 
     // Create session on Stripe's secure infrastructure
     const session = await stripe.identity.verificationSessions.create({
-      type: 'document', // Checks Passport, Driver's License, or ID Card
-      metadata: { userId: userId }, // Critical for linking back in the webhook
-      return_url: `${process.env.CLIENT_URL}?verified=true`
+       metadata: { userId: userId },
+       verification_flow: 'vf_1T5LvfFPJCx6aNreMmJfE4KF'
     });
 
     // Save the Session ID to the database for audit trails

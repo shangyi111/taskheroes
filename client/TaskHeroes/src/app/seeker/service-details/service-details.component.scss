@@ -92,11 +92,6 @@
       .main-title-row {
         display: flex; align-items: center; gap: 16px; margin-bottom: 24px;
         .business-name { font-size: 2.2rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.02em; margin: 0; }
-        .rating-pill { 
-          display: flex; align-items: center; gap: 6px; background: #fffbeb; 
-          color: #b45309; padding: 4px 12px; border-radius: 20px; font-weight: 700;
-          mat-icon { font-size: 18px; width: 18px; height: 18px; }
-        }
       }
 
       .quick-info-bar {
@@ -134,6 +129,88 @@
       margin: 32px 0; 
     }
   }
+
+.trust-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap; // 🟢 Prevents badges from cutting off on mobile
+  gap: 12px;
+  margin: 16px 0;
+  
+  // Base style for any pill/badge inside the bar
+  .rating-badge, 
+  .identity-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px; // Consistent height for all badges
+    padding: 0 12px;
+    border-radius: 16px; // Perfect pill shape
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  // 1. Rating Pill Styles
+  .rating-badge {
+    background-color: #fff9e6; // Soft gold/yellow
+    color: #856404;
+    border: 1px solid rgba(133, 100, 4, 0.1);
+
+    mat-icon {
+      color: #f4b400; // Material Gold
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    .count {
+      color: #666;
+      font-weight: 400;
+      margin-left: 2px;
+    }
+  }
+
+  // 2. Identity Badge Styles (Using your Cadet Blue theme)
+  .identity-badge {
+    // 🟢 Uses your preferred 64% opacity logic via color-mix
+    background-color: color-mix(in srgb, var(--text-primary) 10%, transparent);
+    color: var(--text-primary);
+    border: 1px solid color-mix(in srgb, var(--text-primary) 30%, transparent);
+    cursor: help; // Signals to user they can hover for the Stripe tooltip
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+
+      &.help-icon {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+        opacity: 0.5;
+        margin-left: 2px;
+      }
+    }
+    
+    &:hover {
+      background-color: color-mix(in srgb, var(--text-primary) 15%, transparent);
+    }
+  }
+}
+
+// Mobile responsiveness
+@media (max-width: 480px) {
+  .trust-bar {
+    gap: 8px;
+    
+    .rating-pill, 
+    .identity-badge-large {
+      font-size: 12px;
+      padding: 0 10px;
+    }
+  }
+}
 
   // --- 4. CALENDAR VIEW ---
   .calendar-layout {

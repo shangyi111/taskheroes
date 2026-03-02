@@ -29,6 +29,10 @@ const User = sequelize.define('User', {
     allowNull: true,
     unique: true, // One session per ID check
   },
+  stripeVerificationStatus: {
+    type: DataTypes.ENUM('requires_input', 'processing', 'verified', 'canceled'),
+    allowNull:true,
+  },
 
   // The "Truth" flag for your Seeker Portfolio badge
   isIdentityVerified: {

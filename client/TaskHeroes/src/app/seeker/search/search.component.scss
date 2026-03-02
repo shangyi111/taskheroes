@@ -123,7 +123,8 @@ mat-card-subtitle {
 }
 
 /* REUSABLE MINI BADGE */
-.rating-badge {
+.rating-badge,
+.identity-badge {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -134,7 +135,16 @@ mat-card-subtitle {
   font-size: 0.8rem;
   color:var(--rating-tag-text);
 
-  mat-icon { color: var(--rating-icon); font-size: 14px; width: 14px; height: 14px; }
+  mat-icon { 
+    color: var(--rating-icon); font-size: 14px; width: 14px; height: 14px; 
+     &.help-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+      color: #71767b;
+      margin-left: 2px;
+    }
+  }
   .review-count { color: var(--rating-tag-text); opacity: 0.7; }
   .no-reviews { color: var(--rating-tag-text); font-weight: 500; }
 }
@@ -146,4 +156,32 @@ mat-card-subtitle {
   color: #344054;
   font-size: 0.75rem;
   font-weight: 600;
+}
+/* In global styles.scss */
+
+// We target the overlay container to ensure we're in the right DOM layer
+.cdk-overlay-container {
+  // Use the custom class from your [matTooltipClass] attribute
+  .th-tooltip.mat-mdc-tooltip {
+    
+    // 1. Override the background using the modern MDC variable
+    --mdc-plain-tooltip-container-color: color-mix(in srgb, cadetblue 64%, transparent);
+    
+    // 2. Direct target of the class you found in the inspector
+    .mat-mdc-tooltip-surface {
+      background-color: color-mix(in srgb, cadetblue 64%, transparent);
+      backdrop-filter: blur(4px); // Adds a high-end glass effect
+      
+      // Update these to match your design goals
+      font-size: 13px;
+      line-height: 1.4;
+      padding: 8px 12px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      max-width: 250px;
+      text-align: center;
+      font-family: var(--global-font-family);
+      color: white;
+    }
+  }
 }

@@ -50,3 +50,9 @@ export interface Service {
 
     // Add other provider-related fields as needed
   }
+
+export interface ServiceWithRating extends Service {
+  averageRating: number | null;
+  reviewCount: number;
+  isProviderIdentityVerified?: boolean;
+}

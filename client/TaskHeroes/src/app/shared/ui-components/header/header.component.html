@@ -34,6 +34,11 @@
             <button class="avatar-circle" (click)="toggleMenu()">
               {{ (user.username || '').charAt(0).toUpperCase() }}
             </button>
+             @if (user.isIdentityVerified) {
+                  <div class="badge-overlay" title="Identity Verified">
+                    <i class="material-icons">verified</i>
+                  </div>
+             }
           </div>
           @if (isMenuOpen()) {
             <div class="dropdown-menu">

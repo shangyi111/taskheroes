@@ -2,10 +2,11 @@ import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FilterComponent } from './filter/filter.component';
-import { Service } from 'src/app/shared/models/service';
+import { Service, ServiceWithRating } from 'src/app/shared/models/service';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
 import { UserDataService } from 'src/app/services/user_data.service';
 import { Observable, of as observableOf, shareReplay, BehaviorSubject, combineLatest, forkJoin, map, } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
@@ -15,22 +16,19 @@ import { ReviewService } from 'src/app/services/review.service';
 import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
 import { EmptyStateComponent } from 'src/app/shared/ui-components/th-empty-state/empty-state.component';
 
-interface ServiceWithRating extends Service {
-  averageRating: number | null;
-  reviewCount: number;
-}
 @Component({
   selector: 'search',
   standalone: true,
   templateUrl: './search.component.html',
   styleUrls: ['./search.component.scss'],
   imports: [MatCardModule, MatButtonModule, FilterComponent, CommonModule, MatIconModule, MatChipsModule,
-    EmptyStateComponent, MatPaginatorModule
+    EmptyStateComponent, MatPaginatorModule, MatTooltip
   ],
 })
 export class SearchComponent {
   private searchService = inject(SearchService);
   private reviewService = inject(ReviewService);
+  private userDataService = inject(UserDataService);
   readonly userData$ = inject(UserDataService).userData$.pipe(
     shareReplay({ bufferSize: 1, refCount: true })
   );
@@ -69,35 +67,43 @@ export class SearchComponent {
         if (!serviceList || serviceList.length === 0) {
           return observableOf([]);
         }
-        return this.getServiceRatingObservables(serviceList);
+        return this.getEnrichedServiceData(serviceList);
       }),
       shareReplay(1)
   );
 
-  private getServiceRatingObservables(services: Service[]): Observable<ServiceWithRating[]> {
-    const serviceWithRatings$ = services.map(service => 
-      // Fetch only 1 item to get the metadata (totalItems & averageRating)
-      this.reviewService.getAllReviewsByServiceId(service.id!, 1, 1).pipe(
-        map(res => {
-          // Use the metadata we added to the backend/interface
-          const reviewCount = res.totalItems || 0;
-          const averageRating = reviewCount > 0 ? (res.averageRating ?? null) : null;
-          
-          return {
-            ...service,
-            averageRating,
-            reviewCount
-          } as ServiceWithRating;
-        }),
-        catchError(() => observableOf({ 
-          ...service, 
-          averageRating: null, 
-          reviewCount: 0 
-        } as ServiceWithRating))
-      )
+  private getEnrichedServiceData(services: Service[]): Observable<ServiceWithRating[]> {
+    // 1. Collect all unique provider IDs
+    const providerIds = [...new Set(services.map(s => s.userId!))];
+
+    // 2. Fetch all provider statuses in ONE call
+    const providersMap$ = this.userDataService.getUsersBatch(providerIds).pipe(
+      map(users => new Map(users.map(u => [u.id, u]))),
+      catchError(() => observableOf(new Map()))
     );
-    
-    return forkJoin(serviceWithRatings$);
+
+    // 3. Combine with ratings
+    return providersMap$.pipe(
+      switchMap(userMap => {
+        const ratingRequests$ = services.map(service => 
+          this.reviewService.getAllReviewsByServiceId(service.id!, 1, 1).pipe(
+            map(res => ({
+              ...service,
+              averageRating: res.totalItems > 0 ? (res.averageRating ?? null) : null,
+              reviewCount: res.totalItems || 0,
+              isProviderIdentityVerified: !!userMap.get(service.userId)?.isIdentityVerified
+            } as ServiceWithRating)),
+            catchError(() => observableOf({ 
+              ...service, 
+              averageRating: null, 
+              reviewCount: 0, 
+              isProviderIdentityVerified: !!userMap.get(service.userId)?.isIdentityVerified } as ServiceWithRating))
+
+          )
+        );
+        return forkJoin(ratingRequests$);
+      })
+    );
   }
 
   handleFiltersChanged(filters: any): void {

@@ -10,11 +10,13 @@ exports.getUserById = async (req, res) => {
             return res.status(404).json({ error: 'User not found.' });
         }
 
-        // CRUCIAL: Return a SANITIZED profile with only public fields
         res.status(200).json({
             id: user.id,
             username: user.username,
-            profilePicture: user.profilePicture // Needed for the messenger component
+            profilePicture: user.profilePicture,
+            isIdentityVerified:user.isIdentityVerified,
+            stripeVerificationStatus:user.stripeVerificationStatus,
+            stripeVerificationSessionId:user.stripeVerificationSessionId
             // Do NOT include password hash, email (unless public), or sensitive tokens
         });
     } catch (error) {
@@ -63,7 +65,13 @@ exports.getUsersBatch = async (req, res) => {
                 id: { [Op.in]: ids }
             },
             // Always sanitize: only return public info
-            attributes: ['id', 'username', 'profilePicture']
+            attributes: [
+                'id', 
+                'username', 
+                'profilePicture', 
+                'isIdentityVerified', 
+                'stripeVerificationStatus'
+            ]
         });
 
         res.status(200).json(users);

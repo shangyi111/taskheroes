@@ -51,12 +51,17 @@
         <section class="service-core-info">
           <div class="main-title-row">
             <h1 class="business-name">{{ s.businessName }}</h1>
-            @if (averageRating$ | async; as avg) {
-              <div class="rating-pill">
+            <div class="trust-bar">
+              <div class="rating-badge" *ngIf="s.averageRating !== null">
                 <mat-icon>star</mat-icon>
-                <span>{{ avg | number:'1.1-1' }} ({{ reviewCount$ | async }})</span>
+                <strong>{{ s.averageRating }}</strong> ({{ s.reviewCount }})
               </div>
-            }
+
+              <div *ngIf="s.isProviderIdentityVerified" class="identity-badge" 
+                  matTooltip="Identity verified by Stripe" matTooltipClass="th-tooltip">
+                <mat-icon>verified</mat-icon> Identity Verified
+              </div>
+            </div>
           </div>
 
           <div class="quick-info-bar">

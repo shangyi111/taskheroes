@@ -18,4 +18,5 @@ export interface User {
      */
     stripeVerificationSessionId?: string;
     stripeVerificationFingerprint?: string;
+    stripeVerificationStatus?: 'requires_input' | 'processing' | 'verified' | 'canceled';
 }

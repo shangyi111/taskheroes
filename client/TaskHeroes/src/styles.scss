@@ -154,3 +154,30 @@ body .mat-mdc-select-panel.mat-mdc-select-panel {
     }
   }
 }
+
+
+.cdk-overlay-container {
+ 
+  .th-tooltip.mat-mdc-tooltip {
+    
+    // 1. Override the background using the modern MDC variable
+    --mdc-plain-tooltip-container-color: color-mix(in srgb, cadetblue 64%, transparent);
+    
+    // 2. Direct target of the class you found in the inspector
+    .mat-mdc-tooltip-surface {
+      background-color: color-mix(in srgb, cadetblue 64%, transparent);
+      backdrop-filter: blur(4px); // Adds a high-end glass effect
+      
+      width:fit-content;
+      font-size: 13px;
+      line-height: 1.4;
+      // padding: 8px 12px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      max-width: 250px;
+      text-align: center;
+      font-family: var(--global-font-family);
+      color: white;
+    }
+  }
+}

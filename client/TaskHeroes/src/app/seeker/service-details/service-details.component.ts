@@ -1,11 +1,12 @@
-import { Component, OnInit, inject, signal, ViewChild, ElementRef, AfterViewInit, effect } from '@angular/core';
+import { Component, OnInit, inject, signal, effect } from '@angular/core';
 import { Location, CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
-import { Observable, of, throwError } from 'rxjs';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { Observable, of, combineLatest} from 'rxjs';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { switchMap, tap, map, shareReplay, catchError } from 'rxjs/operators';
 
@@ -15,7 +16,7 @@ import { BusinessService } from 'src/app/services/business.service';
 import { JobService } from 'src/app/services/job.service';
 import { UserDataService } from 'src/app/services/user_data.service';
 import { AuthService } from 'src/app/auth/auth.service'; // Added for Google Login
-import { Service } from 'src/app/shared/models/service';
+import { Service, ServiceWithRating } from 'src/app/shared/models/service';
 import { Job } from 'src/app/shared/models/job';
 import { Review } from 'src/app/shared/models/review';
 import { User } from 'src/app/shared/models/user';
@@ -40,11 +41,12 @@ declare var google: any;
     SeekerCalendarComponent,
     ServiceReviewsComponent,
     MatChipsModule,
+    MatTooltipModule,
   ],
 })
 export class ServiceDetailsComponent implements OnInit {
   // Observables for data streaming
-  service$: Observable<Service | null> = of(null);
+  service$: Observable<ServiceWithRating | null> = of(null);
   averageRating$: Observable<number | undefined> = of(0);
   reviewCount$: Observable<number> = of(0);
   
@@ -86,28 +88,50 @@ export class ServiceDetailsComponent implements OnInit {
     this.viewMode.set(mode);
   }
   ngOnInit(): void {
-    this.user = this.userService.getUserData();
-    this.service$ = this.route.paramMap.pipe(
-      switchMap(params => {
-        const id = params.get('serviceId');
-        if (id) {
-          this.serviceId = id;
-          return this.serviceDataService.getServiceById(parseInt(id));
-        }
-        return of(null);
-      }),
-      tap(service => {
-        if (service) {
-          this.providerId = service.userId;
-          this.fetchReviewStats(service.id!);
-          if (service.portfolio && service.portfolio.length > 0) {
-            this.activeImageUrl = service.portfolio[0].url;
-          }
-        }
-      })
-    );
-  }
+  this.user = this.userService.getUserData();
 
+  // 1. Get the base service data first
+  const baseService$ = this.route.paramMap.pipe(
+    switchMap(params => {
+      const id = params.get('serviceId');
+      return id ? this.serviceDataService.getServiceById(parseInt(id)) : of(null);
+    }),
+    shareReplay(1)
+  );
+
+  // 2. Create the unified enriched stream
+  this.service$ = baseService$.pipe(
+    switchMap(service => {
+      if (!service) return of(null);
+
+      // Fire off both trust signal requests in parallel
+      const ratings$ = this.reviewService.getAllReviewsByServiceId(service.id!).pipe(
+        catchError(() => of({ totalItems: 0, averageRating: null }))
+      );
+      
+      const provider$ = this.userService.getUsersBatch([service.userId]).pipe(
+        map(users => users[0]),
+        catchError(() => of(null))
+      );
+
+      // Combine both results into the final UI model
+      return combineLatest([ratings$, provider$]).pipe(
+        map(([reviewRes, providerRes]) => ({
+          ...service,
+          averageRating: reviewRes.averageRating ?? null,
+          reviewCount: reviewRes.totalItems || 0,
+          isProviderIdentityVerified: !!providerRes?.isIdentityVerified
+        } as ServiceWithRating))
+      );
+    }),
+    tap(service => {
+      if (service?.portfolio?.length) {
+        this.activeImageUrl = service.portfolio[0].url;
+      }
+    }),
+    shareReplay(1)
+  );
+}
   shareService(serviceName: string): void {
     const shareData = {
       title: `${serviceName} on TaskHeroes`,
@@ -186,15 +210,6 @@ export class ServiceDetailsComponent implements OnInit {
   }
 
   // --- UI Helpers ---
-
-  private fetchReviewStats(serviceId: string): void {
-    const reviews$ = this.reviewService.getAllReviewsByServiceId(serviceId).pipe(shareReplay(1));
-    this.reviewCount$ = reviews$.pipe(
-      map(res => res.totalItems || 0)
-    );
-    this.averageRating$ = reviews$.pipe(map(res => res.averageRating));
-  }
-
   /**
    * Helper to map social platform strings to Material Icons.
    * Ensures your Business Profile renders the correct branding.

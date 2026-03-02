@@ -21,6 +21,17 @@
               <span class="no-reviews">New Provider</span>
             }
           </div>
+
+          @if (service.isProviderIdentityVerified) {
+            <div class="identity-badge" 
+                matTooltip="Identity verified by Stripe wth government Id."
+                matTooltipClass="th-tooltip"
+                matTooltipPosition="above">
+              <mat-icon>verified</mat-icon>
+              <span>Identity Verified</span>
+              <mat-icon class="help-icon">help_outline</mat-icon>
+            </div>
+          }
         </div>
 
         <p class="description">{{ service.description }}</p>
