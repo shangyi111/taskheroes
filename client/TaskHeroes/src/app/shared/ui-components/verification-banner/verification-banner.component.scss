@@ -29,7 +29,7 @@
     }
 
     button {
-      background: lightseagreen;
+      background: #3f51b5;
       color: white;
       border: none;
       padding: 8px 16px;
@@ -40,7 +40,7 @@
       transition: background 0.2s;
 
       &:hover {
-        background: var(--text-primary);
+        background: color-mix(in srgb, #3f51b5 60%, gray 100%)
       }
     }
   }

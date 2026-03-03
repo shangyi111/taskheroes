@@ -35,15 +35,15 @@ exports.getReviewsByRevieweeId = async (req, res) => {
     const { page, size } = req.query;
     const { limit, offset } = getPagination(page, size);
 
-    const data = await Review.findAndCountAll({
-      where: { revieweeId, isPublished: true },
+    const responseData = await getReviewPagingDataWithStats(
+      { revieweeId, isPublished: true },
       limit,
       offset,
-      order: [['addedDate', 'DESC']],
-      include: [{ model: User, as: 'reviewer', attributes: ['username', 'profilePicture'] }]
-    });
+      page,
+      [{ model: User, as: 'reviewer', attributes: ['username', 'profilePicture'] }]
+    );
 
-    res.json(getPagingData(data, page, limit));
+    res.json(responseData);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -59,15 +59,15 @@ exports.getReviewsByReviewerId = async (req, res) => {
     const isOwner = req.user && req.user.id === parseInt(reviewerId);
     const whereClause = isOwner ? { reviewerId } : { reviewerId, isPublished: true };
 
-    const reviews = await Review.findAndCountAll({
-      where: whereClause,
+    const responseData = await getReviewPagingDataWithStats(
+      whereClause,
       limit,
       offset,
-      order: [['addedDate', 'DESC']],
-      include: [{ model: User, as: 'reviewee', attributes: ['username', 'profilePicture'] }]
-    });
+      page,
+      [{ model: User, as: 'reviewee', attributes: ['username', 'profilePicture'] }]
+    );
 
-    res.json(getPagingData(reviews, page, limit));
+    res.json(responseData);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -232,27 +232,6 @@ exports.updateReview = async (req, res) => {
   }
 };
 
-// Delete a review disabled right now becuase it should be onl performed by Shangyi Chen
-// exports.deleteReview = async (req, res) => {
-//   try {
-//     const review = await Review.findByPk(req.params.id);
-//     if (!review || review.reviewerId !== req.user.id) { // Ensure user owns the review
-//       return res.status(404).json({ message: 'Review not found or unauthorized' });
-//     }
-//     const deletedRows = await Review.destroy({
-//       where: { id: req.params.id },
-//     });
-//     if (deletedRows > 0) {
-//       res.status(204).send();
-//       sendReviewDeleted(review.id, review.userId);
-//     } else {
-//       res.status(404).json({ message: 'Review not found' });
-//     }
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// };
-
 // Get all reviews for a specific Service ID
 exports.getReviewsByServiceId = async (req, res) => {
   try {
@@ -270,39 +249,14 @@ exports.getReviewsByServiceId = async (req, res) => {
     }
 
     const { limit, offset } = getPagination(page, size);
-    const whereClause = { serviceId, 
-                          revieweeId:service.userId,
-                          isPublished: true };
+    const responseData = await getReviewPagingDataWithStats(
+      { serviceId, revieweeId: service.userId, isPublished: true },
+      limit,
+      offset,
+      page
+    );
 
-    // 2. Find all reviews matching the serviceId column
-    const [data, stats] = await Promise.all([
-      Review.findAll({
-        where: whereClause,
-        limit,
-        offset,
-        order: [['addedDate', 'DESC']],
-        raw: true
-      }),
-      Review.findOne({
-        where: whereClause,
-        attributes: [
-          [fn('COUNT', col('id')), 'totalItems'],
-          [fn('AVG', col('rating')), 'averageRating']
-        ],
-        raw: true
-      })
-    ]);
-    const totalItems = parseInt(stats.totalItems) || 0;
-    const averageRating = parseFloat(parseFloat(stats.averageRating || 0).toFixed(1));
-    const totalPages = Math.ceil(totalItems / limit);
-    const currentPage = page ? +page : 1;
-    res.json({
-      items: data,
-      totalItems,
-      totalPages,
-      currentPage,
-      averageRating
-    });
+    res.json(responseData);
   } catch (error) {
     console.log("Error inside getReviewsByServiceId:", error);
     res.status(500).json({ message: 'Failed to retrieve reviews for the service.' });
@@ -345,4 +299,37 @@ exports.checkReviewEligibility = async (job, userId) => {
       allowed: false
     });
   }
+};
+
+const getReviewPagingDataWithStats = async (whereClause, limit, offset, page, includeArray = []) => {
+  const [data, stats] = await Promise.all([
+    Review.findAll({
+      where: whereClause,
+      limit,
+      offset,
+      order: [['addedDate', 'DESC']],
+      include: includeArray
+    }),
+    Review.findOne({
+      where: whereClause,
+      attributes: [
+        [fn('COUNT', col('id')), 'totalItems'],
+        [fn('AVG', col('rating')), 'averageRating']
+      ],
+      raw: true
+    })
+  ]);
+
+  const totalItems = parseInt(stats?.totalItems || 0);
+  const averageRating = parseFloat(parseFloat(stats?.averageRating || 0).toFixed(1));
+  const totalPages = limit > 0 ? Math.ceil(totalItems / limit) : 0;
+  const currentPage = page ? +page : 1;
+
+  return {
+    items: data,
+    totalItems,
+    totalPages,
+    currentPage,
+    averageRating
+  };
 };

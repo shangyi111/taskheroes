@@ -5,23 +5,42 @@
     <header class="portfolio-hero">
       <div class="hero-content">
         <div class="avatar-wrapper">
-           <i class="material-icons">account_circle</i>
+           @if (userData()?.profilePicture) {
+             <img [src]="userData().profilePicture" class="profile-img" alt="User Avatar">
+           } @else {
+             <i class="material-icons">account_circle</i>
+           }
         </div>
-        <div class="user-meta">
-          <h1>Verified Seeker</h1>
-          <div class="trust-badges">
-            <span class="badge verified">
-              <i class="material-icons">verified</i> Verified Account
-            </span>
+        
+        @if (userData()) {
+          <div class="user-meta">
+            <h1>{{ userData().userName }}</h1>
+            
+            <div class="trust-badges">
+              @if (userData().isIdentityVerified) {
+                <span class="badge verified">
+                  <i class="material-icons">verified</i> Verified Account
+                </span>
+              }
+              @if (userData().createdAt) {
+                <span class="badge member-date">
+                  <i class="material-icons">calendar_today</i> Joined {{ userData().createdAt | date:'yyyy' }}
+                </span>
+              }
+            </div>
           </div>
-        </div>
+        }
       </div>
 
       <div class="stats-grid">
         <div class="stat-card">
-          <span class="stat-value">{{ reputationData()?.averageRating || '0.0' }}</span>
+          <div class="rating-display">
+            <span class="stat-value">{{ (reputationData()?.averageRating || 0) | number:'1.1-1' }}</span>
+            <i class="material-icons sm-star">star</i>
+          </div>
           <span class="stat-label">Average Rating</span>
         </div>
+        
         <div class="stat-card">
           <span class="stat-value">{{ reputationData()?.totalItems || 0 }}</span>
           <span class="stat-label">Total Reviews</span>
@@ -30,23 +49,25 @@
     </header>
 
     <main class="portfolio-content">
-      <h3>Professional References</h3>
-      <p class="subtitle">Feedback from past providers on TaskHeroes.</p>
+      <div class="section-header">
+        <h3>Professional References</h3>
+        <p class="subtitle">Feedback from past providers on TaskHeroes.</p>
+      </div>
 
       <div class="review-list">
         @for (review of reputationData()?.items; track review.id) {
           <div class="review-card">
             <div class="review-header">
               <div class="reviewer-info">
-                <span class="reviewer-name">{{ review.reviewer?.username }}</span>
+                <span class="reviewer-name">{{ review.reviewer?.username || 'TaskHero Provider' }}</span>
                 <span class="review-date">{{ review.addedDate | date:'MMM yyyy' }}</span>
               </div>
               <div class="rating-stars">
-                 <span class="rating-number">{{ review.rating }}</span>
+                 <span class="rating-number">{{ review.rating | number:'1.1-1' }}</span>
                  <i class="material-icons">star</i>
               </div>
             </div>
-            <p class="review-text">{{ review.comment }}</p>
+            <p class="review-text">"{{ review.comment }}"</p>
           </div>
         } @empty {
           <div class="empty-reviews">

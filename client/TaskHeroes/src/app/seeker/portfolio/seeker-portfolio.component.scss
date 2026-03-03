@@ -1,101 +1,248 @@
+// Variables for a modern, clean palette
+$text-main: #222222;
+$text-muted: #666666;
+$border-light: #eaeaea;
+$bg-light: #fdfdfd;
+$star-gold: #ffb400;
+$verified-blue: #e8f0fe;
+$verified-text: #1a73e8;
+
 .portfolio-container {
   max-width: 800px;
   margin: 0 auto;
-  padding: 40px 20px;
-  font-family: 'Inter', sans-serif;
+  padding: 2rem 1.5rem;
+  font-family: 'Inter', 'Roboto', sans-serif; // Modern sans-serif
+  color: $text-main;
+}
 
-  .loading-state {
-    text-align: center;
-    padding: 100px 0;
-    color: #718096;
-    .rotating { animation: spin 2s linear infinite; font-size: 40px; margin-bottom: 16px; }
+// --- HERO HEADER ---
+.portfolio-hero {
+  text-align: center;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid $border-light;
+
+  .hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
   }
 
-  .portfolio-hero {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 24px;
-    padding: 32px;
-    margin-bottom: 40px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+  .avatar-wrapper {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: $bg-light;
+    border: 1px solid $border-light;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
 
-    .hero-content {
+    .profile-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .material-icons {
+      font-size: 80px;
+      color: #ccc;
+    }
+  }
+
+  .user-meta {
+    h1 {
+      margin: 0;
+      font-size: 1.75rem;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+    }
+
+    .trust-badges {
       display: flex;
-      align-items: center;
-      gap: 24px;
-      margin-bottom: 32px;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-top: 0.75rem;
 
-      .avatar-wrapper i {
-        font-size: 80px;
-        color: #cbd5e0;
-      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
 
-      .user-meta {
-        h1 { font-size: 1.8rem; font-weight: 700; color: #2d3748; margin: 0; }
-        .badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 4px;
-          font-size: 0.85rem;
-          font-weight: 600;
-          padding: 4px 12px;
-          border-radius: 20px;
-          &.verified { background: #ebf8ff; color: #3182ce; margin-top: 8px; }
-          i { font-size: 16px; }
+        .material-icons {
+          font-size: 14px;
+        }
+
+        &.verified {
+          background-color: $verified-blue;
+          color: $verified-text;
+        }
+
+        &.member-date {
+          background-color: #f1f3f4;
+          color: $text-muted;
         }
       }
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      border-top: 1px solid #edf2f7;
-      padding-top: 24px;
-
-      .stat-card {
-        text-align: center;
-        .stat-value { display: block; font-size: 1.5rem; font-weight: 800; color: #2d3748; }
-        .stat-label { font-size: 0.85rem; color: #718096; text-transform: uppercase; }
-      }
-    }
-  }
-
-  .portfolio-content {
-    h3 { font-size: 1.25rem; font-weight: 700; color: #2d3748; margin-bottom: 4px; }
-    .subtitle { color: #718096; margin-bottom: 24px; font-size: 0.95rem; }
-
-    .review-card {
-      background: #f8fafc;
-      border: 1px solid #edf2f7;
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 16px;
-
-      .review-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 12px;
-
-        .reviewer-name { display: block; font-weight: 600; color: #2d3748; }
-        .review-date { font-size: 0.8rem; color: #a0aec0; }
-        
-        .rating-stars {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          background: #ffffff;
-          padding: 4px 8px;
-          border-radius: 8px;
-          border: 1px solid #e2e8f0;
-          .rating-number { font-weight: 700; color: #2d3748; }
-          i { color: #f6e05e; font-size: 18px; }
-        }
-      }
-      .review-text { font-size: 0.95rem; color: #4a5568; line-height: 1.6; margin: 0; }
     }
   }
 }
 
-@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+// --- STATS GRID ---
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 2rem;
+
+  .stat-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+
+    &:first-child {
+      border-right: 1px solid $border-light;
+    }
+
+    .rating-display {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: $text-main;
+    }
+
+    .sm-star {
+      font-size: 1.5rem;
+      color: $star-gold;
+    }
+
+    .stat-label {
+      margin-top: 0.25rem;
+      font-size: 0.8rem;
+      color: $text-muted;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+}
+
+// --- MAIN CONTENT (REVIEWS) ---
+.portfolio-content {
+  padding-top: 2rem;
+
+  .section-header {
+    margin-bottom: 2rem;
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0 0 0.25rem 0;
+    }
+
+    .subtitle {
+      color: $text-muted;
+      font-size: 0.95rem;
+      margin: 0;
+    }
+  }
+
+  .review-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .review-card {
+    padding: 1.5rem;
+    border: 1px solid $border-light;
+    border-radius: 12px;
+    background-color: #ffffff;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+
+      .reviewer-info {
+        display: flex;
+        flex-direction: column;
+
+        .reviewer-name {
+          font-weight: 600;
+          font-size: 1rem;
+        }
+
+        .review-date {
+          font-size: 0.85rem;
+          color: $text-muted;
+          margin-top: 0.15rem;
+        }
+      }
+
+      .rating-stars {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        background-color: #fff9e6;
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+
+        .rating-number {
+          font-weight: 600;
+          font-size: 0.9rem;
+          color: darken($star-gold, 15%);
+        }
+
+        .material-icons {
+          font-size: 16px;
+          color: $star-gold;
+        }
+      }
+    }
+
+    .review-text {
+      margin: 0;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: $text-main;
+      font-style: italic;
+    }
+  }
+
+  .empty-reviews {
+    text-align: center;
+    padding: 3rem 1rem;
+    background-color: $bg-light;
+    border-radius: 12px;
+    border: 1px dashed #ccc;
+    color: $text-muted;
+
+    .material-icons {
+      font-size: 40px;
+      color: #bbb;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      margin: 0;
+      font-size: 1rem;
+    }
+  }
+}

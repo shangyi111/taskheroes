@@ -65,6 +65,7 @@ exports.handleStripeWebhook = async (req, res) => {
         isIdentityVerified: true,
         identityVerifiedAt: new Date(),
         stripeVerificationFingerprint: syntheticFingerprint,
+        stripeVerificationStatus:"verified",
       }, { where: { id: userId } });
 
       console.log(`✅ User ${userId} verified successfully.`);
@@ -80,6 +81,7 @@ exports.handleStripeWebhook = async (req, res) => {
         isIdentityVerified: false,
         identityVerifiedAt: null,
         stripeVerificationFingerprint: null,
+        stripeVerificationStatus:"requires_input",
       }, { where: { id: userId } });
       break;
     }
@@ -92,6 +94,7 @@ exports.handleStripeWebhook = async (req, res) => {
         isIdentityVerified: false,
         identityVerifiedAt: null,
         stripeVerificationFingerprint: null,
+        stripeVerificationStatus:"processing"
       }, { where: { id: userId } });
       break;
     }

@@ -32,7 +32,7 @@ export class VerificationBannerComponent {
     const status = this.user()?.stripeVerificationStatus;
     if (status === 'processing') return 'Analyzing documents...';
     if (status === 'requires_input') return 'Action required for identity verification.';
-    return 'Verify identity for 2026 bookings.';
+    return 'Verify identity with stripe to earn the identity verified badge.';
   });
 
   @HostListener('window:pageshow', ['$event'])

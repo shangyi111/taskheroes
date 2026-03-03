@@ -32,6 +32,7 @@ const User = sequelize.define('User', {
   stripeVerificationStatus: {
     type: DataTypes.ENUM('requires_input', 'processing', 'verified', 'canceled'),
     allowNull:true,
+    defaultValue:null,
   },
 
   // The "Truth" flag for your Seeker Portfolio badge
