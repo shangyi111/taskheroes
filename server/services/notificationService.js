@@ -24,6 +24,24 @@ const NotificationService = {
         return null;
     }
   },
+
+  async sendContactUsEmail(name, userEmail, userSubject, message) {
+    const htmlContent = `
+      <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+        <h2 style="color: #333;">New Contact Form Submission</h2>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${userEmail}</p>
+        <p><strong>Subject:</strong> ${userSubject}</p>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+        <p style="white-space: pre-wrap; line-height: 1.6;">${message}</p>
+      </div>
+    `;
+
+    // Reusing your base function! 
+    // We send it TO your admin email, and the user's email is visible inside the body.
+    const subject = `Contact Form: ${userSubject}`;
+    return await this.sendEmail('info@task-heroes.org', subject, htmlContent);
+  },
   // 1. Sign Up
   async sendWelcomeEmail(user) {
     const html = `<h1>Welcome!</h1><p>Thanks for joining, ${user.username}. Start by browsing jobs near you.</p>`;

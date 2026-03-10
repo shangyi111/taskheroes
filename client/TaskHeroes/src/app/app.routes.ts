@@ -4,11 +4,15 @@ import {AuthGuard} from 'src/app/auth/auth.guard';
 import { SearchComponent } from 'src/app/seeker/search/search.component';
 import { RegistrationComponent } from 'src/app/auth/register/register.component';
 import {DashboardComponent} from 'src/app/shared/ui-components/dashboard/dashboard.component';
+import { AccountSettingsComponent } from './pages/account-settings/account-settings.component';
 import {JobOrdersComponent} from './provider/joborders/job_orders.component';
 import { ChatroomComponent } from './shared/ui-components/messenger/components/chatroom/chatroom.component';
 import { BusinessPageComponent } from 'src/app/provider/business_page/business_page.component';
 import { ChatroomsComponent } from './shared/ui-components/messenger/components/chatrooms/chatrooms.component';
 import { OrdersComponent } from './seeker/orders/orders.component';
+import { AboutComponent } from './pages/about/about.component';
+import { ContactComponent } from './pages/contact/contact.component';
+import { LegalComponent } from './pages/legal/legal.component';
 import { SeekerPortfolioComponent } from './seeker/portfolio/seeker-portfolio.component';
 import { ManageServiceComponent } from './provider/manage_service/manage_service.component';
 import { ServiceDetailsComponent } from './seeker/service-details/service-details.component';
@@ -59,6 +63,20 @@ export const routes: Routes = [
     path: 'user/:userId/provider/manage/:serviceId',
     component: ManageServiceComponent,
     canActivate: [AuthGuard],
+  },
+  { path: 'legal', 
+    component: LegalComponent,
+  },
+  { path: 'about', 
+    component: AboutComponent 
+  },
+  { path: 'contact', 
+    component: ContactComponent 
+  },
+  { 
+    path: 'settings', 
+    component: AccountSettingsComponent, 
+    canActivate: [AuthGuard] 
   },
   // Fallbacks
   { path: '', redirectTo: '/search', pathMatch: 'full' },

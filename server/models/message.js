@@ -38,6 +38,18 @@ const Message = sequelize.define('Message', {
     allowNull: false,
     defaultValue: DataTypes.NOW,
   },
+  attachmentUrl: {
+    type: DataTypes.STRING,
+    allowNull: true, // Nullable because most messages are just text
+  },
+  attachmentType: {
+    type: DataTypes.STRING, // e.g., 'image' or 'document'
+    allowNull: true,
+  },
+  attachmentName: {
+    type: DataTypes.STRING, // e.g., 'plumbing_quote.pdf'
+    allowNull: true,
+  },
 });
 
 module.exports = Message;

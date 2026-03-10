@@ -1,0 +1,137 @@
+$text-main: #222222;
+$text-muted: #666666;
+$border-light: #eaeaea;
+$accent-color: #ffb400; // TaskHeroes Gold
+
+:host {
+    display: flex;
+    height: 100%;
+    min-height: 0;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.legal-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+  color: $text-main;
+  font-family: 'Inter', 'Roboto', sans-serif;
+}
+
+.legal-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  border-bottom: 1px solid $border-light;
+  padding-bottom: 2rem;
+
+  h1 {
+    font-size: 2.5rem;
+    margin: 0 0 0.5rem 0;
+  }
+
+  p {
+    color: $text-muted;
+    margin: 0;
+  }
+}
+
+.legal-body {
+  display: flex;
+  gap: 4rem;
+  align-items: flex-start; // Crucial for the sticky sidebar to work
+}
+
+// Left Sidebar: The Catalog
+.legal-catalog {
+  flex: 0 0 250px;
+  position: sticky;
+  top: 100px; // Adjust this based on your header's height
+
+  nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      margin-bottom: 0.75rem;
+
+      &.catalog-title {
+        font-weight: 700;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        color: $text-muted;
+
+        &:first-child {
+          margin-top: 0;
+        }
+      }
+
+      a {
+        color: $text-main;
+        text-decoration: none;
+        cursor: pointer;
+        font-size: 0.95rem;
+        transition: color 0.2s ease;
+
+        &:hover {
+          color: $accent-color;
+        }
+      }
+    }
+  }
+}
+
+// Right Area: The Text
+.legal-content {
+  flex: 1;
+
+  section {
+    margin-bottom: 3rem;
+    // This padding pushes the content down slightly when clicked, 
+    // preventing the top header from covering the section title
+    scroll-margin-top: 100px; 
+  }
+
+  h2 {
+    font-size: 2rem;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    margin-top: 0;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    line-height: 1.7;
+    color: $text-muted;
+    margin-bottom: 1rem;
+  }
+
+  hr {
+    border: 0;
+    border-top: 1px solid $border-light;
+    margin: 4rem 0;
+  }
+}
+
+// Mobile view: Stack them instead of side-by-side
+@media (max-width: 768px) {
+  .legal-body {
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .legal-catalog {
+    position: static;
+    border-bottom: 1px solid $border-light;
+    padding-bottom: 2rem;
+    width: 100%;
+  }
+}

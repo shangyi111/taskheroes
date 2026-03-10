@@ -1,3 +1,32 @@
-<footer>
-    <p>&copy; {{ currentYear }} TaskHeroes</p>
-  </footer>
+<footer class="th-footer">
+  <div class="footer-content">
+    
+    <div class="footer-brand">
+      <h3>TaskHeroes</h3>
+      <p>Connecting reliable help with local needs.</p>
+    </div>
+
+    <nav class="footer-links">
+      <div class="link-group">
+        <h4>Company</h4>
+        <ul>
+          <li><a routerLink="/about">About Us</a></li>  
+          <li><a routerLink="/contact">Contact Us</a></li>
+        </ul>
+      </div>
+      
+      <div class="link-group">
+        <h4>Legal</h4>
+        <ul>
+          <li><a routerLink="/legal" fragment="tos-intro">Terms of Service</a></li>
+          <li><a routerLink="/legal" fragment="privacy-data">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </nav>
+    
+  </div>
+
+  <div class="footer-bottom">
+    <p>&copy; {{ currentYear }} TaskHeroes. All rights reserved.</p>
+  </div>
+</footer>

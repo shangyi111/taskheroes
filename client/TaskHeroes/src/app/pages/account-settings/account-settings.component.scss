@@ -1,0 +1,163 @@
+$text-main: #222222;
+$text-muted: #666666;
+$border-light: #eaeaea;
+$primary-color: #1a73e8;
+$success-color: #0f9d58;
+
+:host {
+    display: flex;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.settings-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+  font-family: 'Inter', 'Roboto', sans-serif;
+  color: $text-main;
+}
+
+.settings-header {
+  margin-bottom: 2.5rem;
+  h1 { font-size: 2rem; margin: 0 0 0.5rem 0; }
+  p { color: $text-muted; margin: 0; }
+}
+
+.settings-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.settings-card {
+  background: #fff;
+  border: 1px solid $border-light;
+  border-radius: 12px;
+  padding: 2rem;
+
+  .card-header {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid $border-light;
+    padding-bottom: 1rem;
+    
+    h2 { font-size: 1.25rem; margin: 0 0 0.25rem 0; }
+    p { color: $text-muted; font-size: 0.9rem; margin: 0; }
+  }
+}
+
+// Avatar Styles
+.avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+
+  .avatar-preview {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid $border-light;
+  }
+}
+
+// Verification Card Styles
+.verification-status {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid $border-light;
+
+  &.verified {
+    background-color: rgba($success-color, 0.05);
+    border-color: rgba($success-color, 0.3);
+    
+    .material-icons { color: $success-color; }
+  }
+
+  .material-icons { font-size: 2.5rem; color: $text-muted; }
+
+  .status-text {
+    flex: 1;
+    h3 { margin: 0 0 0.25rem 0; font-size: 1.1rem; }
+    p { margin: 0; color: $text-muted; font-size: 0.9rem; }
+  }
+
+  .btn-stripe {
+    background-color: #635bff; // Stripe blurple
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    &:hover { background-color: darken(#635bff, 10%); }
+  }
+}
+
+// Form Styles
+.th-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  .form-row {
+    display: flex;
+    gap: 1.5rem;
+    @media (max-width: 600px) { flex-direction: column; }
+    .form-group { flex: 1; }
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label { font-size: 0.9rem; font-weight: 500; }
+    
+    input, textarea {
+      padding: 0.75rem 1rem;
+      border: 1px solid $border-light;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+        box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+      }
+    }
+    textarea { resize: vertical; }
+    .char-count { color: $text-muted; font-size: 0.8rem; }
+  }
+
+  .divider { border: 0; border-top: 1px solid $border-light; margin: 0.5rem 0; }
+}
+
+// Buttons
+.btn-primary {
+  background-color: $primary-color;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  align-self: flex-start;
+  &:disabled { background-color: #ccc; cursor: not-allowed; }
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: $text-main;
+  padding: 0.5rem 1rem;
+  border: 1px solid $border-light;
+  border-radius: 6px;
+  cursor: pointer;
+  &:hover { background-color: #f8f9fa; }
+}

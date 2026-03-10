@@ -1,5 +1,8 @@
 @use 'abstracts' as *;
 
+:host{
+    overflow-y:auto;
+}
 /* Message Area Styles */
 .message-area {
     flex:1;

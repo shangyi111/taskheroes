@@ -4,6 +4,7 @@ const express = require('express');
 const http = require('http');
 const bodyParser = require('body-parser');
 const authRoutes = require('./auth/authRoutes');
+const contactRotues = require('./routes/contact');
 const servicesRoutes = require('./routes/services');
 const reviewsRoutes = require('./routes/reviews');
 const jobsRoutes = require('./routes/jobs');
@@ -29,6 +30,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use('/api/auth', authRoutes); // Use the authentication routes
 app.use('/api/service', servicesRoutes);
+app.use('/api/contact',contactRotues);
 app.use('/api/review', reviewsRoutes);
 app.use('/api/job',jobsRoutes);
 app.use('/api/order',orderRoutes);

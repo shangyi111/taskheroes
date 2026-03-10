@@ -9,6 +9,10 @@ export interface Message {
     readBy:string[];
     type?: 'ACTION_PENDING' | 'LEAVE_REVIEW' | 'DEFAULT'; 
     isSystem?: boolean;
+
+    attachmentUrl?: string; 
+    attachmentType?: 'image' | 'document' | 'other';
+    attachmentName?: string;
     // Add other relevant properties as needed
   }
   

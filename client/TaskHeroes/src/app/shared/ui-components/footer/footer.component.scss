@@ -1,11 +1,108 @@
-footer {
-    background-color: lightseagreen;
-    color: white;
-    text-align: center;
-    padding: 10px 0;
-    font-size: 0.9em;
-    position: fixed;
-    height: var(--global-footer-height);
-    bottom: 0;
-    width: 100%;
+// Variables to match your app's theme
+$bg-color: #fafafa;
+$border-color: #eaeaea;
+$text-main: #333333;
+$text-muted: #666666;
+$accent-color: #ffb400; // TaskHeroes Gold
+
+.th-footer {
+  background-color: $bg-color;
+  border-top: 1px solid $border-color;
+  padding: 3rem 1.5rem 1rem;
+  font-family: 'Inter', 'Roboto', sans-serif;
+  color: $text-main;
+
+  .footer-content {
+    max-width: 1000px; // Aligns with typical modern container widths
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 2rem;
+    margin-bottom: 2rem;
   }
+
+  .footer-brand {
+    max-width: 300px;
+    
+    h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    
+    p {
+      margin: 0;
+      color: $text-muted;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 4rem;
+
+    .link-group {
+      h4 {
+        margin: 0 0 1rem 0;
+        font-size: 0.95rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: $text-main;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+
+        li a {
+          text-decoration: none;
+          color: $text-muted;
+          font-size: 0.95rem;
+          transition: color 0.2s ease;
+
+          &:hover {
+            color: $accent-color;
+          }
+        }
+      }
+    }
+  }
+
+  .footer-bottom {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding-top: 1.5rem;
+    border-top: 1px solid $border-color;
+    text-align: center;
+    
+    p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: lighten($text-muted, 15%);
+    }
+  }
+}
+
+// Mobile Responsiveness
+@media (max-width: 600px) {
+  .th-footer {
+    padding: 2rem 1.5rem 1rem;
+    
+    .footer-content {
+      flex-direction: column;
+    }
+    
+    .footer-links {
+      flex-direction: column;
+      gap: 2rem;
+    }
+  }
+}

@@ -1,125 +1,151 @@
-/* --- Variables --- */
-$primary-color: #007bff;
-$message-sent-bg: #dcf8c6; // Light green/blue for sent
-$message-received-bg: #ffffff; // White/light gray for received
-$timestamp-color: #888;
-$border-color: #e0eeef; // Light border for received messages
+// Use your specific theme color
+$primary-color: cadetblue; 
+$text-light: #ffffff;
+$partner-bg: #f4f5f7; // Slightly softer gray
+$text-dark: #2d3748;
 
-:host {
-    display: block; // Ensures the component takes full width
-    margin-bottom: 12px;
-}
+.message-wrapper {
+  display: flex;
+  margin-bottom: 1.25rem;
+  align-items: flex-end;
+  gap: 0.5rem;
 
-.message-container {
-    display: flex;
-    max-width: 80%; /* Limit the message bubble's width */
-    align-items: flex-end; /* Aligns avatar/timestamp with the bottom of the bubble */
+  /* --- MY MESSAGES --- */
+  &.message-mine {
+    flex-direction: row-reverse;
     
-    /* --- RECEIVED (LEFT ALIGNMENT) --- */
-    &.received {
-        margin-right: auto; /* Pushes the entire container to the left */
-        justify-content: flex-start;
+    .message-bubble {
+      background-color: $primary-color;
+      color: $text-light;
+      border-bottom-right-radius: 4px;
+
+      &.system-bubble {
+        background-color: rgba(95, 158, 160, 0.85); // cadetblue with opacity
+      }
+
+      .attachment-container { border-top-color: rgba(255, 255, 255, 0.2); }
+      .document-link {
+        background: rgba(255, 255, 255, 0.15);
+        color: $text-light;
+        &:hover { background: rgba(255, 255, 255, 0.25); }
+      }
     }
     
-    /* --- SENT (RIGHT ALIGNMENT) --- */
-    &.sent {
-        margin-left: auto; /* Pushes the entire container to the right */
-        justify-content: flex-end;
+    .message-time { text-align: right; }
+  }
+
+  /* --- PARTNER MESSAGES --- */
+  &.message-partner {
+    flex-direction: row;
+
+    .message-bubble {
+      background-color: $partner-bg;
+      color: $text-dark;
+      border-bottom-left-radius: 4px;
+
+      &.system-bubble {
+        background-color: #e2e8f0; // A slightly darker, cooler gray for system alerts
+      }
+
+      .attachment-container { border-top-color: rgba(0, 0, 0, 0.08); }
+      .document-link {
+        background: rgba(0, 0, 0, 0.05);
+        color: $text-dark;
+        &:hover { background: rgba(0, 0, 0, 0.1); }
+      }
     }
-
-    // Global System Overlay
-    &.system-message {
-        .message-bubble {
-            background-color: #f8fafc; // Neutral background
-            color: #64748b;            // Muted slate text
-            border: 1px solid #e2e8f0;
-            box-shadow: none;
-            padding: 6px 12px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-
-            .message-text {
-                font-size: 11px;
-                font-weight: 600;
-                text-transform: none; // Keep it readable
-                letter-spacing: 0;
-            }
-
-            .system-icon {
-                font-size: 14px;
-                color: #94a3b8;
-            }
-        }
-
-        // Keep the timestamps small and muted
-        .message-timestamp {
-            text-align: inherit; 
-            opacity: 0.7;
-        }
-    }
+  }
 }
 
-/* --- Avatar Styling (Received only) --- */
-.message-avatar {
-    margin-right: 8px;
-    margin-bottom: 4px; /* Slight lift to align visually with the bubble */
-    
-    .avatar-img {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 1px solid #ddd;
-    }
+.message-avatar img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: #eee; // Fallback color if image breaks
 }
 
-.message-bubble-group {
-    display: flex;
-    flex-direction: column;
+.message-content {
+  max-width: 75%;
+  display: flex;
+  flex-direction: column;
 }
 
-/* --- Bubble Styling --- */
+.message-sender {
+  font-size: 0.75rem;
+  color: #718096;
+  margin-bottom: 0.25rem;
+  margin-left: 0.25rem;
+}
+
 .message-bubble {
-    padding: 10px 14px;
-    line-height: 1.4;
-    word-wrap: break-word;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  padding: 0.75rem 1rem;
+  border-radius: 18px;
+  position: relative;
+  word-wrap: break-word;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  
+  &.system-bubble {
+    font-style: italic;
+    padding: 0.6rem 1rem; // Slightly slimmer padding for system alerts
     
     .message-text {
-        margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-    
-    /* Sent Message Look */
-    .message-container.sent & {
-        background-color: $message-sent-bg;
-        color: #333;
-        border-radius: 18px 18px 4px 18px; /* Sharp corner on the bottom-right */
+    .system-icon {
+      font-size: 1.1rem;
+      opacity: 0.7;
     }
-    
-    /* Received Message Look */
-    .message-container.received & {
-        background-color: $message-received-bg;
-        color: #333;
-        border: 1px solid $border-color;
-        border-radius: 18px 18px 18px 4px; /* Sharp corner on the bottom-left */
-    }
+  }
 }
 
-/* --- Timestamp Styling --- */
-.message-timestamp {
-    font-size: 0.7rem;
-    color: $timestamp-color;
-    margin-top: 2px;
-    
-    /* Aligned with the bubble */
-    .message-container.sent & {
-        text-align: right;
-        margin-right: 5px;
-    }
+.message-text {
+  margin: 0;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
 
-    .message-container.received & {
-        text-align: left;
-        margin-left: 5px;
+.message-time {
+  font-size: 0.7rem;
+  color: #a0aec0;
+  margin-top: 0.25rem;
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
+}
+
+/* --- ATTACHMENTS --- */
+.attachment-container {
+  border-top: 1px solid transparent; 
+
+  .attachment-image {
+    max-width: 100%;
+    border-radius: 8px;
+    max-height: 80px;
+    object-fit: cover;
+    display: block;
+    transition: opacity 0.2s;
+    &:hover { opacity: 0.9; cursor: pointer; }
+  }
+  
+  .document-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    padding: 10px 12px;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+    
+    .material-icons { font-size: 1.2rem; }
+    
+    span {
+      font-size: 0.9rem;
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
+  }
 }

@@ -34,8 +34,26 @@
         }
         <footer class="message-input-area">
             <div class="input-actions">
-                <i class="material-icons">attach_file</i>
-                <i class="material-icons">mic</i>
+               <input 
+                    type="file" 
+                    #fileAttachmentInput 
+                    (change)="onFileAttached($event)" 
+                    style="display: none;"
+                    accept="image/png, image/jpeg, image/webp, application/pdf, .doc, .docx"
+                >
+                
+                <button 
+                    type="button" 
+                    class="icon-btn" 
+                        (click)="fileAttachmentInput.click()" 
+                        [disabled]="isUploadingAttachment()"
+                        style="background: none; border: none; cursor: pointer; color: #666;"
+                    >
+                    <i class="material-icons">
+                        {{ isUploadingAttachment() ? 'hourglass_empty' : 'attach_file' }}
+                    </i>
+                </button>
+                <i class="material-icons" style="color: #666; cursor: pointer;">mic</i>
             </div>
             <textarea
                 [(ngModel)]="newMessageContent"

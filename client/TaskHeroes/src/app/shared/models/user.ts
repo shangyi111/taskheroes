@@ -19,4 +19,11 @@ export interface User {
     stripeVerificationSessionId?: string;
     stripeVerificationFingerprint?: string;
     stripeVerificationStatus?: 'requires_input' | 'processing' | 'verified' | 'canceled' | null;
+    profile?: UserProfile;
+}
+
+export interface UserProfile {
+  legalFirstName?: string;
+  legalLastName?: string;
+  phoneNumber?: string;
 }

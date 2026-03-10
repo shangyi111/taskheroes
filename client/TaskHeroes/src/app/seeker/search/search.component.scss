@@ -1,3 +1,11 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  // Use dvh (dynamic viewport height) to handle mobile browser bars correctly
+  min-height: 0;
+  overflow-y:auto; 
+  width: 100%;
+}
 /* Styles for the Filter Component */
 th-filter {
   display: block; /* Make it take full width */
@@ -156,32 +164,4 @@ mat-card-subtitle {
   color: #344054;
   font-size: 0.75rem;
   font-weight: 600;
-}
-/* In global styles.scss */
-
-// We target the overlay container to ensure we're in the right DOM layer
-.cdk-overlay-container {
-  // Use the custom class from your [matTooltipClass] attribute
-  .th-tooltip.mat-mdc-tooltip {
-    
-    // 1. Override the background using the modern MDC variable
-    --mdc-plain-tooltip-container-color: color-mix(in srgb, cadetblue 64%, transparent);
-    
-    // 2. Direct target of the class you found in the inspector
-    .mat-mdc-tooltip-surface {
-      background-color: color-mix(in srgb, cadetblue 64%, transparent);
-      backdrop-filter: blur(4px); // Adds a high-end glass effect
-      
-      // Update these to match your design goals
-      font-size: 13px;
-      line-height: 1.4;
-      padding: 8px 12px;
-      border-radius: 6px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      max-width: 250px;
-      text-align: center;
-      font-family: var(--global-font-family);
-      color: white;
-    }
-  }
 }

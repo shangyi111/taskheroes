@@ -7,4 +7,6 @@ router.post('/batch', usersController.getUsersBatch);
 // Get a specific user by userId
 router.get('/:id', usersController.getUserById);
 
+router.put('/me/security', usersController.updateSecurity);
+
 module.exports = router;

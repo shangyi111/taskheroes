@@ -19,6 +19,7 @@ export class HeaderComponent {
   private userDataService = inject(UserDataService);
   
   readonly userData$: Observable<User | null> = this.userDataService.userData$;
+  readonly currentRole = this.userDataService.userRoleSignal;
   
   // Signal to manage the dropdown visibility
   isMenuOpen = signal(false);
@@ -41,9 +42,11 @@ export class HeaderComponent {
       this.logout();
       return;
     }
-    const newRole = currentUser.role === 'seeker' ? 'provider' : 'seeker';
+    const activeRole = this.currentRole();
+    const newRole = activeRole === 'seeker' ? 'provider' : 'seeker';
     localStorage.setItem('preferred_role', newRole);
-    this.userDataService.updateUserData({ ...currentUser, role: newRole });
+    this.userDataService.setUserRole(newRole);
+    
     this.isMenuOpen.set(false); // Close menu after switching
 
     // Redirect to the role's primary context

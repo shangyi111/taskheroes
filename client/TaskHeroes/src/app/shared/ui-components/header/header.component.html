@@ -9,7 +9,7 @@
         @if (userData$ | async; as user) {
           <a [routerLink]="getMessagesLink(user)" routerLinkActive="active-link">Messages</a>
 
-          @if (user.role === 'provider') {
+          @if (currentRole() === 'provider') {
             <a [routerLink]="['/provider', user.id]" 
             routerLinkActive="active-link"
             [routerLinkActiveOptions]="{ exact: true }">Listings</a>
@@ -27,7 +27,7 @@
                   [class.is-provider]="user.role === 'provider'"
                   (click)="toggleRole(user)">
             <span class="icon">⇄</span>
-            Switch to {{ user.role === 'seeker' ? 'Provider' : 'Seeker' }}
+            Switch to {{ currentRole() === 'seeker' ? 'Provider' : 'Seeker' }}
           </button>
 
           <div class="profile-container">
@@ -48,12 +48,8 @@
               </div>
 
               <div class="menu-items">
-                <a [routerLink]="['/user', user.id, 'profile']" (click)="isMenuOpen.set(false)" class="menu-item">
+                <a [routerLink]="['settings']" (click)="isMenuOpen.set(false)" class="menu-item">
                   <span class="item-icon">👤</span> Account Settings
-                </a>
-                
-                <a [routerLink]="['/user', user.id, 'security']" (click)="isMenuOpen.set(false)" class="menu-item">
-                  <span class="item-icon">🔒</span> Password & Security
                 </a>
 
                 <div class="menu-divider"></div>

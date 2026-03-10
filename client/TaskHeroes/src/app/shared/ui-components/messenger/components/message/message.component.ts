@@ -24,7 +24,7 @@ export class MessageComponent implements OnInit {
   isSentMessage = computed(() => this.currentUserId === this.message.senderId);
 
   senderAvatarUrl = computed(() => {
-    if (this.isSentMessage() || this.isSystemMessage()) return null;
+    if (this.isSentMessage()) return null;
     return this.chatPartnerAvatarUrl || 'assets/img/default-avatar.png';
   });
 

@@ -1,0 +1,95 @@
+<div class="legal-container">
+  <div class="legal-header">
+    <h1>Legal Information</h1>
+    <p>Last updated: March 2026</p>
+  </div>
+
+  <div class="legal-body">
+    <aside class="legal-catalog">
+      <nav>
+        <ul>
+          <li class="catalog-title">Terms of Service</li>
+          <li><a (click)="scrollToSection('tos-intro')">1. Introduction</a></li>
+          <li><a (click)="scrollToSection('tos-role')">2. Platform Role</a></li>
+          <li><a (click)="scrollToSection('tos-accounts')">3. Accounts & Verification</a></li>
+          <li><a (click)="scrollToSection('tos-payments')">4. Payments</a></li>
+          <li><a (click)="scrollToSection('tos-liability')">5. Limitation of Liability</a></li>
+          
+          <li class="catalog-title">Privacy Policy</li>
+          <li><a (click)="scrollToSection('privacy-data')">1. Data We Collect</a></li>
+          <li><a (click)="scrollToSection('privacy-usage')">2. How We Use Data</a></li>
+          <li><a (click)="scrollToSection('privacy-sharing')">3. Information Sharing</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="legal-content">
+      
+      <section id="tos-intro">
+        <h2>Terms of Service</h2>
+        <h3>1. Introduction</h3>
+        <p>Welcome to TaskHeroes. These Terms of Service ("Terms") govern your access to and use of the TaskHeroes website and platform. By accessing or using our platform, you agree to be bound by these Terms. If you do not agree to these Terms, please do not use our services.</p>
+      </section>
+
+      <section id="tos-role">
+        <h3>2. Our Role as a Facilitator</h3>
+        <p>TaskHeroes is a communications platform that enables connections between individuals seeking services ("Seekers") and individuals or businesses providing services ("Providers"). <strong>TaskHeroes does not perform the services and does not employ the Providers.</strong></p>
+        <p>We act solely as a venue to allow Seekers and Providers to discover one another and communicate. Any agreement formed for the provision of services is solely between the Seeker and the Provider. TaskHeroes is not a party to any such contract and disclaims all liability arising from or related to any agreements entered into between users.</p>
+      </section>
+
+      <section id="tos-accounts">
+        <h3>3. User Accounts and Identity Verification</h3>
+        <p>You must be at least 18 years old to create an account. You agree to provide accurate, current, and complete information during the registration process and to keep your account information updated.</p>
+        <p>To promote trust and safety, TaskHeroes utilizes Stripe Identity to offer optional identity verification for our users. By choosing to verify your identity to earn a verification badge, you agree to Stripe's data collection and verification processes. TaskHeroes does not store your raw identification documents; we only receive a confirmation of your verification status. You can learn more about how this secure process works at <a href="https://stripe.com/identity" target="_blank" rel="noopener noreferrer">Stripe Identity</a>.</p>
+      </section>
+
+      <section id="tos-payments">
+        <h3>4. Payments and Transactions</h3>
+        <p><strong>TaskHeroes does not process, handle, or guarantee payments for services.</strong> Our platform is entirely free to use for searching, booking, and communicating.</p>
+        <p>All financial transactions, negotiations regarding pricing, and the exchange of funds for services rendered are conducted entirely off-platform directly between the Seeker and the Provider. TaskHeroes will not mediate payment disputes, issue refunds, or be held responsible for unpaid invoices or unsatisfactory work. Users are strongly encouraged to agree on payment terms, methods, and milestones prior to the commencement of any work.</p>
+      </section>
+
+      <section id="tos-liability">
+        <h3>5. Limitation of Liability</h3>
+        <p>To the fullest extent permitted by law, TaskHeroes shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly, or any loss of data, use, goodwill, or other intangible losses, resulting from (a) your access to or use of or inability to access or use the platform; (b) any conduct or content of any third party on the platform, including without limitation, any defamatory, offensive, or illegal conduct of other users or third parties; or (c) the quality, safety, or legality of the services advertised or provided by Providers.</p>
+      </section>
+
+      <hr>
+
+      <section id="privacy-data">
+        <h2>Privacy Policy</h2>
+        <h3>1. Data We Collect</h3>
+        <p>When you use TaskHeroes, we collect information you provide directly to us. This includes:</p>
+        <ul>
+          <li><strong>Account Information:</strong> Your name, email address, password, and profile picture.</li>
+          <li><strong>Profile Data:</strong> Information you choose to add to your profile, such as your location, skills, bio, and portfolio images.</li>
+          <li><strong>Communications:</strong> Messages, job requests, and reviews you send to other users via our in-platform chat and review systems.</li>
+          <li><strong>Verification Data:</strong> If you choose to undergo identity verification, you will provide sensitive documents directly to Stripe. We only collect the resulting "Verified" status provided back to us by Stripe.</li>
+        </ul>
+      </section>
+
+      <section id="privacy-usage">
+        <h3>2. How We Use Data</h3>
+        <p>We use the information we collect to:</p>
+        <ul>
+          <li>Provide, maintain, and improve the TaskHeroes platform.</li>
+          <li>Facilitate communication between Seekers and Providers.</li>
+          <li>Send you technical notices, updates, security alerts, and support messages.</li>
+          <li>Monitor and analyze trends, usage, and activities in connection with our platform.</li>
+          <li>Detect, investigate, and prevent fraudulent transactions and other illegal activities to protect the rights and property of TaskHeroes and our users.</li>
+        </ul>
+      </section>
+
+      <section id="privacy-sharing">
+        <h3>3. Information Sharing</h3>
+        <p>TaskHeroes values your privacy. <strong>We do not sell your personal data to third parties.</strong> We may share your information in the following circumstances:</p>
+        <ul>
+          <li><strong>With Other Users:</strong> When you send a message, request a booking, or leave a review, your public profile information (such as your username and avatar) is shared with the interacting user.</li>
+          <li><strong>With Service Providers:</strong> We share data with third-party vendors who need access to such information to carry out work on our behalf, such as our email notification provider (Resend) and identity verification partner (Stripe).</li>
+          <li><strong>For Legal Reasons:</strong> We may share information if we believe disclosure is in accordance with, or required by, any applicable law, regulation, or legal process.</li>
+        </ul>
+      </section>
+
+    </main>
+  </div>
+</div>

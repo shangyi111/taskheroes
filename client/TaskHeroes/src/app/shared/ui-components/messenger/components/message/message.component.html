@@ -1,19 +1,43 @@
-<div 
-  class="message-container"
-  [class.sent]="isSentMessage()"
-  [class.received]="!isSentMessage()"
-  [class.system-message]="isSystemMessage()">
+<div class="message-wrapper" [ngClass]="{'message-mine': isSentMessage(), 'message-partner': !isSentMessage()}">
   
-  <div *ngIf="!isSentMessage()" class="message-avatar">
-    <img [src]="senderAvatarUrl() || 'assets/img/default-avatar.png'" alt="Sender Avatar" class="avatar-img">
+  <div class="message-avatar" *ngIf="!isSentMessage()">
+    <img [src]="senderAvatarUrl()" alt="Avatar">
   </div>
-  
-  <div class="message-bubble-group">
-    <div class="message-bubble">
-      <i *ngIf="isSystemMessage()" class="material-icons system-icon">info_outline</i>
-      <p class="message-text">{{ displayText() }}</p>
+
+  <div class="message-content">
+    <div class="message-sender" *ngIf="!isSentMessage()">
+      {{ message.senderUsername }}
     </div>
-    <div class="message-timestamp">
+
+    <div class="message-bubble" [ngClass]="{'system-bubble': isSystemMessage()}">
+      
+      @if (displayText()) {
+        <p class="message-text">
+          <i class="material-icons system-icon" *ngIf="isSystemMessage()">bolt</i>
+          {{ displayText() }}
+        </p>
+      }
+
+      @if (message.attachmentUrl) {
+        <div class="attachment-container" [style.margin-top]="displayText() ? '0.5rem' : '0'">
+          
+          @if (message.attachmentType === 'image') {
+            <a [href]="message.attachmentUrl" target="_blank" rel="noopener noreferrer">
+              <img [src]="message.attachmentUrl" alt="Attachment" class="attachment-image">
+            </a>
+          } 
+          
+          @else {
+            <a [href]="message.attachmentUrl" target="_blank" rel="noopener noreferrer" class="document-link">
+              <i class="material-icons">insert_drive_file</i>
+              <span>{{ message.attachmentName || 'Download File' }}</span>
+            </a>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="message-time">
       {{ message.createdAt | date:'shortTime' }}
     </div>
   </div>

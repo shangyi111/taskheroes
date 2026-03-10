@@ -17,12 +17,54 @@ export class UserDataService {
     username: 'Guest'
   };
 
+  private readonly PREFERRED_ROLE_KEY = 'preferred_role';
+
+  // 2. Create the Role Subject & Signal (Add this below your userSignal)
+  private userRoleSubject = new BehaviorSubject<string>(
+    localStorage.getItem(this.PREFERRED_ROLE_KEY) || 'seeker'
+  );
+  
+  userRole$ = this.userRoleSubject.asObservable().pipe(
+    shareReplay({ bufferSize: 1, refCount: true })
+  );
+  userRoleSignal = toSignal(this.userRole$, { 
+    initialValue: localStorage.getItem(this.PREFERRED_ROLE_KEY) || 'seeker' 
+  });
+
+  // 3. Add this method so your toggle buttons can switch the role globally
+  setUserRole(role: 'seeker' | 'provider'): void {
+    localStorage.setItem(this.PREFERRED_ROLE_KEY, role);
+    this.userRoleSubject.next(role);
+  }
+
   private http = inject(HttpClient);
   private userDataSubject = new BehaviorSubject<User|null>(this.GUEST_USER);
-  userData$ = this.userDataSubject.asObservable().pipe(
-      shareReplay({ bufferSize: 1, refCount: true })
-  );
+  userData$ = this.userDataSubject.asObservable();
   userSignal = toSignal(this.userData$, { initialValue: this.GUEST_USER });
+
+  constructor() {
+    // THE FIX: Wake up and hydrate using ONLY the token!
+    this.hydrateFromToken();
+  }
+
+  private hydrateFromToken(): void {
+    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+    if (!token) return;
+
+    try {
+      // 1. Decode the token payload securely (without needing a backend call just yet)
+      const decodedPayload = JSON.parse(atob(token.split('.')[1]));
+      const userId = decodedPayload.id;
+
+      if (userId) {
+        // 2. Fetch the fresh, secure profile from the backend
+        this.fetchAndSyncProfile(userId).subscribe();
+      }
+    } catch (e) {
+      console.error('Failed to decode token on startup', e);
+      this.removeUserData(); // Clear bad tokens
+    }
+  }
 
   setUserData(userData: User): void {
     this.userDataSubject.next(userData);
@@ -40,7 +82,7 @@ export class UserDataService {
   }
 
   removeUserData():void{
-    this.userDataSubject.next(null);
+    this.userDataSubject.next(this.GUEST_USER);
     localStorage.removeItem(AUTH_TOKEN_KEY);
   }
 
@@ -97,6 +139,43 @@ export class UserDataService {
       catchError(err => {
         console.error('Failed to fetch batch users', err);
         return of([]); // Return empty array on failure
+      })
+    );
+  }
+
+  /**
+   * Updates the core profile and user details
+   */
+  updateUserProfile(profileData: any): Observable<any> {
+    // Hits the exports.updateMe route you set up in your backend
+    return this.http.put(`${API_BASE_URL}/me`, profileData).pipe(
+      tap((response: any) => {
+        // If the backend returns the updated user, sync it to the frontend state
+        if (response && response.user) {
+          this.updateUserData({
+            username: response.user.username,
+            email: response.user.email,
+            profile: response.profile // The new UserProfile data
+          });
+        }
+      }),
+      catchError(err => {
+        console.error('Failed to update profile', err);
+        throw err;
+      })
+    );
+  }
+
+  /**
+   * Updates account security (Password)
+   * Note: You will need to create a specific backend route (e.g., PUT /api/user/me/security)
+   * in your userController.js to handle bcrypt password hashing securely.
+   */
+  updateUserSecurity(securityData: any): Observable<any> {
+    return this.http.put(`${API_BASE_URL}/me/security`, securityData).pipe(
+      catchError(err => {
+        console.error('Failed to update security settings', err);
+        throw err;
       })
     );
   }

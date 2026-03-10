@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed} from '@angular/core';
 import { Router,ActivatedRoute,NavigationEnd } from '@angular/router';
-import { Subscription, filter, map } from 'rxjs';
+import { Subscription, filter, map, distinctUntilChanged, combineLatest } from 'rxjs';
 import { ChatroomService } from '../../../../../services/chatroom.service';
 import { Chatroom } from '../../../../models/chatroom';
 import { User} from '../../../../models/user';
@@ -25,10 +25,12 @@ export class ChatroomsComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private chatRoomservice = inject(ChatroomService);
   private userDataService = inject(UserDataService);
+  private activeUserId: string | null = null;
+  private activeRole: string | null = null;
 
   chatrooms = this.chatRoomservice.chatrooms;
-  user = signal<User | null>(null);
-  currentUserRole = signal<string | null>(null);
+  user = this.userDataService.userSignal;
+  currentUserRole = this.userDataService.userRoleSignal;
   activeChatId = signal<string | null>(null);
 
   //pagination
@@ -44,14 +46,16 @@ export class ChatroomsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.captureInitialRouteId();
     this.trackActiveChatFromUrl();
-    this.initUserAndChatrooms(); 
+    this.initDataFlow();
+    // this.initUserAndChatrooms(); 
   }
 
   onBottomReached(): void {
     const role = this.currentUserRole();
-    if (role && !this.isLoading() && this.hasMore()) {
+    const userId = this.user()?.id;
+    if (role && userId && !this.isLoading() && this.hasMore()) {
       console.log('Sensor triggered: loading page', this.currentPage);
-      this.loadChatrooms(role);
+      this.loadChatrooms(role, userId);
     }
   }
 
@@ -95,35 +99,73 @@ export class ChatroomsComponent implements OnInit, OnDestroy {
       })
     );
   }
-  private initUserAndChatrooms(): void {
+  // private initUserAndChatrooms(): void {
+  //   this.subscriptions.push(
+  //     this.userDataService.userData$.subscribe(user => {
+  //       if (!user) return;
+
+  //       // RESET PAGINATION if user/role changes to avoid data pollution
+  //       if (this.user()?.id !== user.id || this.currentUserRole() !== user.role) {
+  //         this.chatRoomservice.updateChatroomsList([]);
+  //         this.currentPage = 1;
+  //         this.hasMore.set(true);
+  //       }
+
+  //       this.user.set(user); 
+  //       this.currentUserRole.set(user?.role || null); 
+  //       const userId = user?.id;
+  //       const role = user?.role;
+  //       if (userId && role) {
+  //         this.loadChatrooms(role);
+  //       } else {
+  //         console.warn('User not logged in');
+  //       }
+  //     })
+  //   );
+  // }
+
+  private initDataFlow(): void {
     this.subscriptions.push(
-      this.userDataService.userData$.subscribe(user => {
-        if (!user) return;
-
-        // RESET PAGINATION if user/role changes to avoid data pollution
-        if (this.user()?.id !== user.id || this.currentUserRole() !== user.role) {
-          this.chatRoomservice.updateChatroomsList([]);
-          this.currentPage = 1;
-          this.hasMore.set(true);
+      combineLatest([
+        this.userDataService.userData$,
+        this.userDataService.userRole$
+      ]).subscribe(([user, role]) => {
+        
+        // Wait for a real user ID from the backend hydration
+        if (!user || !user.id || user.id === 'guest') {
+          return; 
         }
 
-        this.user.set(user); 
-        this.currentUserRole.set(user?.role || null); 
-        const userId = user?.id;
-        const role = user?.role;
-        if (userId && role) {
-          this.loadChatrooms(role);
-        } else {
-          console.warn('User not logged in');
+        const normalizedRole = role.toLowerCase();
+
+        // Stop if we already loaded this exact User + Role combo.
+        // (Prevents infinite loops on refresh)
+        if (this.activeUserId === user.id && this.activeRole === normalizedRole) {
+          return; 
         }
+
+        console.log(`✅ Ready! Fetching chatrooms for User: ${user.id} as Role: ${normalizedRole}`);
+
+        // Lock in the current state
+        this.activeUserId = user.id;
+        this.activeRole = normalizedRole;
+        
+        // Reset the slate
+        this.chatRoomservice.updateChatroomsList([]);
+        this.currentPage = 1;
+        this.hasMore.set(true);
+        this.isLoading.set(false);
+
+        // Fetch the data!
+        this.loadChatrooms(normalizedRole, user.id);
       })
     );
   }
 
-
-  loadChatrooms(role: string): void {
-    const userId = this.user()?.id;
-    if (!userId) return;
+  loadChatrooms(role: string, userId:string): void {
+    if (!userId || this.isLoading() || !this.hasMore()) {
+      return; 
+    }
 
     this.isLoading.set(true); // Start loading
 

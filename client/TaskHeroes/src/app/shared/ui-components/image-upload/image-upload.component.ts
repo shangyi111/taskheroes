@@ -40,7 +40,7 @@ export class ImageUploadComponent {
 
       // 2. Upload to Cloudinary via Backend
       this.isUploading = true;
-      this.portfolioService.uploadImage(file,this.folder).subscribe({
+      this.portfolioService.uploadTempImage(file,this.folder).subscribe({
         next: (res: Image) => {
           this.isUploading = false;
           this.imageUploaded.emit(res); // Send the new CDN URL to the parent form

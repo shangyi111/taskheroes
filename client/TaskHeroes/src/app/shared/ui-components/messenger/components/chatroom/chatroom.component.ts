@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChatroomService } from 'src/app/services/chatroom.service';
 import { UserDataService } from 'src/app/services/user_data.service';
+import { PortfolioService } from 'src/app/services/portfolio.service';
 import { JobService } from 'src/app/services/job.service';
 import { ReviewService } from 'src/app/services/review.service';
 import { BusinessService } from 'src/app/services/business.service';
@@ -44,6 +45,7 @@ export class ChatroomComponent implements OnInit, OnDestroy {
   private chatroomService = inject(ChatroomService);
   private userDataService = inject(UserDataService);
   private jobService = inject(JobService);
+  private portfolioService = inject(PortfolioService);
   private reviewService = inject(ReviewService);
   private businessService = inject(BusinessService);
   private route = inject(ActivatedRoute);
@@ -68,6 +70,7 @@ export class ChatroomComponent implements OnInit, OnDestroy {
   showScrollToBottomBtn = signal(false);
   hasUnreadAtBottom = signal(false);
   markCurrentRoomAsRead = signal(false);
+  isUploadingAttachment = signal(false);
 
   private subscriptions: Subscription = new Subscription();
   private chatroomMessageSubscription: Subscription | undefined;
@@ -143,10 +146,10 @@ export class ChatroomComponent implements OnInit, OnDestroy {
  // 3. Extract the loading logic to a helper
   private loadInitialData(id: string): void {
     this.userDataService.userData$.pipe(
-      filter(Boolean),
+      filter(user => !!user && !!user.id),
       take(1),
       tap(user => this.currentUser.set(user)),
-      switchMap(user => this.loadChatroomAndMessages(id, user.id!))
+      switchMap(user => this.loadChatroomAndMessages(id, user!.id!))
     ).subscribe({
       next: () => {
         this.setupRealtimeMessaging(id);
@@ -261,7 +264,13 @@ export class ChatroomComponent implements OnInit, OnDestroy {
 
     this.subscriptions.add(this.chatroomMessageSubscription);
   }
-  sendMessage(customMessage?: string, type: 'ACTION_PENDING' | 'LEAVE_REVIEW' | 'DEFAULT' = 'DEFAULT', isSystem: boolean = false): void {
+  sendMessage(customMessage?: string, 
+    type: 'ACTION_PENDING' | 'LEAVE_REVIEW' | 'DEFAULT' = 'DEFAULT', 
+    isSystem: boolean = false,
+    attachmentUrl?: string,
+    attachmentType?: 'image' | 'document' | 'other',
+    attachmentName?: string
+  ): void {
     if (!this.currentUser()) {
       this.error.set('User not logged in. Please sign in to send messages.');
       return;
@@ -271,9 +280,9 @@ export class ChatroomComponent implements OnInit, OnDestroy {
     const userId = this.currentUser()!.id;
     const chatroomId = this.chatroomId();
 
-    if (messageText && userId && chatroomId) {
+    if ((messageText || attachmentUrl) && userId && chatroomId) {
 
-      const messageToSend = {
+      const messageToSend : any = {
         chatroomId: chatroomId,
         senderId: userId,
         text: messageText,
@@ -281,6 +290,12 @@ export class ChatroomComponent implements OnInit, OnDestroy {
         type: type, 
         isSystem: isSystem
       };
+
+      if (attachmentUrl) {
+        messageToSend.attachmentUrl = attachmentUrl;
+        messageToSend.attachmentType = attachmentType;
+        messageToSend.attachmentName = attachmentName;
+      }
 
       const tempMessageId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
       const optimisticMessage: Message = {
@@ -290,6 +305,8 @@ export class ChatroomComponent implements OnInit, OnDestroy {
         updatedAt: new Date(),
         readBy: [userId],
       };
+
+      
       this.messages.update(msgs => [...msgs, optimisticMessage]);
       if (!customMessage) {
         this.newMessageContent.set('');
@@ -340,14 +357,15 @@ export class ChatroomComponent implements OnInit, OnDestroy {
   }
 
   backToChatList(): void {
-  const user = this.currentUser();
-  if (user?.id && user?.role) {
-    // Navigates to /seeker/:id/chatrooms or /provider/:id/chatrooms
-    this.router.navigate([`/${user.role}`, user.id, 'chatrooms']);
-  } else {
-    this.router.navigate(['/search']); // Safe fallback
+    const user = this.currentUser();
+    const currentRole = this.userDataService.userRoleSignal();
+    if (user?.id && currentRole) {
+      // Navigates to /seeker/:id/chatrooms or /provider/:id/chatrooms
+      this.router.navigate([`/${currentRole}`, user.id, 'chatrooms']);
+    } else {
+      this.router.navigate(['/search']); // Safe fallback
+    }
   }
-}
 
   isMyMessage(senderId: string): boolean {
     return senderId === this.currentUser()!.id;
@@ -505,5 +523,40 @@ export class ChatroomComponent implements OnInit, OnDestroy {
         console.error('Submission failed', err);
       }
     });
+  }
+
+  onFileAttached(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      input.value = '';
+      this.isUploadingAttachment.set(true);
+
+      // Determine the type for UI rendering later
+      const isImage = file.type.startsWith('image/');
+      const fileType = isImage ? 'image' : 'document';
+      const fileName = file.name;
+
+      // Upload to Cloudinary into a 'chat_attachments' folder
+      this.portfolioService.uploadDirectFile(file, 'chat_attachments').subscribe({
+        next: (response) => {
+          this.isUploadingAttachment.set(false);
+          // Send the message with the URL!
+          this.sendMessage(
+            '', // Default text if they didn't type anything
+            'DEFAULT', 
+            false, 
+            response.url, 
+            fileType, 
+            fileName
+          );
+        },
+        error: (err) => {
+          console.error('Attachment upload failed', err);
+          this.error.set('Failed to upload file. Please try again.');
+          this.isUploadingAttachment.set(false);
+        }
+      });
+    }
   }
 }

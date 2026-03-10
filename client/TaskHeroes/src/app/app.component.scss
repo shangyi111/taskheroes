@@ -2,22 +2,20 @@
   display: flex;
   flex-direction: column;
   // Use dvh (dynamic viewport height) to handle mobile browser bars correctly
-  height: 100dvh; 
+  min-height: 100dvh; 
   width: 100%;
 }
 
 app-header, app-footer {
   flex: 0 0 auto; // These stay their natural size
+  min-height:0;
 }
 
 // This targets the router-outlet's sibling content
 // (Note: router-outlet itself doesn't render as a tag, it renders siblings)
 main, .content-wrapper {
-  flex: 1 1 auto; // Fills the remaining space between header and footer
+  flex: 1; // Fills the remaining space between header and footer
   display: flex;
+  min-height: 0;
   flex-direction: column;
-  min-height:0;
-  height:100%;
-  overflow:scroll;
-  padding-bottom: calc(var(--global-footer-height) + var(--global-footer-padding));
 }

@@ -1,0 +1,184 @@
+<div class="settings-container">
+  <header class="settings-header">
+    <h1>Account Settings</h1>
+    <p>Manage your public profile, security, and verification status.</p>
+  </header>
+
+  <div class="settings-grid">
+    
+    <section class="settings-card">
+      <div class="card-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <h2>Profile & Identity</h2>
+          <p>Manage your public display name and private legal information.</p>
+        </div>
+        <button type="button" class="btn-outline" (click)="toggleEditProfile()">
+          {{ isEditingProfile ? 'Cancel' : 'Edit Profile' }}
+        </button>
+      </div>
+
+      <div class="avatar-section">
+        <img [src]="currentUser?.profilePicture || 'assets/default-avatar.png'" alt="Profile Avatar" class="avatar-preview">
+        
+        <input 
+            type="file" 
+            #fileInput 
+            (change)="onFileSelected($event)" 
+            accept="image/*" 
+            style="display: none;"
+        >
+        
+        <div class="avatar-actions" style="display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem;">
+          <button 
+              type="button" 
+              class="btn-outline" 
+              (click)="fileInput.click()" 
+              [disabled]="isUploading">
+              {{ isUploading ? 'Uploading...' : 'Change Picture' }}
+          </button>
+
+          @if (currentUser?.profilePicture) {
+            <button type="button" class="btn-text-danger" (click)="onRemovePicture()" style="color: #d93025; background: none; border: none; cursor: pointer; text-align: left; font-size: 0.9rem; padding: 0;">
+              Remove Picture
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (!isEditingProfile) {
+        <div class="profile-read-only">
+          <div class="info-group">
+            <label>Display Name (aka Username Public)</label>
+            <p>{{ currentUser?.username || 'Not set' }}</p>
+          </div>
+          <hr class="divider">
+          <div class="info-group">
+            <label>Legal Name (Private)</label>
+            <p>{{ currentUser?.profile?.legalFirstName || 'Not set' }} {{ currentUser?.profile?.legalLastName || '' }}</p>
+          </div>
+          <div class="info-group">
+            <label>Phone Number (Private)</label>
+            <p>{{ currentUser?.profile?.phoneNumber || 'Not set' }}</p>
+          </div>
+        </div>
+      } 
+      
+      @else {
+        <form [formGroup]="profileForm" (ngSubmit)="onSaveProfile()" class="th-form">
+          <div class="form-group">
+            <label for="username">Display Name (aka Username Public)</label>
+            <input id="username" type="text" formControlName="username">
+          </div>
+          <hr class="divider">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="firstName">Legal First Name</label>
+              <input id="firstName" type="text" formControlName="firstName">
+            </div>
+            <div class="form-group">
+              <label for="lastName">Legal Last Name</label>
+              <input id="lastName" type="text" formControlName="lastName">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input id="phone" type="tel" formControlName="phone">
+          </div>
+          <div class="submit-row" style="display: flex; align-items: center; gap: 1rem;">
+            <button type="submit" class="btn-primary" [disabled]="profileForm.invalid || profileForm.pristine">
+              Save Profile
+            </button>
+            @if (isProfileSaved) {
+              <span class="success-text" style="color: #0f9d58; font-weight: 500; display: flex; align-items: center; gap: 4px;">
+                <i class="material-icons" style="font-size: 1.1rem;">check_circle</i>
+                Saved!
+              </span>
+            }
+          </div>
+        </form>
+      }
+    </section>
+
+    <section class="settings-card verification-card">
+      <div class="card-header">
+        <h2>Trust & Verification</h2>
+        <p>Build trust with your community by verifying your identity via Stripe.</p>
+      </div>
+      
+      <div class="verification-status" [class.verified]="currentUser?.isIdentityVerified">
+        <i class="material-icons">
+          {{ currentUser?.isIdentityVerified ? 'verified_user' : 'gpp_maybe' }}
+        </i>
+        <div class="status-text">
+          <h3>{{ currentUser?.isIdentityVerified ? 'Identity Verified' : 'Not Verified' }}</h3>
+          @if (currentUser?.isIdentityVerified) {
+            <p>Verified account.</p>
+          } @else {
+            <p>Verification helps you stand out and win more jobs.</p>
+          }
+        </div>
+        
+        @if (!currentUser?.isIdentityVerified) {
+          <button type="button" class="btn-stripe">
+            Verify with Stripe
+          </button>
+        }
+      </div>
+    </section>
+
+    <section class="settings-card">
+      <div class="card-header">
+        <h2>Account Security</h2>
+        <p>Update your login email or change your password.</p>
+      </div>
+
+      <form [formGroup]="securityForm" (ngSubmit)="onSaveSecurity()" class="th-form">
+        <div class="form-group">
+          <label for="email">Login Email</label>
+          <input id="email" type="email" formControlName="email">
+          
+          @if (securityForm.get('email')?.invalid && securityForm.get('email')?.touched) {
+            <div class="error-text">Please enter a valid email address.</div>
+          }
+        </div>
+
+        <hr class="divider">
+
+        <div class="form-group">
+          <label for="currentPassword">Current Password</label>
+          <input id="currentPassword" type="password" formControlName="currentPassword" placeholder="Required to set a new password">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="newPassword">New Password</label>
+            <input id="newPassword" type="password" formControlName="newPassword" placeholder="Minimum 8 characters">
+          </div>
+          
+          <div class="form-group">
+            <label for="confirmPassword">Confirm New Password</label>
+            <input id="confirmPassword" type="password" formControlName="confirmPassword" placeholder="Must match new password">
+          </div>
+        </div>
+
+        @if (securityForm.get('newPassword')?.touched && securityForm.value.newPassword !== securityForm.value.confirmPassword) {
+          <div class="error-text">Your new passwords do not match.</div>
+        }
+
+        <div class="submit-row" style="display: flex; align-items: center; gap: 1rem;">
+          <button type="submit" class="btn-primary" [disabled]="securityForm.invalid || securityForm.pristine">
+            Update Security Settings
+          </button>
+          
+          @if (isSecuritySaved) {
+            <span class="success-text" style="color: #0f9d58; font-weight: 500; display: flex; align-items: center; gap: 4px;">
+              <i class="material-icons" style="font-size: 1.1rem;">check_circle</i>
+              Saved securely!
+            </span>
+          }
+        </div>
+      </form>
+    </section>
+
+  </div>
+</div>
