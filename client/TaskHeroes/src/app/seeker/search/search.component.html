@@ -59,8 +59,9 @@
   } @else {
     <mat-paginator 
       [length]="(totalServices$ | async) || 0"
-      [pageSize]="(pageState$ | async)?.size"
+      [pageSize]="pageSize()"
       [pageSizeOptions]="[5, 10, 20, 50]"
+      [pageIndex]="currentPage() - 1"
       (page)="onPageChange($event)"
       aria-label="Select page of services">
     </mat-paginator>

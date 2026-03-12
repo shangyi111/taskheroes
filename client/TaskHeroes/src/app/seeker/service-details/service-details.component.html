@@ -52,7 +52,7 @@
           <div class="main-title-row">
             <h1 class="business-name">{{ s.businessName }}</h1>
             <div class="trust-bar">
-              <div class="rating-badge" *ngIf="s.averageRating !== null">
+              <div class="rating-badge" *ngIf="s.averageRating !== null && s.reviewCount!==0">
                 <mat-icon>star</mat-icon>
                 <strong>{{ s.averageRating }}</strong> ({{ s.reviewCount }})
               </div>

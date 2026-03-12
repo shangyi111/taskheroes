@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FilterComponent } from './filter/filter.component';
@@ -10,6 +10,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { UserDataService } from 'src/app/services/user_data.service';
 import { Observable, of as observableOf, shareReplay, BehaviorSubject, combineLatest, forkJoin, map, } from 'rxjs';
 import { switchMap, catchError } from 'rxjs/operators';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { MatChipsModule } from '@angular/material/chips';
 import { SearchService } from 'src/app/services/search.service';
 import { ReviewService } from 'src/app/services/review.service';
@@ -34,7 +35,14 @@ export class SearchComponent {
   );
   private route = inject(Router);
   private filtersSubject = new BehaviorSubject<any>({});
-  pageState$ = new BehaviorSubject({ page: 1, size: 10 });
+  currentPage = signal(1); // Backend is 1-indexed
+  pageSize = signal(10);
+
+  readonly pageState$ = combineLatest([
+    toObservable(this.currentPage),
+    toObservable(this.pageSize)
+  ]).pipe(map(([page, size]) => ({ page, size })));
+
   private totalServicesSubject = new BehaviorSubject<number>(0);
   readonly totalServices$ = this.totalServicesSubject.asObservable();
   readonly currentFilters$ = this.filtersSubject.asObservable();
@@ -107,6 +115,7 @@ export class SearchComponent {
   }
 
   handleFiltersChanged(filters: any): void {
+    this.currentPage.set(1);
     this.filtersSubject.next(filters);
   }
 
@@ -120,11 +129,8 @@ export class SearchComponent {
   }
 
   onPageChange(event: PageEvent): void {
-    this.pageState$.next({
-      page: event.pageIndex + 1, // Material is 0-indexed, Backend is 1-indexed
-      size: event.pageSize
-    });
-    
+    this.currentPage.set(event.pageIndex + 1); // Material 0-index to Backend 1-index
+    this.pageSize.set(event.pageSize);
     // Optional: Scroll to top after page change
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }

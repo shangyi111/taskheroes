@@ -46,12 +46,12 @@ export class HeaderComponent {
     const newRole = activeRole === 'seeker' ? 'provider' : 'seeker';
     localStorage.setItem('preferred_role', newRole);
     this.userDataService.setUserRole(newRole);
-    
+
     this.isMenuOpen.set(false); // Close menu after switching
 
     // Redirect to the role's primary context
     if (newRole === 'provider') {
-      this.router.navigate(['user', currentUser.id, 'provider']);
+      this.router.navigate(['provider', currentUser.id]);
     } else {
       this.router.navigate(['/search']);
     }
