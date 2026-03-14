@@ -98,7 +98,7 @@ exports.getUsersBatch = async (req, res) => {
 };
 
 // PUT/PATCH /api/v1/users/me/security: Update password and login email
-exports.updateSecurity = [authMiddleware, async (req, res) => {
+exports.updateSecurity = async (req, res) => {
     try {
         const userId = req.user.id;
         const { email, currentPassword, newPassword } = req.body;
@@ -142,4 +142,4 @@ exports.updateSecurity = [authMiddleware, async (req, res) => {
         console.error("Security update error:", error);
         res.status(500).json({ message: 'Server error updating security settings.' });
     }
-}];
+};

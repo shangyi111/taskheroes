@@ -58,7 +58,15 @@ const Service = sequelize.define('Service', {
       allowNull: true,
       defaultValue: 90,
   },
+  version: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 1 // Industry standard for "Optimistic Locking"
+  }
 },{
+  paranoid: true, // THE MAGIC SWITCH: Enables Soft Deletes
+  timestamps: true,
+  version: true,
   hooks: {
     // 1. Fires on Service.create()
     afterCreate: async (service) => {

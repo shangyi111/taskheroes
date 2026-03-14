@@ -14,33 +14,17 @@ const messageService = require('../services/messageService');
 const STATUS_RULES = require('../constants/jobStatusRules');
 const { reconcileJobStatus } = require('../services/jobStatusService');
 
+// GET /api/jobs/:id
 exports.getJobById = async (req, res) => {
   try {
-    const jobId = req.params.id;
-    const job = await Job.findByPk(jobId);
-    
-    if (job) {
-      const updatedJob = await reconcileJobStatus(job); 
-      res.json(updatedJob);
-    } else {
-      res.status(404).json({ message: 'Job not found' });
-    }
+    // req.job is already populated by our middleware!
+    const updatedJob = await reconcileJobStatus(req.job); 
+    res.json(updatedJob);
   } catch (error) {
-    console.error("Error retrieving job by ID:", error);
     res.status(500).json({ message: error.message });
   }
 };
 
-// Get all jobs
-exports.getAllJobs = async (req, res) => {
-  try {
-    const jobs = await Job.findAll();
-    res.json(jobs);
-  } catch (error) {
-    console.log("error inside get all jobs",error);
-    res.status(500).json({ message: error.message });
-  }
-};
 
 // GET /api/order/performer/:id
 exports.getJobsByPerformerId = async (req, res) => {
@@ -110,17 +94,19 @@ const buildJobQuery = (params, query) => {
 // Create a new job
 exports.createJob = async (req, res) => {
   try {
-    const startOfDay = new Date(req.body.jobDate);
+    const customerId = req.user.id; 
+    const { performerId, jobDate, serviceId, jobTitle } = req.body;
+    const startOfDay = new Date(jobDate);
     startOfDay.setHours(0, 0, 0, 0);
     
-    const endOfDay = new Date(req.body.jobDate);
+    const endOfDay = new Date(jobDate);
     endOfDay.setHours(23, 59, 59, 999);
     // 2. Strict Check: Same customer, Same provider, Same service, Same day
     const existingJob = await Job.findOne({
       where: {
-        customerId: req.body.customerId,
-        performerId: req.body.performerId,
-        serviceId: req.body.serviceId,
+        customerId,
+        performerId,
+        serviceId,
         jobStatus: {
           [Op.not]: 'cancelled' // Allow a new request if the old one was cancelled
         },
@@ -137,10 +123,10 @@ exports.createJob = async (req, res) => {
     }
 
     // 2. Create the Job (defaultValue 'pending' handles the status)
-    const newJob = await Job.create({ ...req.body, lastActionBy: req.body.customerId });
+    const newJob = await Job.create({ ...req.body, lastActionBy: customerId });
 
     // Fetch the Provider's email to notify them
-    const provider = await User.findByPk(req.body.performerId);
+    const provider = await User.findByPk(performerId);
     if (provider && provider.email) {
       // Send notification to the provider
       await NotificationService.sendJobNotification(
@@ -154,14 +140,14 @@ exports.createJob = async (req, res) => {
     // 3. Create a NEW Chatroom for this specific Job
     const chatroom = await Chatroom.create({
       jobId: newJob.id,
-      customerId: req.body.customerId,
-      providerId: req.body.performerId,
+      customerId: customerId,
+      providerId:performerId,
       name: `Chat for ${newJob.jobTitle || 'New Job'}` // Optional: give it a name
     });
 
     await messageService.sendInternalMessage({
       chatroomId: chatroom.id,
-      senderId: req.body.customerId,
+      senderId: customerId,
       text: `[System] Job request or inquiry created. Please review. Thank you.`
     });
     // 4. Return the consolidated response

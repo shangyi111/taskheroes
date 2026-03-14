@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const servicesController = require('../controllers/servicesController');
 const searchController=require('../controllers/searchController');
-const authMiddleware = require('../auth/authMiddleware');
+const { authenticateToken, requireJobParticipant } = require('../auth/authMiddleware');
 
 
 // Route for searching services with filtering (this is your new search controller)
@@ -15,15 +15,15 @@ router.get('/', servicesController.getAllServices);
 router.get('/:id', servicesController.getServiceById);
 
 // Create a new service (protected)
-router.post('/', authMiddleware, servicesController.createService);
+router.post('/', authenticateToken, servicesController.createService);
 
 // Update a service (protected)
-router.put('/:id', authMiddleware, servicesController.updateService);
+router.put('/:id', authenticateToken, servicesController.updateService);
 
 //Update only the Availability Window for a specific service (protected)
-router.put('/:id/availabilityWindow', authMiddleware, servicesController.updateAvailabilityWindow);
+router.put('/:id/availabilityWindow', authenticateToken, servicesController.updateAvailabilityWindow);
 
 // Delete a service (protected)
-router.delete('/:id', authMiddleware, servicesController.deleteService);
+router.delete('/:id', authenticateToken, servicesController.deleteService);
 
 module.exports = router;

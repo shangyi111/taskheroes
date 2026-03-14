@@ -1,14 +1,24 @@
 const cloudinary = require('../utils/cloudinary');
 
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const ALLOWED_FILE_TYPES = [...ALLOWED_IMAGE_TYPES, 'application/pdf'];
+const ALLOWED_SUB_FOLDERS = ['profiles', 'portfolios', 'services', 'chat', 'general'];
+
 // 1. Upload WITH 'temp_upload' tag (For Profiles & Portfolios)
 exports.uploadTempImage = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+    if (!ALLOWED_IMAGE_TYPES.includes(req.file.mimetype)) {
+      return res.status(400).json({ message: 'Invalid file type. Images only.' });
+    }
 
-    const targetFolder = req.body.folder || 'general';
+    const requestedFolder = req.body.folder || 'general';
+    const subFolder = ALLOWED_SUB_FOLDERS.includes(requestedFolder) ? requestedFolder : 'general';
+    const secureFolder = `taskheroes/user_${req.user.id}/${subFolder}`;
+
     const uploadOptions = {
-      folder: targetFolder,
-      tags: 'temp_upload',
+      folder: secureFolder,
+      tags: ['temp_upload', `user_${req.user.id}`],
       resource_type: 'image', // Profiles/Portfolios are always images
       transformation: [{ quality: "auto", fetch_format: "auto" }] 
     };
@@ -26,13 +36,17 @@ exports.uploadTempImage = async (req, res) => {
 exports.uploadDirectFile = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+    if (!ALLOWED_FILE_TYPES.includes(req.file.mimetype)) {
+      return res.status(400).json({ message: 'Unsupported file format. Only images and PDFs allowed.' });
+    }
 
-    const targetFolder = req.body.folder || 'general';
     const isImage = req.file.mimetype.startsWith('image/');
+    const secureFolder = `taskheroes/user_${req.user.id}/chat`;
     
     const uploadOptions = {
-      folder: targetFolder,
+      folder: secureFolder,
       resource_type: isImage ? 'image' : 'raw', // Crucial for PDFs!
+      tags: ['chat_attachment', `user_${req.user.id}`]
     };
 
     // Only compress if it's actually an image
@@ -61,6 +75,15 @@ exports.deleteFile = async (req, res) => {
   try {
     const { public_id, resource_type } = req.body;
     if (!public_id) return res.status(400).json({ message: 'No public_id provided' });
+
+    // SECURITY: Authorization via Path Validation
+    // A user can only delete a file if the path starts with their user ID folder
+    const userFolderPrefix = `taskheroes/user_${req.user.id}/`;
+
+    if (!public_id.startsWith(userFolderPrefix)) {
+      console.error(`IDOR ALERT: User ${req.user.id} tried to delete ${public_id}`);
+      return res.status(403).json({ message: 'Unauthorized: You can only delete your own assets.' });
+    }
 
     // Pass resource_type (default to 'image' if not provided) so Cloudinary knows how to delete PDFs
     const result = await cloudinary.uploader.destroy(public_id, {

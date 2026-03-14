@@ -76,19 +76,42 @@ exports.createService = async (req, res) => {
 exports.updateService = async (req, res) => {
   try {
     const serviceId = req.params.id;
-    const [updatedRowCount] = await Service.update(req.body, {
-      where: { id: serviceId, userId: req.user.id }, // Ensure user owns the service
-      individualHooks: true,
-      returning: true, // To get the updated record
+    const userId = req.user.id;
+    const service = await Service.findOne({
+      where: { id: serviceId, userId: userId }
     });
 
-    if (updatedRowCount > 0) {
-      const updatedService = await Service.findByPk(serviceId);
-      res.status(200).json(updatedService);
-      sendServiceUpdated(updatedService);
-    } else {
-      res.status(404).json({ message: 'Service not found or unauthorized' });
+    if (!service) {
+      return res.status(404).json({ message: 'Service not found or unauthorized' });
     }
+
+    const allowedFields = [
+      'businessName', 
+      'businessAddress', 
+      'phoneNumber', 
+      'category', 
+      'hourlyRate', 
+      'customSections',
+      'availabilityWindowDays', 
+      'portfolio', 
+      'profilePicture'
+    ];
+
+    let hasChanges = false;
+    Object.keys(req.body).forEach((key) => {
+      if (allowedFields.includes(key)) {
+        service[key] = req.body[key];
+        hasChanges = true;
+      }
+    });
+
+    if (!hasChanges) {
+      return res.status(400).json({ message: 'No valid fields provided for update.' });
+    }
+    await service.save();
+
+    res.status(200).json(service);
+    sendServiceUpdated(service);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -103,26 +126,30 @@ exports.updateAvailabilityWindow = async (req, res) => {
     if (typeof availabilityWindowDays !== 'number' || availabilityWindowDays < 1) {
         return res.status(400).json({ message: 'Availability window must be a positive number.' });
     }
-    // Perform a targeted update query
-    const [updatedRows] = await Service.update(
-        { availabilityWindowDays: availabilityWindowDays },
-        { 
-            where: { id: serviceId, userId: userId } // Security check: Ensure user owns service
-        }
-    );
 
-    if (updatedRows > 0) {
-        const updatedService = await Service.findByPk(serviceId);
-        res.status(200).json(updatedService);
-        sendServiceUpdated(updatedService); // Broadcast the change
-    } else {
-        res.status(404).json({ 
-            message: 'Service not found or user is not authorized to update this service.' 
-        });
+    const service = await Service.findOne({
+      where: { id: serviceId, userId: userId }
+    });
+
+    if (!service) {
+      return res.status(404).json({ 
+        message: 'Service not found or user is not authorized.' 
+      });
     }
+    // Perform a targeted update query
+    service.availabilityWindowDays = availabilityWindowDays;
 
+    // 4. Save (This increments 'version' and handles hooks)
+    await service.save();
+
+    // 5. Respond & Broadcast
+    res.status(200).json(service);
+    sendServiceUpdated(service);
   } catch (error) {
     console.error('Error updating availability window:', error);
+    if (error.name === 'SequelizeOptimisticLockError') {
+      return res.status(409).json({ message: 'Conflict: Please refresh and try again.' });
+    }
     // Note: If error.errors exists, it's a Sequelize validation error
     const message = error.errors ? error.errors[0].message : error.message; 
     res.status(500).json({ message: message });
@@ -132,19 +159,14 @@ exports.updateAvailabilityWindow = async (req, res) => {
 // Delete a service
 exports.deleteService = async (req, res) => {
   try {
-    const service = await Service.findByPk(req.params.id);
-    if (!service || service.userId !== req.user.id) { // Ensure user owns the service
-      return res.status(404).json({ message: 'Service not found or unauthorized' });
-    }
-    const deletedRows = await Service.destroy({
-      where: { id: req.params.id },
+   const service = await Service.findOne({ 
+      where: { id: req.params.id, userId: req.user.id } 
     });
-    if (deletedRows > 0) {
-      res.status(204).send();
-      sendServiceDeleted(service.id, service.userId);
-    } else {
-      res.status(404).json({ message: 'Service not found' });
-    }
+
+    if (!service) return res.status(404).json({ message: 'Not found' });
+    await service.destroy();
+    sendServiceDeleted(service.id, req.user.id);
+    res.status(204).send();
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

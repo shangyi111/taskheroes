@@ -9,6 +9,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSelectModule } from '@angular/material/select';
 import { BusinessService } from 'src/app/services/business.service';
 import { UserDataService } from 'src/app/services/user_data.service';
+import { PortfolioService } from 'src/app/services/portfolio.service';
 import { Router } from '@angular/router';
 import { take } from 'rxjs';
 import { ImageUploadComponent } from 'src/app/shared/ui-components/image-upload/image-upload.component';
@@ -40,6 +41,7 @@ export class AddServiceDialogComponent {
   private dialogRef = inject(MatDialogRef<AddServiceDialogComponent>);
   private businessService = inject(BusinessService);
   private userDataService = inject(UserDataService);
+  private portfolioService = inject(PortfolioService);
   private router = inject(Router);
 
   localData: Partial<Service> = {
@@ -113,8 +115,11 @@ export class AddServiceDialogComponent {
   }
   removePortfolioItem(index: number) {
     const current = [...(this.localData.portfolio || [])];
-    current.splice(index, 1);
-    this.localData.portfolio = current;
+    const imageToDelete = current[index];
+    this.portfolioService.deleteImage(imageToDelete.public_id).subscribe(()=>{
+      current.splice(index, 1);
+      this.localData.portfolio = current;
+    });
   }
 
   removeCustomSection(index: number) {

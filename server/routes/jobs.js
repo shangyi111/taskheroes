@@ -1,27 +1,24 @@
 const express = require('express');
 const router = express.Router();
 const jobsController = require('../controllers/jobsController');
-const authMiddleware = require('../auth/authMiddleware');
-
-// Get all jobs
-router.get('/', jobsController.getAllJobs);
+const { authenticateToken, requireJobParticipant } = require('../auth/authMiddleware');
 
 // Get a job by job id
-router.get('/:id', jobsController.getJobById);
+router.get('/:id', authenticateToken, requireJobParticipant, jobsController.getJobById);
 
 // Get a specific job by provider userId
-router.get('/provider/:id', jobsController.getJobsByPerformerId);
+router.get('/provider/:id', authenticateToken, requireJobParticipant,jobsController.getJobsByPerformerId);
 
 // Create a new job (protected)
-router.post('/', authMiddleware, jobsController.createJob);
+router.post('/', authenticateToken, jobsController.createJob);
 
 // Update a job (protected)
-router.put('/:id', authMiddleware, jobsController.updateJob);
+router.put('/:id', authenticateToken, requireJobParticipant, jobsController.updateJob);
 
 //Updatea a job's status(protected)
-router.put('/:id/status', authMiddleware, jobsController.updateJobStatus);
+router.put('/:id/status', authenticateToken, requireJobParticipant, jobsController.updateJobStatus);
 
 // Delete a job (protected)
-router.delete('/provider/:id', authMiddleware, jobsController.deleteOrderByPerformerId);
+router.delete('/provider/:id', authenticateToken, jobsController.deleteOrderByPerformerId);
 
 module.exports = router;

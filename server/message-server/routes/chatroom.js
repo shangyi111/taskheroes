@@ -1,28 +1,28 @@
 const express = require('express');
 const router = express.Router();
 const chatroomController = require('../controllers/chatroomController');
-const authMiddleware = require('../../auth/authMiddleware');
+const {authenticateToken} = require('../../auth/authMiddleware');
 
 
 // Routes for chatrooms list for certain provider
 router.route('/chatrooms/provider/:providerId')
-  .get(authMiddleware,chatroomController.getChatroomsForProvider)
+  .get(authenticateToken,chatroomController.getChatroomsForProvider)
 
 // Routes for chatrooms list for certain customer
 router.route('/chatrooms/seeker/:seekerId')
-  .get(authMiddleware,chatroomController.getChatroomsForCustomer)
+  .get(authenticateToken,chatroomController.getChatroomsForCustomer)
 
 router.route('/:chatroomId')
-  .get(authMiddleware,chatroomController.getChatroomById)
+  .get(authenticateToken,chatroomController.getChatroomById)
 
 router.route('/job/:jobId')
-  .get(authMiddleware,chatroomController.getChatroomByJobId)
+  .get(authenticateToken,chatroomController.getChatroomByJobId)
 
 router.route('')
-  .post(authMiddleware,chatroomController.createChatroom);
+  .post(authenticateToken,chatroomController.createChatroom);
 
 // Mark chatroom as read (The new optimized feature)
 // Using PATCH because we are partially updating the chatroom record
-router.patch('/:chatroomId/read', authMiddleware, chatroomController.markAsRead);
+router.patch('/:chatroomId/read', authenticateToken, chatroomController.markAsRead);
 
 module.exports = router;
