@@ -19,6 +19,11 @@ const User = sequelize.define('User', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  googleId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    unique: true, // Crucial: One Google account = One TaskHeroes account
+  },
   stripeVerificationFingerprint: {
     type: DataTypes.STRING,
     allowNull: true,

@@ -32,7 +32,7 @@ exports.getUserById = async (req, res) => {
 };
 
 // 3. PUT/PATCH /api/v1/users/me: Update the authenticated user's profile
-exports.updateMe = [authMiddleware, async (req, res) => {
+exports.updateMe = async (req, res) => {
     try {
         // Filter req.body to prevent unauthorized updates (like changing role or ID)
         const userId = req.user.id;
@@ -59,13 +59,25 @@ exports.updateMe = [authMiddleware, async (req, res) => {
         if (phone) profile.phoneNumber = phone;
         await profile.save();
 
-        res.status(200).json({ message: 'Profile updated successfully', user, profile });
+        res.status(200).json({ message: 'Profile updated successfully', 
+            user: {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                profilePicture: user.profilePicture
+            },
+            profile: {
+                firstName: profile.legalFirstName,
+                lastName: profile.legalLastName,
+                phone: profile.phoneNumber
+            }
+        });
 
     } catch (error) {
     console.log("error inside get all services",error);
     res.status(400).json({ message: error.message });
   }
-}];
+};
 
 exports.getUsersBatch = async (req, res) => {
     try {
@@ -110,7 +122,7 @@ exports.updateSecurity = async (req, res) => {
 
         // 1. Handle Email Update (if they typed a new one)
         if (email && email !== user.email) {
-            const existingEmail = await User.findOne({ where: { email } });
+            const existingEmail = await User.findOne({ where: { email, id: { [Op.ne]: userId } }});
             if (existingEmail) {
                 return res.status(400).json({ message: 'This email is already in use.' });
             }

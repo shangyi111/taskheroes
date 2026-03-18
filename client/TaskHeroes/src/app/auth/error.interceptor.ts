@@ -7,8 +7,9 @@ import { AUTH_TOKEN_KEY } from '../shared/constants';
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
+      const hasToken = !!localStorage.getItem(AUTH_TOKEN_KEY);
       // Catch both 401 (Missing Token) and 403 (Expired/Invalid Token)
-      if (error.status === 401 || error.status === 403) {
+      if ((error.status === 401 || error.status === 403)&& hasToken) {
         console.warn('🔒 Token expired or unauthorized. Forcing logout...');
         
         // 1. Wipe the token directly from local storage

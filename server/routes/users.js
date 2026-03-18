@@ -4,10 +4,11 @@ const usersController = require('../controllers/usersController');
 const { authenticateToken } = require('../auth/authMiddleware');
 
 
-router.post('/batch',  usersController.getUsersBatch);
+router.post('/batch',  authenticateToken, usersController.getUsersBatch);
 // Get a specific user by userId
 router.get('/:id', authenticateToken, usersController.getUserById);
 
+router.put('/me', authenticateToken, usersController.updateMe);
 router.put('/me/security',authenticateToken, usersController.updateSecurity);
 
 module.exports = router;

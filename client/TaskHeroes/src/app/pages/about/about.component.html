@@ -1,31 +1,124 @@
-<div class="page-container">
-  <header class="page-header">
-    <h1>About TaskHeroes</h1>
-    <p class="subtitle">Connecting reliable help with local needs.</p>
-  </header>
+<div class="hub-container">
+  <aside class="hub-sidebar">
+    <nav>
+      <div class="sidebar-group">
+        <p class="group-title">Company</p>
+        <a (click)="scrollTo('mission')" [class.active]="activeSection() === 'mission'">Our Mission</a>
+        <a (click)="scrollTo('contact')" [class.active]="activeSection() === 'contact'">Contact Us</a>
+      </div>
 
-  <main class="about-content">
-    <section class="mission-section">
-      <h2>Our Mission</h2>
-      <p>
-        Finding trustworthy local service providers shouldn't be a hassle. 
-        TaskHeroes was built to bridge the gap between skilled professionals 
-        and people who need things done right. We believe in transparency, 
-        accountability, and the power of community.
-      </p>
+      <div class="sidebar-group">
+        <p class="group-title">Legal</p>
+        
+        <a (click)="scrollTo('tos')" class="catalog-title" [class.active]="activeSection().startsWith('tos')">Terms of Service</a>
+        <div class="sub-nav">
+          <a (click)="scrollTo('tos-intro')" [class.active]="activeSection() === 'tos-intro'">1. Introduction</a>
+          <a (click)="scrollTo('tos-role')" [class.active]="activeSection() === 'tos-role'">2. Platform Role</a>
+          <a (click)="scrollTo('tos-accounts')" [class.active]="activeSection() === 'tos-accounts'">3. Accounts</a>
+          <a (click)="scrollTo('tos-payments')" [class.active]="activeSection() === 'tos-payments'">4. Payments</a>
+          <a (click)="scrollTo('tos-liability')" [class.active]="activeSection() === 'tos-liability'">5. Liability</a>
+        </div>
+        
+        <a (click)="scrollTo('privacy')" class="catalog-title" [class.active]="activeSection().startsWith('privacy')">Privacy Policy</a>
+        <div class="sub-nav">
+          <a (click)="scrollTo('privacy-data')" [class.active]="activeSection() === 'privacy-data'">1. Data Collection</a>
+          <a (click)="scrollTo('privacy-usage')" [class.active]="activeSection() === 'privacy-usage'">2. Data Usage</a>
+          <a (click)="scrollTo('privacy-sharing')" [class.active]="activeSection() === 'privacy-sharing'">3. Sharing</a>
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <main class="hub-content" #scrollContainer (scroll)="onScroll()">
+    
+    <section id="mission" class="content-section">
+      <h1 class="serif-title">About TaskHeroes</h1>
+      <p class="lead-text">Connecting reliable help with local needs.</p>
+      
+      <div class="text-block">
+        <h2>Our Mission</h2>
+        <p>
+          Finding trustworthy local service providers shouldn't be a hassle. 
+          TaskHeroes was built to bridge the gap between skilled professionals 
+          and people who need things done right. We believe in transparency, 
+          accountability, and the power of community.
+        </p>
+      </div>
+      
+      <div class="values-grid">
+        <div class="value-card">
+          <mat-icon>verified_user</mat-icon>
+          <h3>Trust First</h3>
+          <p>Our mutual rating system ensures everyone is held to a high standard.</p>
+        </div>
+        <div class="value-card">
+          <mat-icon>forum</mat-icon>
+          <h3>Clear Communication</h3>
+          <p>Chat directly and agree on terms before the job even starts.</p>
+        </div>
+      </div>
     </section>
 
-    <section class="values-grid">
-      <div class="value-card">
-        <i class="material-icons">verified_user</i>
-        <h3>Trust First</h3>
-        <p>Every provider is vetted, and our mutual rating system ensures everyone is held to a high standard.</p>
-      </div>
-      <div class="value-card">
-        <i class="material-icons">forum</i>
-        <h3>Clear Communication</h3>
-        <p>Chat directly, share photos, and agree on terms before the job even starts.</p>
-      </div>
+    <section id="contact" class="content-section">
+      <h1 class="serif-title">Contact Us</h1>
+      <p>Have questions about a task or your account? Our team is here to help.</p>
+      <th-contact></th-contact> 
     </section>
+
+    <hr class="section-divider">
+
+    <div id="tos" class="legal-wrap">
+      <section class="content-section">
+        <h1 class="serif-title">Terms of Service</h1>
+        <p class="last-updated">Last updated: March 2026</p>
+        
+        <div id="tos-intro" class="legal-block">
+          <h3>1. Introduction</h3>
+          <p>Welcome to TaskHeroes. By accessing our platform, you agree to be bound by these Terms.</p>
+        </div>
+
+        <div id="tos-role" class="legal-block">
+          <h3>2. Our Role as a Facilitator</h3>
+          <p>TaskHeroes is a communications platform. <strong>We do not perform services and do not employ Providers.</strong> Any agreement is solely between the Seeker and the Provider.</p>
+        </div>
+
+        <div id="tos-accounts" class="legal-block">
+          <h3>3. User Accounts & Verification</h3>
+          <p>Users must be 18+. We utilize Stripe Identity for optional verification badges to promote trust.</p>
+        </div>
+
+        <div id="tos-payments" class="legal-block">
+          <h3>4. Payments and Transactions</h3>
+          <p><strong>TaskHeroes does not currently process or guarantee payments.</strong> Financial transactions are conducted off-platform directly between users.</p>
+        </div>
+
+        <div id="tos-liability" class="legal-block">
+          <h3>5. Limitation of Liability</h3>
+          <p>TaskHeroes is not liable for indirect damages or the quality of services provided by third-party Providers.</p>
+        </div>
+      </section>
+    </div>
+
+    <div id="privacy" class="legal-wrap">
+      <section class="content-section">
+        <h1 class="serif-title">Privacy Policy</h1>
+        
+        <div id="privacy-data" class="legal-block">
+          <h3>1. Data We Collect</h3>
+          <p>We collect account info (email, username), profile data (skills, bio), and verification status via Stripe.</p>
+        </div>
+
+        <div id="privacy-usage" class="legal-block">
+          <h3>2. How We Use Data</h3>
+          <p>To maintain the platform, facilitate communication, and prevent fraudulent activity.</p>
+        </div>
+
+        <div id="privacy-sharing" class="legal-block">
+          <h3>3. Information Sharing</h3>
+          <p><strong>We do not sell your personal data.</strong> Data is shared only with other users (for bookings) or trusted partners like Stripe and Resend.</p>
+        </div>
+      </section>
+    </div>
+
   </main>
 </div>

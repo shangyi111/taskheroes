@@ -13,7 +13,10 @@ const signup = async (req, res) => {
     const { user, token } = await authService.signup(email, username, password);
 
     NotificationService.sendWelcomeEmail(user);
-    res.status(201).json({ user, token });
+    res.status(201).json({ 
+      token, 
+      user: { id: user.id, username: user.username, email: user.email } 
+    });
   } catch (error) {
     res.status(500).json({ message: error.message || 'Failed to signup' });
   }
@@ -27,7 +30,10 @@ const login = async (req, res) => {
       return res.status(400).json({ message: 'Email and password are required' });
     }
     const { user, token } = await authService.login(email, password);
-    res.status(200).json({ user, token });
+    res.status(200).json({ 
+      token, 
+      user: { id: user.id, username: user.username, email: user.email } 
+    });
   } catch (error) {
     res.status(400).json({ message: error.message || 'Invalid credentials' }); // Or 500 depending on the error
   }
@@ -47,21 +53,35 @@ const googleLogin = async (req, res) => {
     const { email, name, picture, sub } = payload;
 
     // 1. Find or Create User in your DB
-    let user = await User.findOne({ where: { email } });
-    if (!user) {
-      user = await User.create({ 
-        username: name, 
-        email, 
+   const [user, created] = await User.findOrCreate({
+      where: { email },
+      defaults: {
+        username: name,
         googleId: sub,
+        email,
         profilePicture: picture,
-        role: 'seeker', // Default role, adjust as needed
+        role: 'seeker',
         isIdentityVerified: false
-      });
+      }
+    });
+
+    // If the user already existed but didn't have a googleId (Account Merging)
+    if (!created && !user.googleId) {
+      user.googleId = sub;
+      await user.save();
     }
 
     // 2. Generate your own JWT for the session
     const token = authService.generateToken(user);
-    res.json({ user, token });
+    res.json({ 
+      token, 
+      user: { 
+        id: user.id, 
+        username: user.username, 
+        email: user.email, 
+        profilePicture: user.profilePicture 
+      }  
+    });
 
   } catch (error) {
     console.log('Google login error: ', error);

@@ -1,88 +1,152 @@
-$text-main: #222222;
-$text-muted: #666666;
-$border-light: #eaeaea;
-$accent-color: #ffb400;
+// Variables for consistency
+$text-main: #1a1a1a;
+$text-muted: #666;
+$border-color: #f0f0f0;
+$accent-color: #008080; // TaskHeroes Teal
 
-:host {
-    display: flex;
-    height: 100%;
-    min-height: 0;
-    flex: 1;
-    overflow-y: auto;
-}
-
-.page-container {
-  max-width: 900px;
+.hub-container {
+  display: flex;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 4rem 1.5rem;
-  font-family: 'Inter', 'Roboto', sans-serif;
-  color: $text-main;
+  height: calc(100vh - 70px);
+  background: #fff;
 }
 
-.page-header {
-  text-align: center;
-  margin-bottom: 4rem;
+// Sidebar Styling
+.hub-sidebar {
+  width: 300px;
+  padding: 60px 40px;
+  border-right: 1px solid $border-color;
+  overflow-y: auto;
 
-  h1 {
-    font-size: 2.5rem;
+  .sidebar-group {
+    margin-bottom: 40px;
+  }
+
+  .group-title {
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: #999;
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+
+  .catalog-title {
+    font-weight: 600;
+    color: $text-main;
+    margin-top: 15px;
+    display: block;
+  }
+
+  a {
+    display: block;
+    padding: 8px 0;
+    color: $text-muted;
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover, &.active {
+      color: $text-main;
+      transform: translateX(4px);
+    }
+    
+    &.active {
+      font-weight: 600;
+      color: $accent-color;
+    }
+  }
+
+  .sub-nav {
+    padding-left: 15px;
+    border-left: 1px solid $border-color;
+    margin: 10px 0;
+    
+    a {
+      font-size: 13px;
+      padding: 5px 0;
+    }
+  }
+}
+
+// Content Styling
+.hub-content {
+  flex: 1;
+  padding: 80px 120px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+
+  .content-section {
+    margin-bottom: 150px;
+    max-width: 800px;
+  }
+
+  .serif-title {
+    font-family: 'Playfair Display', serif; // Ensure this is imported in index.html
+    font-size: 48px;
     font-weight: 700;
-    margin: 0 0 0.5rem 0;
+    margin-bottom: 20px;
+    color: $text-main;
+  }
+
+  .lead-text {
+    font-size: 20px;
+    color: $text-muted;
+    margin-bottom: 60px;
+    font-weight: 300;
+  }
+
+  h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
     letter-spacing: -0.5px;
   }
 
-  .subtitle {
-    font-size: 1.1rem;
-    color: $text-muted;
-    margin: 0;
-  }
-}
-
-.mission-section {
-  text-align: center;
-  max-width: 700px;
-  margin: 0 auto 4rem auto;
-
-  h2 {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
+  h3 {
+    font-size: 18px;
+    margin: 30px 0 10px;
   }
 
   p {
-    font-size: 1.05rem;
-    line-height: 1.7;
-    color: $text-muted;
+    line-height: 1.8;
+    color: #444;
+    margin-bottom: 20px;
+    font-size: 16px;
   }
-}
 
-.values-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
+  .values-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-top: 60px;
 
-  .value-card {
-    padding: 2rem;
-    border: 1px solid $border-light;
-    border-radius: 12px;
-    text-align: center;
-    background-color: #fff;
-
-    .material-icons {
-      font-size: 2.5rem;
-      color: $accent-color;
-      margin-bottom: 1rem;
+    .value-card {
+      padding: 30px;
+      background: #fafafa;
+      border-radius: 4px;
+      
+      mat-icon {
+        color: $accent-color;
+        margin-bottom: 15px;
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+      }
     }
+  }
 
-    h3 {
-      font-size: 1.2rem;
-      margin: 0 0 0.75rem 0;
-    }
+  .section-divider {
+    border: 0;
+    border-top: 1px solid $border-color;
+    margin: 100px 0;
+  }
 
-    p {
-      font-size: 0.95rem;
-      line-height: 1.5;
-      color: $text-muted;
-      margin: 0;
-    }
+  .last-updated {
+    font-size: 12px;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 1px;
   }
 }

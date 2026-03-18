@@ -1,4 +1,4 @@
-const { Review, Service } = require('../models');
+const { Review, Service, User } = require('../models');
 const { Op } = require('sequelize');
 const axios = require('axios'); // For geocoding
 
@@ -102,7 +102,12 @@ exports.searchServices = async (req, res) => {
       where: { [Op.and]: [where, proximityWhere] },
       order,
       ...pagination,
-      include: [{ model: Review }],
+      include: [{ model: Review,
+                  attributes: ['rating'], 
+                  where: { isPublished: true }, 
+                  required: false
+       }],
+       distinct: true
     });
 
     res.status(200).json({

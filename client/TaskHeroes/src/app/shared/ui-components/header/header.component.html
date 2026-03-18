@@ -51,6 +51,9 @@
                 <a [routerLink]="['settings']" (click)="isMenuOpen.set(false)" class="menu-item">
                   <span class="item-icon">👤</span> Account Settings
                 </a>
+                <a routerLink="/about" (click)="isMenuOpen.set(false)" class="menu-item">
+                  <span class="item-icon">🏛️</span> About TaskHeroes
+                </a>
 
                 <div class="menu-divider"></div>
 
@@ -63,6 +66,7 @@
         }
       } @else {
         <div class="auth-group">
+          <a routerLink="/about" class="nav-link-secondary" routerLinkActive="active-link">About</a>
           <a routerLink="/login" routerLinkActive="active-link">Login</a>
           <a routerLink="/register" class="btn-primary" routerLinkActive="active-link">Register</a>
         </div>
