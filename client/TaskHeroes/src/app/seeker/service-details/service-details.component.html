@@ -28,22 +28,29 @@
         
         <section class="gallery-preview-container">
           @if (s.portfolio && s.portfolio.length > 0) {
-            <div class="mosaic-grid">
-              <div class="mosaic-main">
+            <div class="mosaic-grid" [class.single-image]="s.portfolio.length === 1">
+              
+              <div class="mosaic-main" (click)="openGallery(s.portfolio, 0)">
                 <img [src]="s.portfolio[0].url.replace('/upload/', '/upload/w_800,c_fill/')" alt="Featured">
               </div>
-              <div class="mosaic-side">
-                @for (img of s.portfolio.slice(1, 3); track img.public_id) {
-                  <div class="side-item">
-                    <img [src]="img.url.replace('/upload/', '/upload/w_400,h_400,c_fill/')" alt="Gallery">
-                  </div>
-                }
-                @if (s.portfolio.length > 3) {
-                  <div class="side-item more-overlay">
-                    <span>+{{ s.portfolio.length - 3 }}</span>
-                  </div>
-                }
-              </div>
+              
+              @if (s.portfolio.length > 1) {
+                <div class="mosaic-side">
+                  @for (img of s.portfolio.slice(1, 3); track img.public_id; let i = $index) {
+                    
+                    <div class="side-item" (click)="openGallery(s.portfolio, i + 1)">
+                      <img [src]="img.url.replace('/upload/', '/upload/w_400,h_400,c_fill/')" alt="Gallery">
+                      
+                      @if (i === 1 && s.portfolio.length > 3) {
+                        <div class="more-overlay">
+                          <span>+{{ s.portfolio.length - 3 }}</span>
+                        </div>
+                      }
+                    </div>
+                    
+                  }
+                </div>
+              }
             </div>
           }
         </section>

@@ -5,6 +5,7 @@ const { authenticateToken } = require('../auth/authMiddleware');
 
 
 router.post('/batch',  authenticateToken, usersController.getUsersBatch);
+router.post('/publicbatch',  usersController.getPublicUserBatch);
 // Get a specific user by userId
 router.get('/:id', authenticateToken, usersController.getUserById);
 

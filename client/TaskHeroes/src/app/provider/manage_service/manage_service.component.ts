@@ -10,6 +10,7 @@ import { BusinessService } from 'src/app/services/business.service';
 import { Service } from 'src/app/shared/models/service';
 import { ProviderCalendarComponent } from '../calendar/provider_calendar.component';
 import { AddServiceDialogComponent } from '../add_service_dialog/add_service_dialog.component';
+import { GalleryLightboxComponent } from 'src/app/shared/ui-components/gallery-lightbox/gallery-lightbox.component';
 
 @Component({
   selector: 'manage-service',
@@ -100,5 +101,19 @@ export class ManageServiceComponent implements OnInit {
         this.router.navigate(['../../'], { relativeTo: this.route });
       });
     }
+  }
+
+  openGallery(portfolio: any[], startIndex: number = 0) {
+    this.dialog.open(GalleryLightboxComponent, {
+      maxWidth: '100vw',
+      maxHeight: '100vh',
+      height: '100%',
+      width: '100%',
+      panelClass: 'full-screen-modal',
+      data: {
+        images: portfolio,
+        initialIndex: startIndex
+      }
+    });
   }
 }

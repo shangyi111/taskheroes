@@ -1,0 +1,33 @@
+<div class="lightbox-container">
+  
+  <div class="lightbox-toolbar">
+    <div class="counter">
+      {{ currentIndex() + 1 }} / {{ images.length }}
+    </div>
+    <button mat-icon-button class="close-btn" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="main-display">
+    <button mat-icon-button class="nav-btn left" (click)="prev()" *ngIf="images.length > 1">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+
+    <img [src]="images[currentIndex()].url" class="active-image fade-in" alt="Gallery Image">
+
+    <button mat-icon-button class="nav-btn right" (click)="next()" *ngIf="images.length > 1">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+
+  <div class="thumbnail-strip" *ngIf="images.length > 1">
+    @for (img of images; track img.public_id; let i = $index) {
+      <div class="thumbnail-wrapper" 
+           [class.active]="i === currentIndex()"
+           (click)="setIndex(i)">
+        <img [src]="img.url.replace('/upload/', '/upload/w_150,h_150,c_fill/')" alt="Thumbnail">
+      </div>
+    }
+  </div>
+</div>

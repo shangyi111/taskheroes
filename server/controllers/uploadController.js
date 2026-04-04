@@ -78,7 +78,8 @@ exports.deleteFile = async (req, res) => {
 
     // SECURITY: Authorization via Path Validation
     // A user can only delete a file if the path starts with their user ID folder
-    const userFolderPrefix = `taskheroes/user_${req.user.id}/`;
+    const userFolderPrefix = `taskheroes_user_${req.user.id}/`;
+
 
     if (!public_id.startsWith(userFolderPrefix)) {
       console.error(`IDOR ALERT: User ${req.user.id} tried to delete ${public_id}`);

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const servicesController = require('../controllers/servicesController');
 const searchController=require('../controllers/searchController');
-const { authenticateToken, requireJobParticipant } = require('../auth/authMiddleware');
+const { authenticateToken, optionalAuth } = require('../auth/authMiddleware');
 
 
 // Route for searching services with filtering (this is your new search controller)
@@ -13,6 +13,11 @@ router.get('/', servicesController.getAllServices);
 
 // Get a specific service by ID
 router.get('/:id', servicesController.getServiceById);
+
+// Get all services for a specific user
+// Optional auth allows Seekers to see public provider profiles, 
+// but lets Providers see their own private info.
+router.get('/user/:userId', optionalAuth, servicesController.getServicesByUserId);
 
 // Create a new service (protected)
 router.post('/', authenticateToken, servicesController.createService);

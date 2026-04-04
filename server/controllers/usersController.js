@@ -109,6 +109,15 @@ exports.getUsersBatch = async (req, res) => {
     }
 };
 
+exports.getPublicUserBatch = async (req, res) => {
+  const { ids } = req.body;
+  const users = await User.findAll({
+    where: { id: { [Op.in]: ids } },
+    attributes: ['id', 'username', 'profilePicture'] // ONLY public fields
+  });
+  res.json(users);
+};
+
 // PUT/PATCH /api/v1/users/me/security: Update password and login email
 exports.updateSecurity = async (req, res) => {
     try {

@@ -35,13 +35,41 @@ const scrubService = (service, requesterId) => {
 // Get all services
 exports.getAllServices = async (req, res) => {
   try {
+    const { excludeUserId } = req.query;
+    const where = {};
+
+    if (excludeUserId) {
+      where.userId = { [Op.ne]: excludeUserId };
+    }
     const services = await Service.findAll({
-      include:[ Review]
+      where,
+      include:[ Review],
+      order: [['createdAt', 'DESC']]
     });
     const scrubbed = services.map(s => scrubService(s, req.user?.id));
     res.json(scrubbed); 
   } catch (error) {
     console.log("error inside get all services",error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getServicesByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const services = await Service.findAll({
+      where: { userId: userId },
+      include: [Review],
+      order: [['createdAt', 'DESC']]
+    });
+
+    // We still scrub! If the requester is the owner, scrubService keeps the private data.
+    // If a Seeker is looking at a Provider's public profile, the private data is hidden.
+    const scrubbed = services.map(s => scrubService(s, req.user?.id));
+    res.json(scrubbed);
+  } catch (error) {
+    console.error("Error fetching user's services:", error);
     res.status(500).json({ message: error.message });
   }
 };

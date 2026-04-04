@@ -152,7 +152,8 @@ export class AddServiceDialogComponent {
       const payload: Service = {
         ...this.localData as Service,
         customSections: customSections,
-        userId: user.id!
+        userId: user.id!,
+        portfolio:this.localData.portfolio
       };
 
       const request = this.isEditMode 

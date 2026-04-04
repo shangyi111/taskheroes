@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Observable, of, combineLatest} from 'rxjs';
@@ -16,7 +17,7 @@ import { BusinessService } from 'src/app/services/business.service';
 import { JobService } from 'src/app/services/job.service';
 import { UserDataService } from 'src/app/services/user_data.service';
 import { AuthService } from 'src/app/auth/auth.service'; // Added for Google Login
-import { Service, ServiceWithRating } from 'src/app/shared/models/service';
+import { Service, ServiceWithRating, Image} from 'src/app/shared/models/service';
 import { Job } from 'src/app/shared/models/job';
 import { Review } from 'src/app/shared/models/review';
 import { User } from 'src/app/shared/models/user';
@@ -26,6 +27,7 @@ import { AUTH_TOKEN_KEY } from 'src/app/shared/constants';
 // Sub-components
 import { SeekerCalendarComponent } from 'src/app/seeker/service-details/seeker-calendar/seeker-calendar.component';
 import { ServiceReviewsComponent } from './service-reviews/service-reviews.component';
+import { GalleryLightboxComponent } from 'src/app/shared/ui-components/gallery-lightbox/gallery-lightbox.component';
 // 1. Declare Google global (provided by the script in index.html)
 declare var google: any;
 @Component({
@@ -73,13 +75,28 @@ export class ServiceDetailsComponent implements OnInit {
   private location = inject(Location);
   private snackBar = inject(MatSnackBar);
 
-  constructor() {
+  constructor(private dialog: MatDialog) {
     // 2. This effect watches the showAuthOptions signal. 
     // When it turns TRUE, it waits a tick and then initializes the Google button.
     effect(() => {
       if (this.showAuthOptions()) {
         // Small delay to ensure the DOM element inside @if is rendered
         setTimeout(() => this.initializeGoogleButton(), 100);
+      }
+    });
+  }
+
+  openGallery(portfolio: any[], startIndex: number = 0) {
+    // We will build this GalleryLightboxComponent next
+    this.dialog.open(GalleryLightboxComponent, {
+      maxWidth: '100vw',
+      maxHeight: '100vh',
+      height: '100%',
+      width: '100%',
+      panelClass: 'full-screen-modal', // Important for removing white padding
+      data: {
+        images: portfolio,
+        initialIndex: startIndex
       }
     });
   }
@@ -109,7 +126,7 @@ export class ServiceDetailsComponent implements OnInit {
         catchError(() => of({ totalItems: 0, averageRating: null }))
       );
       
-      const provider$ = this.userService.getUsersBatch([service.userId]).pipe(
+      const provider$ = this.userService.getUsersPublicBatch([service.userId]).pipe(
         map(users => users[0]),
         catchError(() => of(null))
       );

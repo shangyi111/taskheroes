@@ -85,7 +85,7 @@ export class SearchComponent {
     const providerIds = [...new Set(services.map(s => s.userId!))];
 
     // 2. Fetch all provider statuses in ONE call
-    const providersMap$ = this.userDataService.getUsersBatch(providerIds).pipe(
+    const providersMap$ = this.userDataService.getUsersPublicBatch(providerIds).pipe(
       map(users => new Map(users.map(u => [u.id, u]))),
       catchError(() => observableOf(new Map()))
     );

@@ -63,4 +63,31 @@ const requireJobParticipant = async (req, res, next) => {
   }
 };
 
-module.exports = {authenticateToken,requireJobParticipant};
+/**
+ * Optional Auth: 
+ * If a valid token is present, attaches req.user.
+ * If no token (or an expired token) is present, allows the request to continue as a Guest.
+ */
+const optionalAuth = async (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  // 1. If there is no token, just move on to the controller. req.user remains undefined.
+  if (!token) {
+    return next(); 
+  }
+
+  // 2. If there is a token, try to verify it.
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (!err) {
+      // 3. Token is valid! Attach the user identity so `scrubService` knows who this is.
+      req.user = user; 
+    }
+    
+    // 4. Even if there is an error (like an expired token), we don't block the request.
+    // We just call next() and let them browse as a Guest.
+    next();
+  });
+};
+
+module.exports = {authenticateToken,requireJobParticipant, optionalAuth};

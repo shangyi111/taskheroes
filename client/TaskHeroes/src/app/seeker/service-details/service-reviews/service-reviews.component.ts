@@ -58,7 +58,7 @@ export class ServiceReviewsComponent implements OnInit {
           // Get unique IDs for this page only
           const uniqueIds = [...new Set(reviews.map(r => r.reviewerId))]
                             .filter((id): id is string => !!id);
-          return this.userDataService.getUsersBatch(uniqueIds).pipe(
+          return this.userDataService.getUsersPublicBatch(uniqueIds).pipe(
             map(users => {
               const userMap = new Map(users.map(u => [u.id, u]));
               return reviews.map(r => ({

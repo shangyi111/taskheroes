@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AUTH_TOKEN_KEY } from 'src/app/shared/constants';
 import {Service} from "src/app/shared/models/service";
@@ -23,20 +23,15 @@ export class BusinessService {
     return this.http.get<Service>(`${this.API_URL}/${id}`);
   }
 
-  getAllServicesByUserId(userId:string):Observable<Service[]>{
-    return this.getAllServices().pipe(
-      map((services: Service[]) => {
-        return services.filter((service: Service) => service.userId === userId);
-      })
-    );
+  getAllServicesByUserId(userId: string): Observable<Service[]> {
+    return this.http.get<Service[]>(`${this.API_URL}/user/${userId}`);
   }
 
-  getAllServicesExceptUserId(userId:string):Observable<Service[]>{
-    return this.getAllServices().pipe(
-      map((services: Service[]) => {
-        return services.filter((service: Service) => service.userId != userId);
-      })
-    );
+  getAllServicesExceptUserId(userId: string): Observable<Service[]> {
+    const params = new HttpParams().set('excludeUserId', userId);
+    return this.http.get<Service[]>(this.API_URL, { 
+      params 
+    });
   }
 
   createService(serviceData: Service): Observable<Service> {

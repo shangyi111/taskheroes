@@ -143,6 +143,23 @@ export class UserDataService {
     );
   }
 
+   /**
+   * Fetches multiple user profiles in a single request.
+   * @param ids Array of user IDs to fetch.
+   */
+  getUsersPublicBatch(ids: (string | number)[]): Observable<User[]> {
+    if (!ids || ids.length === 0) {
+      return of([]);
+    }
+
+    return this.http.post<User[]>(`${API_BASE_URL}/publicbatch`, { ids }).pipe(
+      catchError(err => {
+        console.error('Failed to fetch batch users', err);
+        return of([]); // Return empty array on failure
+      })
+    );
+  }
+
   /**
    * Updates the core profile and user details
    */

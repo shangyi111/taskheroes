@@ -32,7 +32,12 @@ const login = async (req, res) => {
     const { user, token } = await authService.login(email, password);
     res.status(200).json({ 
       token, 
-      user: { id: user.id, username: user.username, email: user.email } 
+      user: { 
+        id: user.id, 
+        username: user.username, 
+        email: user.email,
+        isIdentityVerified:user.isIdentityVerified
+       } 
     });
   } catch (error) {
     res.status(400).json({ message: error.message || 'Invalid credentials' }); // Or 500 depending on the error
